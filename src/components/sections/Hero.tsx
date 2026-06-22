@@ -85,7 +85,7 @@ export default function Hero() {
               <p className="text-slate-300 font-sans text-xs md:text-sm leading-relaxed max-w-2xl font-normal select-text">
                 Building AI systems that solve real-world problems.
                 <br /><br />
-                Currently developing <span className="text-emerald-400 font-semibold">Accessible Vision</span>, <span className="text-cyan-400 font-semibold">ClinicalBrief</span>, <span className="text-slate-200 font-semibold">StudentHub</span>, and intelligent computer vision systems while pursuing a Master of Artificial Intelligence at Monash University.
+                Currently developing <span className="text-emerald-400 font-semibold">Accessible Vision</span>, <span className="text-cyan-400 font-semibold">ClinicalBrief</span>, <span className="text-slate-200 font-semibold">StudentHub</span>, and <span className="text-amber-400 font-semibold">Traffic AI</span> while pursuing a Master of Artificial Intelligence at Monash University.
               </p>
 
               {/* Action inputs (CTA row) */}
@@ -136,88 +136,71 @@ export default function Hero() {
                 <span className="w-2 h-2 bg-slate-800 rounded-full" />
               </div>
               <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                <TerminalSquare className="w-3 h-3 text-amber-500" />
-                sys_monitor.sh
+                <TerminalSquare className="w-3 h-3 text-[#10b981]" />
+                status_check.sh
               </span>
-              <span className="text-[9px] text-[#10b981] animate-pulse">RUNNING</span>
+              <span className="text-[9px] text-[#10b981] animate-pulse">ONLINE</span>
             </div>
 
             {/* Terminal Body */}
             <div className="p-5 flex-1 flex flex-col justify-start text-xs space-y-4">
               <div className="space-y-1">
                 <div className="flex items-center space-x-2 text-slate-500">
-                  <span className="text-amber-500 font-bold">krishi@stack:~$</span>
-                  <span className="text-slate-100 select-all">ps aux | grep krishi</span>
-                </div>
-                <div className="text-[10px] text-slate-650 tracking-tight leading-none overflow-hidden text-ellipsis whitespace-nowrap">
-                  USER      PID  %CPU %MEM      VSZ    RSS   TTY      STAT START   TIME COMMAND
+                  <span className="text-emerald-500 font-bold">krishi@stack:~$</span>
+                  <span className="text-slate-100 select-all">status --check</span>
                 </div>
               </div>
 
-              {/* Running Processes Output */}
-              <div className="space-y-3.5 border-l border-slate-900 pl-3 py-1">
+              {/* Status Output */}
+              <div className="space-y-3.5 border-l border-[#10b981]/30 pl-3 py-1">
                 <div>
-                  <div className="text-emerald-400 font-bold tracking-wider text-[10px] uppercase mb-1.5 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                    RUNNING:
+                  <div className="text-emerald-400 font-bold tracking-wider text-[10px] uppercase mb-1 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    OPEN TO:
                   </div>
-                  <ul className="space-y-1 pl-2 text-slate-300">
-                    {currentProcesses.running.map((proc) => (
-                      <li key={proc} className="flex items-center gap-2 select-text">
-                        <span className="text-emerald-500/60">•</span>
-                        <span>{proc}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div>
-                  <div className="text-cyan-400 font-bold tracking-wider text-[10px] uppercase mb-1.5 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
-                    LEARNING:
-                  </div>
-                  <ul className="space-y-1 pl-2 text-slate-300">
-                    {currentProcesses.learning.map((learn) => (
-                      <li key={learn} className="flex items-center gap-2 select-text">
-                        <span className="text-cyan-500/60">•</span>
-                        <span>{learn}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div>
-                  <div className="text-amber-400 font-bold tracking-wider text-[10px] uppercase mb-1.5 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                    ROLE:
-                  </div>
-                  <ul className="space-y-1 pl-2 text-slate-300">
-                    <li className="flex items-start gap-2 select-text">
-                      <span className="text-amber-500/60">•</span>
-                      <span>{currentProcesses.role}</span>
+                  <ul className="space-y-1 pl-2 text-slate-355 font-mono text-[11px]">
+                    <li className="flex items-center gap-2 select-text">
+                      <span className="text-[#10b981]">•</span>
+                      <span>AI Engineering</span>
+                    </li>
+                    <li className="flex items-center gap-2 select-text">
+                      <span className="text-[#10b981]">•</span>
+                      <span>ML Engineering</span>
+                    </li>
+                    <li className="flex items-center gap-2 select-text">
+                      <span className="text-[#10b981]">•</span>
+                      <span>Software Engineering</span>
+                    </li>
+                    <li className="flex items-center gap-2 select-text">
+                      <span className="text-[#10b981]">•</span>
+                      <span>Technology Consulting</span>
                     </li>
                   </ul>
                 </div>
 
-                {currentProcesses.availability && (
+                <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
                   <div>
-                    <div className="text-[#10b981] font-bold tracking-wider text-[10px] uppercase mb-1.5 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
-                      STATUS:
-                    </div>
-                    <ul className="space-y-1 pl-2 text-slate-300">
-                      <li className="flex items-start gap-2 select-text">
-                        <span className="text-emerald-500/60">•</span>
-                        <span className="text-[#10b981] font-bold">{currentProcesses.availability}</span>
-                      </li>
-                    </ul>
+                    <span className="text-slate-500 block uppercase text-[9px] font-bold">Graduation:</span>
+                    <span className="text-white font-mono">July 2027</span>
                   </div>
-                )}
+                  <div>
+                    <span className="text-slate-500 block uppercase text-[9px] font-bold">Location:</span>
+                    <span className="text-white font-mono">Melbourne, Australia</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-900">
+                  <span className="text-slate-500 block uppercase text-[9px] font-bold mb-1">Status:</span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-950/40 border border-emerald-900/50 text-[#10b981] font-bold text-[10px] tracking-wider uppercase animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
+                    AVAILABLE FOR OPPORTUNITIES
+                  </span>
+                </div>
               </div>
 
               {/* Shell output trailing decoration */}
               <div className="text-[10px] text-slate-600 border-t border-slate-900/50 pt-3 mt-auto select-none">
-                [info] Process buffer synced with live workstation state.
+                [info] Status check completed successfully.
               </div>
             </div>
           </motionFramer.div>

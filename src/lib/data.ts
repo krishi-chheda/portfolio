@@ -127,7 +127,7 @@ export const experienceData: Experience[] = [
     id: "mdas-director",
     year: "2026",
     role: "Media & Marketing Director",
-    organization: "MDAS",
+    organization: "Monash Data & AI Society (MDAS)",
     location: "Melbourne, VIC, Australia",
     period: "2024 - Present",
     description: [
@@ -190,7 +190,7 @@ export const aiKnowledgeBase = {
   aboutMe: {
     fullName: "Krishi Chheda",
     tagline: "AI Engineer, Builder, and Community Leader",
-    roleSummary: "Krishi is an international student based in Melbourne, studying for a Master of Artificial Intelligence at Monash University. He holds the role of Media & Marketing Director at Monash Data Analytics Society (MDAS). He is passionate about bridging the gap between machine learning models and highly-usable, production-grade applications.",
+    roleSummary: "Krishi is an international student based in Melbourne, studying for a Master of Artificial Intelligence at Monash University. He holds the role of Media & Marketing Director at Monash Data & AI Society (MDAS). He is passionate about bridging the gap between machine learning models and highly-usable, production-grade applications.",
     interests: ["Formula 1", "Fitness & Lifting", "High-Agency Startups", "Applied ML Research", "Agentic AI"]
   },
   careerGoals: "Krishi aims to work in high-growth environments where he can deploy AI models to production. He is looking for opportunities as an AI Engineer, Full-Stack Developer, or Founding Engineer in startups, scale-ups, and AI research labs in Australia or globally.",

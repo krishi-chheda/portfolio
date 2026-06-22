@@ -61,10 +61,10 @@ export async function POST(req: Request) {
         reply = `Accessible Vision is an AI-powered accessibility platform helping visually impaired users understand and navigate environments through computer vision and audio guidance.\n\nKey details:\n- Tech: Computer Vision, YOLO, Python, and Real-Time AI. \n- Features: Real-time scene understanding, obstacle warnings, and spoken audio cues.`;
       }
       else if (query.includes("mdas") || query.includes("media") || query.includes("director") || query.includes("society")) {
-        reply = `Krishi serves as the Media & Marketing Director at Monash Data Analytics Society (MDAS). He managed a rebrand that grew digital engagement by 40% and coordinates career events and coding bootcamps for student builders.`;
+        reply = `Krishi serves as the Media & Marketing Director at Monash Data & AI Society (MDAS). He managed a rebrand that grew digital engagement by 40% and coordinates career events and coding bootcamps for student builders.`;
       }
       else if (query.includes("monash") || query.includes("master") || query.includes("uni") || query.includes("education") || query.includes("study") || query.includes("grade")) {
-        reply = `Krishi is pursuing a Master of Artificial Intelligence at Monash University in Melbourne. His academic focus centers on deep learning, reinforcement learning, NLP, and agentic pipelines.`;
+        reply = `Krishi is pursuing a Master of Artificial Intelligence at Monash University in Melbourne (graduating in July 2027). His academic focus centers on deep learning, reinforcement learning, NLP, and agentic pipelines.`;
       }
       else if (
         query.includes("job") ||
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
         query.includes("cv") ||
         query.includes("offer")
       ) {
-        reply = `Krishi is actively seeking opportunities in Australia (or remote) starting post-graduation. He is aiming for AI Engineer, Founding Software Engineer, or Full-Stack developer roles.\n\nYou can access his career timeline directly in the ./career section on the website or contact him at krishichheda10@gmail.com to discuss role details.`;
+        reply = `Krishi is actively seeking opportunities in Australia (or remote) starting post-graduation in July 2027. He is aiming for AI Engineering, Machine Learning Engineering, Software Engineering, AI Product, or Technology Consulting roles.\n\nYou can access his career timeline directly in the ./career section on the website or contact him at krishichheda10@gmail.com to discuss role details.`;
       }
       else if (query.includes("contact") || query.includes("email") || query.includes("reach") || query.includes("linkedin")) {
         reply = `You can reach Krishi directly:\n- Email: krishichheda10@gmail.com\n- LinkedIn: linkedin.com/in/krishi-chheda\n- GitHub: github.com/krishi-chheda\n\nYou can also drop a message through the contact form on the home page!`;

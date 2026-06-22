@@ -31,7 +31,7 @@ export default function Footer() {
         {/* Social Links */}
         <div className="flex items-center space-x-6">
           <a
-            href="https://github.com/krishichheda"
+            href="https://github.com/krishi-chheda"
             target="_blank"
             rel="noopener noreferrer"
             className="text-slate-500 hover:text-cyan-400 transition-colors p-1"
@@ -40,7 +40,7 @@ export default function Footer() {
             <Github className="w-5 h-5" />
           </a>
           <a
-            href="https://linkedin.com/in/krishichheda"
+            href="https://linkedin.com/in/krishi-chheda"
             target="_blank"
             rel="noopener noreferrer"
             className="text-slate-500 hover:text-cyan-400 transition-colors p-1"

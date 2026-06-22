@@ -55,11 +55,10 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled || isOpen
-          ? "py-3 bg-[#080c14]/90 backdrop-blur-md border-b border-slate-900"
-          : "py-5 bg-transparent border-b border-transparent"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || isOpen
+        ? "py-3 bg-[#080c14]/90 backdrop-blur-md border-b border-slate-900"
+        : "py-5 bg-transparent border-b border-transparent"
+        }`}
     >
       <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
         {/* Left Side: OS Badge and Status Indicator */}
@@ -72,7 +71,7 @@ export default function Navbar() {
               KRISHI.OS
             </span>
           </Link>
-          
+
           <div className="hidden md:flex items-center space-x-1.5 bg-slate-950/60 border border-slate-900 rounded px-2.5 py-0.5 font-mono text-[9px] text-slate-500">
             <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
             <span className="uppercase text-slate-400">SYS: ONLINE</span>
@@ -91,9 +90,8 @@ export default function Navbar() {
                 key={link.name}
                 href={link.href}
                 onClick={() => setActiveHash(link.hash)}
-                className={`font-mono text-[12px] transition-colors relative py-1 hover:text-[#10b981] ${
-                  isActive ? "text-[#10b981] font-bold" : "text-slate-400"
-                }`}
+                className={`font-mono text-[12px] transition-colors relative py-1 hover:text-[#10b981] ${isActive ? "text-[#10b981] font-bold" : "text-slate-400"
+                  }`}
               >
                 <span>{link.name}</span>
                 {isActive && (
@@ -108,15 +106,13 @@ export default function Navbar() {
 
         {/* Right Side: Resume Command Action */}
         <div className="hidden md:flex items-center">
-          <a
-            href="/assets/krishi_resume.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 px-3 py-1.5 rounded bg-slate-950 border border-slate-900 hover:border-[#10b981]/40 font-mono text-[11px] text-slate-400 hover:text-[#10b981] transition-all duration-300"
+          <button
+            onClick={() => setIsPaletteOpen(true)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded bg-slate-950 border border-slate-900 hover:border-[#10b981]/40 font-mono text-[11px] text-slate-400 hover:text-[#10b981] transition-all duration-300 cursor-pointer"
           >
-            <span>./resume</span>
-            <ArrowUpRight size={10} className="text-slate-600" />
-          </a>
+            <span>./command-palette</span>
+            <Search size={10} className="text-[#10b981]" />
+          </button>
         </div>
 
         {/* Mobile menu prompt toggle */}
@@ -140,7 +136,7 @@ export default function Navbar() {
             className="md:hidden bg-[#080c14] border-b border-slate-900 absolute top-full left-0 right-0 overflow-hidden shadow-2xl"
           >
             <div className="px-6 py-6 font-mono text-left space-y-4">
-              
+
               {/* Shell CLI Prompt Execution */}
               <div className="flex items-center space-x-1.5 text-xs">
                 <span className="text-[#10b981]">krishi@stack:~$</span>
@@ -152,7 +148,7 @@ export default function Navbar() {
                 <div className="text-[10px] text-slate-600 uppercase tracking-wider mb-2">
                   total 42 // folders mapped to sections
                 </div>
-                
+
                 {navLinks.map((link) => (
                   <div key={link.name} className="flex items-center hover:bg-slate-900/60 py-1 rounded transition-colors px-1">
                     <span className="text-slate-600 w-28 shrink-0">drwxr-xr-x 1 krishi</span>
@@ -172,17 +168,17 @@ export default function Navbar() {
                 {/* Resume pdf reference link */}
                 <div className="flex items-center hover:bg-slate-900/60 py-1 rounded transition-colors px-1">
                   <span className="text-slate-600 w-28 shrink-0">-rwxr-xr-x 1 krishi</span>
-                  <a
-                    href="/assets/krishi_resume.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setIsOpen(false)}
-                    className="text-slate-200 hover:text-amber-500 transition-all flex items-center gap-1 flex-1"
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      setIsPaletteOpen(true);
+                    }}
+                    className="text-slate-200 hover:text-amber-500 transition-all flex items-center gap-1 flex-1 text-left cursor-pointer"
                   >
-                    <span>./resume</span>
-                    <span className="text-slate-600 text-[10px]">{"->"} resume.pdf</span>
-                    <ArrowUpRight size={10} className="text-slate-600" />
-                  </a>
+                    <span>./command-palette</span>
+                    <span className="text-slate-600 text-[10px]">{"->"} cmd_palette</span>
+                    <Search size={10} className="text-slate-650" />
+                  </button>
                 </div>
               </div>
 
@@ -194,7 +190,7 @@ export default function Navbar() {
                 </div>
                 <span>tty_mobile</span>
               </div>
-              
+
             </div>
           </motion.div>
         )}

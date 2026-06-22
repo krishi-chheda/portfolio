@@ -50,7 +50,7 @@ export const projectsData: Project[] = [
       "Provides low-latency spoken guidance through audio feedback APIs",
       "Improves user safety by recognizing critical pathway obstacles"
     ],
-    githubUrl: "https://github.com/krishichheda/accessible-vision",
+    githubUrl: "https://github.com/krishi-chheda/accessible-vision",
     terminalLog: [
       "CORE > Starting scene analyzer inference engine...",
       "AI   > Detected: Crosswalk (Confidence: 94.1%), Light Pole (Confidence: 89.4%)",
@@ -70,7 +70,7 @@ export const projectsData: Project[] = [
       "Improves information retrieval using semantic search workflows",
       "Protects patient records with custom metadata sanitization"
     ],
-    githubUrl: "https://github.com/krishichheda/ClinicalBrief",
+    githubUrl: "https://github.com/krishi-chheda/ClinicalBrief",
     terminalLog: [
       "API  > POST /api/v1/summarize 200 OK",
       "AI   > Extracting clinical concepts and structured medical data...",
@@ -90,7 +90,7 @@ export const projectsData: Project[] = [
       "Provides interactive maps for discovery of local community resources",
       "Supports dark theme dashboards with unified database queries"
     ],
-    githubUrl: "https://github.com/krishichheda/studenthub-melbourne",
+    githubUrl: "https://github.com/krishi-chheda/studenthub-melbourne",
     terminalLog: [
       "SYS  > Connecting to database pools...",
       "DB   > Synced verified student housing checklists and local events",
@@ -110,7 +110,7 @@ export const projectsData: Project[] = [
       "Achieved low-latency vehicle detection using YOLO on Jetson Nano",
       "Optimized intersection queues dynamically based on lane density"
     ],
-    githubUrl: "https://github.com/krishichheda/ai-traffic-system",
+    githubUrl: "https://github.com/krishi-chheda/ai-traffic-system",
     terminalLog: [
       "EDGE > Initializing Jetson Nano processing pipeline...",
       "CV   > OpenCV matrix frame captured at 30 FPS",
@@ -169,7 +169,7 @@ export const experienceData: Experience[] = [
   {
     id: "traffic-ai-dev",
     year: "2024",
-    role: "AI Traffic Light System",
+    role: "Traffic AI Development",
     organization: "Traffic AI",
     location: "Melbourne, VIC, Australia",
     period: "2024",
@@ -244,20 +244,20 @@ export const skillsCategories: SkillCategory[] = [
 ];
 
 export const skillsDetails: Record<string, SkillDetail> = {
-  computer_vision: { experience: "2 years", projects: ["AI Traffic Light System", "Accessible Vision"] },
-  yolo: { experience: "1.5 years", projects: ["AI Traffic Light System", "Accessible Vision"] },
-  opencv: { experience: "2 years", projects: ["AI Traffic Light System"] },
-  python: { experience: "3 years", projects: ["ClinicalBrief", "AI Traffic Light System", "Accessible Vision"] },
+  computer_vision: { experience: "2 years", projects: ["Traffic AI", "Accessible Vision"] },
+  yolo: { experience: "1.5 years", projects: ["Traffic AI", "Accessible Vision"] },
+  opencv: { experience: "2 years", projects: ["Traffic AI"] },
+  python: { experience: "3 years", projects: ["ClinicalBrief", "Traffic AI", "Accessible Vision"] },
   ai_inference: { experience: "1.5 years", projects: ["Accessible Vision"] },
-  real_time_systems: { experience: "1.5 years", projects: ["Accessible Vision", "AI Traffic Light System"] },
+  real_time_systems: { experience: "1.5 years", projects: ["Accessible Vision", "Traffic AI"] },
   llm_applications: { experience: "1.5 years", projects: ["ClinicalBrief"] },
   nextjs: { experience: "2 years", projects: ["ClinicalBrief", "StudentHub"] },
   typescript: { experience: "2 years", projects: ["StudentHub"] },
   database_systems: { experience: "2 years", projects: ["StudentHub"] },
   api_integrations: { experience: "2 years", projects: ["ClinicalBrief", "StudentHub"] },
   vercel: { experience: "2 years", projects: ["StudentHub"] },
-  jetson_nano: { experience: "1 year", projects: ["AI Traffic Light System"] },
-  git: { experience: "3 years", projects: ["ClinicalBrief", "StudentHub", "AI Traffic Light System", "Accessible Vision"] },
+  jetson_nano: { experience: "1 year", projects: ["Traffic AI"] },
+  git: { experience: "3 years", projects: ["ClinicalBrief", "StudentHub", "Traffic AI", "Accessible Vision"] },
   mdas: { experience: "1 year", projects: ["MDAS Branding Campaign", "MDAS Event Strategy"] },
   media_marketing: { experience: "1.5 years", projects: ["MDAS Marketing Campaigns", "MDAS Branding Design"] },
   event_management: { experience: "1.5 years", projects: ["MDAS Industry Networking Night", "MDAS Winter Hackathon"] },

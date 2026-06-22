@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Krishi Chheda | AI Engineer & Builder",
-  description: "Master of AI student at Monash University, Media & Marketing Director at MDAS, and builder of production-ready AI software.",
+  title: "Krishi Chheda | AI Engineer & Product Builder",
+  description: "Master of Artificial Intelligence student at Monash University building AI systems, accessibility solutions, healthcare platforms, and community-focused products.",
   keywords: [
     "Krishi Chheda",
     "AI Engineer",
@@ -33,9 +33,9 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Krishi Chheda" }],
   openGraph: {
-    title: "Krishi Chheda | AI Engineer & Builder",
-    description: "Master of AI student at Monash University, Media & Marketing Director at MDAS, and builder of production-ready AI software.",
-    url: "https://krishi.dev",
+    title: "Krishi Chheda | AI Engineer & Product Builder",
+    description: "Master of Artificial Intelligence student at Monash University building AI systems, accessibility solutions, healthcare platforms, and community-focused products.",
+    url: "https://krishi-portfolio.vercel.app",
     siteName: "Krishi Chheda Portfolio",
     locale: "en_AU",
     type: "website",

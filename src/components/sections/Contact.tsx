@@ -78,13 +78,13 @@ export default function Contact() {
                   <span>krishi.chheda@outlook.com</span>
                 </a>
                 <a
-                  href="https://linkedin.com/in/krishichheda"
+                  href="https://linkedin.com/in/krishi-chheda"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-3 rounded border border-slate-900 bg-slate-950/40 hover:border-cyan-500/30 hover:text-cyan-400 transition-colors"
                 >
                   <Linkedin className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>linkedin.com/in/krishichheda</span>
+                  <span>linkedin.com/in/krishi-chheda</span>
                 </a>
               </div>
             </div>

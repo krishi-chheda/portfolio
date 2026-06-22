@@ -45,7 +45,7 @@ export const initialNodes: GraphNode[] = [
     group: "category",
     val: 12,
     description: "Production-ready software builds combining AI backends with seamless responsive frontend web architectures.",
-    details: ["ClinicalBrief (Healthcare AI)", "StudentHub (Melbourne Services)", "AI Traffic Light System (Edge AI & Optimization)"]
+    details: ["ClinicalBrief (Healthcare AI)", "StudentHub (Melbourne Services)", "Traffic AI (Edge AI)", "Accessible Vision (AI Accessibility)"]
   },
   {
     id: "cat_swe",
@@ -127,11 +127,11 @@ export const initialNodes: GraphNode[] = [
   },
   {
     id: "proj_traffic",
-    label: "AI Traffic Light System",
+    label: "Traffic AI",
     group: "project",
     val: 9,
-    description: "Reinforcement learning traffic controller optimizing intersection wait times in real-time.",
-    details: ["Tech: YOLO, OpenCV, Python, Jetson Nano", "Result: Waiting time reduced by approximately 42%"],
+    description: "Intelligent traffic management system using computer vision to optimize traffic flow.",
+    details: ["Tech: YOLO, OpenCV, Python, Jetson Nano", "Result: Waiting time reduced by 42%"],
     parentId: "cat_projects"
   },
 
@@ -217,6 +217,14 @@ export const initialNodes: GraphNode[] = [
     val: 7,
     description: "Architecting scale digital applications powered by intelligence backends.",
     parentId: "cat_future"
+  },
+  {
+    id: "proj_accessible",
+    label: "Accessible Vision",
+    group: "project",
+    val: 9,
+    description: "AI-powered accessibility platform helping visually impaired users navigate environments using computer vision and audio guidance.",
+    parentId: "cat_projects"
   }
 ];
 
@@ -268,16 +276,7 @@ export const detailNodes: GraphNode[] = [
     isDetail: true
   },
 
-  // Projects Cluster Detail Nodes
-  {
-    id: "proj_accessible",
-    label: "Accessible Vision",
-    group: "project",
-    val: 6,
-    description: "An AI-powered assistive system designed to help visually impaired users navigate surroundings.",
-    parentId: "cat_projects",
-    isDetail: true
-  },
+  // Projects Cluster Detail Nodes (Moved Accessible Vision to initialNodes)
 
   // Software Engineering Detail Nodes
   {
@@ -444,7 +443,13 @@ export const initialLinks: GraphLink[] = [
 
   // Future Links
   { source: "cat_future", target: "future_agentic" },
-  { source: "cat_future", target: "future_products" }
+  { source: "cat_future", target: "future_products" },
+
+  // Accessible Vision Initial Links
+  { source: "cat_projects", target: "proj_accessible" },
+  { source: "proj_accessible", target: "ai_yolo" },
+  { source: "proj_accessible", target: "ai_cv" },
+  { source: "proj_accessible", target: "swe_python" }
 ];
 
 export const detailLinks: GraphLink[] = [
@@ -454,9 +459,6 @@ export const detailLinks: GraphLink[] = [
   { source: "cat_ai", target: "ai_realtime" },
   { source: "cat_ai", target: "ai_jetson" },
   { source: "cat_ai", target: "ai_dl" },
-
-  // Project Detail Links
-  { source: "cat_projects", target: "proj_accessible" },
 
   // SWE Detail Links
   { source: "cat_swe", target: "swe_fastapi" },
@@ -476,13 +478,9 @@ export const detailLinks: GraphLink[] = [
   { source: "proj_traffic", target: "ai_jetson" },
   { source: "proj_traffic", target: "ai_realtime" },
 
-  { source: "proj_accessible", target: "ai_yolo" },
-  { source: "proj_accessible", target: "ai_cv" },
-  { source: "proj_accessible", target: "proj_clinicalbrief" }, // make sure everything links up or we can add it
   { source: "proj_accessible", target: "ai_dl" },
   { source: "proj_accessible", target: "ai_inference" },
   { source: "proj_accessible", target: "ai_realtime" },
-  { source: "proj_accessible", target: "swe_python" },
 
   // Leadership Detail Links
   { source: "cat_leadership", target: "lead_director" },

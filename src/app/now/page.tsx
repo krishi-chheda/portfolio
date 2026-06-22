@@ -49,7 +49,7 @@ export default function NowPage() {
               </h2>
               <p className="text-slate-300 text-sm leading-relaxed">
                 Currently wrapping up complex units in my **Master of Artificial Intelligence at Monash University**. 
-                My current focus is building robust agentic systems. I am dedicating coding hours to refining [ClinicalBrief](file:///C:/Users/krish/OneDrive/Desktop/Python/ClinicalBelief)&mdash;specifically optimizing the speaker diarization pipeline to support simultaneous clinical speakers and adding low-latency transcription stream buffers.
+                My current focus is building robust agentic systems. I am dedicating coding hours to refining [ClinicalBrief](https://github.com/krishi-chheda/ClinicalBrief)&mdash;specifically optimizing the speaker diarization pipeline to support simultaneous clinical speakers and adding low-latency transcription stream buffers.
               </p>
             </Card>
 

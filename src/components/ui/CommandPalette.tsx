@@ -66,9 +66,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     {
       id: "resume",
       name: "resume",
-      description: "cat resume.pdf // Open Krishi's academic & industry history",
+      description: "cat resume // Scroll to academic & industry experience logs",
       action: () => {
-        window.open("/assets/krishi_resume.pdf", "_blank", "noopener,noreferrer");
+        document.getElementById("career")?.scrollIntoView({ behavior: "smooth" });
       }
     },
     {

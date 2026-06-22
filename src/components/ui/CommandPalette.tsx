@@ -90,7 +90,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     {
       id: "accessible-vision",
       name: "accessible-vision",
-      description: "cat projects/accessible-vision/project.md // Inspect AI Accessibility platform",
+      description: "cat projects/accessible-vision/overview.md // Inspect AI Accessibility platform",
       action: () => {
         document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
         window.dispatchEvent(new CustomEvent("select-project", { detail: { id: "accessible-vision" } }));
@@ -99,7 +99,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     {
       id: "clinicalbrief",
       name: "clinicalbrief",
-      description: "cat projects/clinicalbrief/project.md // Inspect Healthcare AI platform",
+      description: "cat projects/clinicalbrief/overview.md // Inspect Healthcare AI platform",
       action: () => {
         document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
         window.dispatchEvent(new CustomEvent("select-project", { detail: { id: "clinicalbrief" } }));
@@ -108,7 +108,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     {
       id: "studenthub",
       name: "studenthub",
-      description: "cat projects/studenthub/project.md // Inspect Melbourne Student services guide",
+      description: "cat projects/studenthub/overview.md // Inspect Melbourne Student services guide",
       action: () => {
         document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
         window.dispatchEvent(new CustomEvent("select-project", { detail: { id: "studenthub" } }));
@@ -117,7 +117,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     {
       id: "traffic-ai",
       name: "traffic-ai",
-      description: "cat projects/traffic-ai/project.md // Inspect computer vision queue management system",
+      description: "cat projects/traffic-ai/overview.md // Inspect computer vision queue management system",
       action: () => {
         document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
         window.dispatchEvent(new CustomEvent("select-project", { detail: { id: "traffic-ai" } }));

@@ -162,7 +162,24 @@ export default function Projects() {
                   {/* Project description story text */}
                   <div className="bg-slate-900/30 border border-slate-900 p-4 rounded text-slate-350 text-xs leading-relaxed select-text font-sans">
                     <p className="font-mono text-[9px] text-slate-500 uppercase tracking-widest mb-1.5 select-none">[SYSTEMS_OVERVIEW]</p>
-                    {activeProject.story}
+                    {activeProject.story.split("\n\n").map((para, pIdx) => {
+                      const colonIdx = para.indexOf(":");
+                      if (colonIdx !== -1) {
+                        const label = para.substring(0, colonIdx);
+                        const content = para.substring(colonIdx + 1);
+                        return (
+                          <p key={pIdx} className={pIdx > 0 ? "mt-3" : ""}>
+                            <span className="text-[#10b981] font-mono text-[11px] font-bold tracking-wide uppercase mr-1">{label}:</span>
+                            <span className="text-slate-300">{content}</span>
+                          </p>
+                        );
+                      }
+                      return (
+                        <p key={pIdx} className={pIdx > 0 ? "mt-3" : ""}>
+                          {para}
+                        </p>
+                      );
+                    })}
                   </div>
 
                   {/* Execution Metrics logs */}

@@ -14,19 +14,19 @@ export default function CurrentlyBuilding() {
   const activeProjects: BuildingProject[] = [
     {
       name: "Accessible Vision",
-      description: "AI-powered assistive technology helping visually impaired users understand their surroundings through computer vision and audio guidance.",
+      description: "AI-powered assistive platform helping visually impaired users navigate unfamiliar environments through real-time computer vision models and low-latency audio guidance.",
       status: "Active Development",
       statusType: "active"
     },
     {
       name: "ClinicalBrief",
-      description: "Healthcare AI platform designed to transform medical information into structured and actionable insights.",
+      description: "Secure clinical intelligence platform that transcribes clinician-patient consultation audio and extracts structured, actionable clinical insights.",
       status: "Active Development",
       statusType: "active"
     },
     {
       name: "StudentHub",
-      description: "Platform helping Melbourne students discover housing, events, opportunities, and resources.",
+      description: "Melbourne student community resource hub consolidating verified housing checklists, public transit routes, and student events.",
       status: "Expanding Features",
       statusType: "expanding"
     }

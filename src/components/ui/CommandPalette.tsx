@@ -42,7 +42,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     {
       id: "career",
       name: "career",
-      description: "git log --career // View academic and technical work history log",
+      description: "git log --career // View academic, leadership, and volunteering history",
       action: () => {
         document.getElementById("career")?.scrollIntoView({ behavior: "smooth" });
       }
@@ -229,11 +229,10 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                         cmd.action();
                         onClose();
                       }}
-                      className={`w-full text-left flex items-start justify-between p-3.5 rounded transition-all cursor-pointer ${
-                        isActive
+                      className={`w-full text-left flex items-start justify-between p-3.5 rounded transition-all cursor-pointer ${isActive
                           ? "bg-cyan-950/80 border border-cyan-800/40 text-cyan-200"
                           : "border border-transparent hover:bg-slate-900/40 text-slate-400"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <Terminal className={`w-3.5 h-3.5 ${isActive ? "text-cyan-400" : "text-slate-600"}`} />

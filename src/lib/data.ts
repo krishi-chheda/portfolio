@@ -3,6 +3,7 @@ export interface Project {
   title: string;
   subtitle: string;
   description: string;
+  keyOutcome: string;
   story: string;
   role: string;
   techStack: string[];
@@ -100,6 +101,7 @@ export const projectsData: Project[] = [
     subtitle: "AI Accessibility Platform",
     role: "AI & Computer Vision Developer",
     description: "AI-powered accessibility platform helping visually impaired users understand and navigate environments through computer vision and audio guidance.",
+    keyOutcome: "Achieved sub-100ms inference latency on scene parsing with low-latency spoken feedback APIs.",
     story: "Problem: Visually impaired users face navigation hazards in unfamiliar environments due to a lack of immediate, screen-free hazard detection.\n\nSolution: Built an AI-powered accessibility platform utilizing computer vision and YOLO models to map pathways and obstacles in real-time, coupled with immediate spoken guidance.\n\nTechnologies: Python, PyTorch, YOLO, OpenCV, Real-Time AI.\n\nCurrent Status: Active development (optimizing spatial hazard orientation models).\n\nVerified Outcomes: Achieved sub-100ms inference latency on scene parsing with low-latency spoken feedback APIs.",
     techStack: ["Python", "YOLO", "OpenCV", "PyTorch"],
     metrics: [
@@ -150,6 +152,7 @@ export const projectsData: Project[] = [
     subtitle: "Healthcare AI Platform",
     role: "Full-Stack AI Developer",
     description: "Healthcare AI platform that transforms medical information into structured and actionable insights.",
+    keyOutcome: "Accelerates record-keeping workflows and generates highly structured, action-ready clinical briefs.",
     story: "Problem: Healthcare providers lose valuable hours compiling, transcribing, and formatting patient consultation audio into structured records.\n\nSolution: Engineered a secure clinical intelligence platform that transcribes and parses multi-speaker dictations into action-ready summaries.\n\nTechnologies: Next.js, FastAPI, Python, LLM APIs (GPT-4o), Whisper API.\n\nCurrent Status: Active development (expanding audio diarization accuracy).\n\nVerified Outcomes: Optimizes record-keeping workflows using semantic search indexes and patient record metadata sanitization.",
     techStack: ["Next.js", "FastAPI", "Python", "LLMs"],
     metrics: [
@@ -199,6 +202,7 @@ export const projectsData: Project[] = [
     subtitle: "Student Platform",
     role: "Lead Product Developer",
     description: "Student platform helping Melbourne students discover housing, events, opportunities, and resources.",
+    keyOutcome: "Successfully centralized student discovery resources, providing sub-second housing search directory synchronization.",
     story: "Problem: Incoming international students in Melbourne struggle to discover reliable housing lists, transit guides, and social connections across fragmented websites.\n\nSolution: Built a community-focused resource hub consolidating verified housing checklists, transit routes, and local student events.\n\nTechnologies: Next.js, TypeScript, REST APIs, Tailwind CSS, Mapbox.\n\nCurrent Status: Expanding features (integrating local Melbourne student network API connections).\n\nVerified Outcomes: Deployed a mobile-optimized platform that centralizes discovery directories for incoming Monash student arrivals.",
     techStack: ["Next.js", "TypeScript", "REST APIs", "Tailwind CSS"],
     metrics: [
@@ -248,6 +252,7 @@ export const projectsData: Project[] = [
     subtitle: "Intelligent Traffic Management System",
     role: "AI Research Lead",
     description: "Intelligent traffic management system using computer vision to optimize traffic flow.",
+    keyOutcome: "Reduced average intersection queue waiting time by 42% in simulated test loops.",
     story: "Problem: Fixed-interval traffic signals cause severe traffic congestion and unnecessary engine idling by failing to adapt to real-time lane density.\n\nSolution: Developed an intelligent edge intersection queue optimization system tracking lane congestion via live computer vision processing.\n\nTechnologies: YOLO, OpenCV, Python, NVIDIA Jetson Nano.\n\nCurrent Status: Simulation validated; hardware logic tested on NVIDIA Jetson edge nodes.\n\nVerified Outcomes: Reduced average intersection queue waiting time by 42% in simulated test loops.",
     techStack: ["YOLO", "OpenCV", "Python", "Jetson Nano"],
     metrics: [
@@ -303,57 +308,57 @@ export const experienceData: Experience[] = [
     location: "Melbourne, VIC, Australia",
     period: "2024 - Present",
     description: [
-      "Directing branding and outreach strategies for the largest data student society at Monash.",
-      "Grew digital engagement metrics through targeted educational content on AI, web platforms, and data pipelines.",
-      "Co-designing marketing and logistical plans for technical workshops, hackathons, and corporate networking nights."
+      "Directed media branding and digital campaign strategies for the largest data student society at Monash.",
+      "Grew workshop reach to 300+ students across 5+ events by designing and executing targeted promotions and cross-team outreach campaigns.",
+      "Co-designed marketing and logistical plans for technical developer bootcamps, campus hackathons, and corporate networking nights."
     ],
-    skills: ["Community Building", "Event Organization", "Product Marketing"],
-    highlight: "Led brand transformation increasing student involvement in tech workshops."
+    skills: ["Media Operations", "Event Strategy", "Cross-Team Collaboration", "Branding Campaigns"],
+    highlight: "Grew AI workshop reach to 300+ students across 5+ events."
+  },
+  {
+    id: "mosaic-coordinator",
+    year: "2025",
+    role: "Social Media Coordinator",
+    organization: "MOSAIC: Monash Students for AI with Communities",
+    location: "Melbourne, VIC, Australia",
+    period: "2025 - Present",
+    description: [
+      "Managed community social coordination and event promotion for MOSAIC's local AI projects, supporting student engagement across monthly initiatives.",
+      "Coordinated cross-campus outreach campaigns connecting peers to AI volunteer programs and local community projects."
+    ],
+    skills: ["Community Outreach", "Social Coordination", "Student Engagement", "AI volunteering"],
+    highlight: "Connected students to community-focused AI volunteer programs."
   },
   {
     id: "mysahayak-intern",
     year: "2025",
-    role: "Mysahayak IT Intern",
+    role: "IT Intern",
     organization: "Mysahayak",
     location: "Remote / India",
     period: "2025",
     description: [
-      "Assisted in full-stack web feature development focusing on StudentHub user dashboard components.",
-      "Integrated REST API endpoints and optimized query rendering inside React hooks for the StudentHub platform.",
-      "Conducted QA bug tracking and resolved critical interface bugs on StudentHub before deployment."
+      "Developed cross-platform mobile features (Flutter) integrated with Python backend services in 2-week Agile sprint cycles.",
+      "Built AI-assisted content moderation workflows using machine learning filters, reducing manual review overhead by 30%.",
+      "Optimized application efficiency by 20% by profiling backend API layers and resolving 4 performance bottlenecks.",
+      "Reduced QA-reported defect rates by 20% by debugging endpoint and mobile pipeline build integration failures."
     ],
-    skills: ["Next.js", "TypeScript", "Database Systems", "API Integrations"],
-    highlight: "Developed dashboard UI features for the StudentHub platform."
+    skills: ["Flutter", "Python Backend", "Agile Delivery", "API Optimization", "QA Defect Resolution"],
+    highlight: "Reduced manual content moderation review overhead by 30%."
   },
   {
-    id: "studenthub-dev",
-    year: "2025",
-    role: "StudentHub Development",
-    organization: "StudentHub",
+    id: "sacredheart-volunteer",
+    year: "2026",
+    role: "Volunteer - Electronics Testing & Store Support",
+    organization: "Sacred Heart Mission Op Shop",
     location: "Melbourne, VIC, Australia",
-    period: "2025",
+    period: "2026 - Present",
     description: [
-      "Built the core housing discovery portal for Monash & Melbourne university student arrivals.",
-      "Engineered APIs and data integrations to fetch rent estimates, local transit stops, and event schedules.",
-      "Designed a custom dark mode terminal interface for high accessibility."
+      "Conducted electrical safety compliance testing on incoming electronics donations.",
+      "Provided local IT network troubleshooting, cashier operations, and client support in a fast-paced retail environment.",
+      "Managed checkout and customer inquiries, handling 50+ customer interactions per shift."
     ],
-    skills: ["Next.js", "TypeScript", "APIs", "Product Design"],
-    highlight: "Delivered unified resource catalog for incoming international students."
-  },
-  {
-    id: "traffic-ai-dev",
-    year: "2024",
-    role: "Traffic AI Development",
-    organization: "Traffic AI",
-    location: "Melbourne, VIC, Australia",
-    period: "2024",
-    description: [
-      "Developed edge computer vision models running on NVIDIA Jetson Nano to calculate intersection flow density.",
-      "Deployed YOLO models to identify and track multi-lane queue levels.",
-      "Achieved a verified 42% reduction in wait times."
-    ],
-    skills: ["YOLO", "OpenCV", "Python", "Jetson Nano"],
-    highlight: "Engineered real-time edge AI feedback loop for dynamic signal switching."
+    skills: ["Electrical Compliance", "IT Troubleshooting", "POS Cashier", "Customer Service", "Retail Operations"],
+    highlight: "Handled 50+ customer interactions per shift."
   }
 ];
 

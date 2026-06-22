@@ -342,11 +342,8 @@ export default function KnowledgeGraph() {
   // Dynamic filter lists
   const filteredNodes = nodes.filter((node) => {
     if (activeGroupFilter === "all") return true;
-    if (activeGroupFilter === "ai") return node.group === "ai" || node.group === "category" || node.group === "root";
-    if (activeGroupFilter === "projects") return node.group === "project" || node.group === "category" || node.group === "root";
-    if (activeGroupFilter === "leadership") return node.group === "leadership" || node.group === "category" || node.group === "root";
-    if (activeGroupFilter === "swe") return node.group === "swe" || node.group === "category" || node.group === "root";
-    if (activeGroupFilter === "future") return node.group === "future" || node.group === "category" || node.group === "root";
+    if (activeGroupFilter === "domains") return node.group === "category";
+    if (activeGroupFilter === "projects") return node.group === "project" || node.group === "leadership";
     return true;
   });
 
@@ -605,11 +602,8 @@ export default function KnowledgeGraph() {
           <div className="flex flex-wrap gap-1.5">
             {[
               { id: "all", label: "ALL" },
-              { id: "ai", label: "AI & ML" },
-              { id: "projects", label: "PROJECTS" },
-              { id: "leadership", label: "LEADERSHIP" },
-              { id: "swe", label: "SOFTWARE ENG" },
-              { id: "future", label: "FUTURE" }
+              { id: "domains", label: "DOMAINS" },
+              { id: "projects", label: "PROJECTS" }
             ].map((filter) => (
               <button
                 key={filter.id}

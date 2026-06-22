@@ -12,7 +12,7 @@
 
 # testing
 /coverage
-
+public\assets\Master_Resume.pdf
 # next.js
 /.next/
 /out/

@@ -83,11 +83,11 @@ export default function Hero() {
 
               {/* Supporting Description text */}
               <p className="text-slate-300 font-sans text-xs md:text-sm leading-relaxed max-w-2xl font-normal select-text">
-                Building AI systems that solve real-world problems.
-                <br /><br />
-                Currently pursuing a <span className="text-[#10b981] font-semibold">Master of Artificial Intelligence at Monash University</span> and serving as the <span className="text-purple-400 font-semibold">Media & Marketing Director at MDAS</span> (Monash Data & AI Society).
+                Currently pursuing a <span className="text-[#10b981] font-semibold">Master of Artificial Intelligence at Monash University</span>.
                 <br /><br />
                 Builder of <span className="text-emerald-400 font-semibold">Accessible Vision</span>, <span className="text-cyan-400 font-semibold">ClinicalBrief</span>, <span className="text-slate-200 font-semibold">StudentHub</span>, and <span className="text-amber-400 font-semibold">Traffic AI</span>.
+                <br /><br />
+                Open to opportunities in <span className="text-cyan-400 font-semibold">AI Engineering</span>, <span className="text-cyan-400 font-semibold">Machine Learning</span>, <span className="text-cyan-400 font-semibold">Software Engineering</span>, and <span className="text-cyan-400 font-semibold">Technology Consulting</span>.
               </p>
 
               {/* Action inputs (CTA row) */}
@@ -185,7 +185,7 @@ export default function Hero() {
                     <div className="space-y-1">
                       {currentProcesses.running.map((proc) => (
                         <div key={proc.name} className="relative group/item">
-                          <div className="flex items-center justify-between py-1 px-1.5 rounded hover:bg-slate-900/40 border border-transparent hover:border-slate-900 transition-all cursor-help">
+                          <div className="flex items-center justify-between py-1 px-1.5 rounded hover:bg-slate-900/40 border border-transparent hover:border-slate-900 transition-all cursor-default">
                             <div className="flex items-center gap-1.5 min-w-0">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                               <span className="text-emerald-400 font-bold text-[10px] shrink-0">[RUNNING]</span>
@@ -202,19 +202,6 @@ export default function Hero() {
                                 [repo]
                               </a>
                             )}
-                          </div>
-
-                          {/* Hover Tooltip Card */}
-                          <div className="absolute left-0 right-0 sm:left-full sm:right-auto sm:w-64 sm:ml-3.5 bottom-full sm:bottom-auto sm:top-0 z-30 hidden group-hover/item:block bg-slate-950 border border-emerald-500/40 p-3.5 rounded-lg shadow-2xl font-mono text-[10.5px] space-y-2 select-text pointer-events-auto">
-                            <div className="text-white font-bold uppercase tracking-wider border-b border-slate-900 pb-1 flex justify-between items-center">
-                              <span>{proc.name}</span>
-                              <span className="text-[8px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 font-bold">RUNNING</span>
-                            </div>
-                            <p className="text-slate-400 leading-normal font-sans text-[10px]">{proc.description}</p>
-                            <div className="pt-1.5 border-t border-slate-900 text-[9.5px]">
-                              <span className="text-emerald-400 font-bold block mb-0.5">STACK:</span>
-                              <span className="text-slate-350">{proc.stack}</span>
-                            </div>
                           </div>
                         </div>
                       ))}

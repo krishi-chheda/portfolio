@@ -1,28 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Award, Users, Megaphone, Calendar, Users2, Shield, Sparkles } from "lucide-react";
-import Card from "../ui/Card";
+import { Users, Megaphone, Calendar, Users2, Sparkles, Heart } from "lucide-react";
 
 export default function Leadership() {
-  const leadershipCards = [
-    {
-      title: "Event Strategy",
-      icon: <Calendar className="w-5 h-5 text-purple-400" />,
-      description: "Co-designing marketing campaigns and structural logistics for corporate networking nights, industry panels, and winter hackathons with 100+ attendees."
-    },
-    {
-      title: "Community Building",
-      icon: <Users className="w-5 h-5 text-purple-400" />,
-      description: "Fostering active student developer networks and society growth. Boosted overall MDAS digital channel metrics and member registration counts by 40%."
-    },
-    {
-      title: "Team Leadership",
-      icon: <Users2 className="w-5 h-5 text-purple-400" />,
-      description: "Directing cross-functional squads of visual designers, copywriters, and developers to coordinate and deploy branding packages and web landing pages."
-    }
-  ];
-
   return (
     <section id="leadership" className="py-24 relative overflow-hidden border-t border-slate-900/60 select-none">
       <div className="max-w-6xl mx-auto px-6">
@@ -51,70 +32,115 @@ export default function Leadership() {
           </div>
 
           {/* Window Body */}
-          <div className="p-6 md:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="p-6 md:p-10 space-y-8">
             
-            {/* Left Column: MDAS Primary Role */}
-            <div className="lg:col-span-5 space-y-6 select-text">
-              <div className="border border-slate-900 bg-slate-950/40 p-5 rounded-lg space-y-4">
-                <span className="text-[9px] font-bold text-purple-400 uppercase tracking-widest px-2 py-0.5 rounded bg-purple-950/30 border border-purple-900/40">
-                  [DIRECTOR_ROLE]
-                </span>
-                
-                <div>
-                  <h3 className="text-base md:text-lg font-bold text-white uppercase tracking-tight">
-                    Media & Marketing Director
-                  </h3>
-                  <p className="text-[10px] text-slate-500 mt-1 uppercase">
-                    Monash Data Analytics Society (MDAS) • 2024 - Present
-                  </p>
-                </div>
-
-                <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
-                  Leading visual branding, content publication, and campus-wide campaigns for the largest specialized data society at Monash. I supervise outreach schedules, coordinate designer pipelines, and publish educational technical posts designed to bridge the gap between student builders and leading tech organizations.
-                </p>
-
-                <div className="bg-purple-950/10 border border-purple-900/30 p-3 rounded text-[11px] text-purple-400 flex items-start gap-2">
-                  <Sparkles className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                  <span>Grew MDAS digital interaction metrics and event sign-ups by 40%.</span>
-                </div>
-
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {["Campaign Strategy", "Outreach", "Visual Branding", "Event Coordination"].map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-[9px] px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
+            {/* Leadership Overview Statement */}
+            <div className="border border-slate-900 bg-slate-950/40 p-5 rounded-lg select-text">
+              <h2 className="text-lg font-bold text-white uppercase tracking-tight flex items-center gap-2">
+                <span className="text-purple-400">Can Krishi lead?</span>
+              </h2>
+              <p className="mt-2 text-slate-400 text-xs md:text-sm leading-relaxed font-sans">
+                Yes. I drive growth in student organizations by leading cross-functional teams, structuring event marketing campaigns, and building developer networks. I coordinate campaign schedules and lead design pipelines to translate community needs into successful events.
+              </p>
             </div>
 
-            {/* Right Column: Pillars list */}
-            <div className="lg:col-span-7 space-y-4 select-text">
-              {leadershipCards.map((card, idx) => (
-                <motion.div
-                  key={card.title}
-                  initial={{ opacity: 0, x: 15 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="border border-slate-900 bg-slate-950/40 p-5 rounded-lg flex items-start gap-4"
-                >
-                  <div className="p-2 rounded bg-slate-900 border border-slate-800 shrink-0 select-none">
-                    {card.icon}
+            {/* Side-by-Side Roles layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              
+              {/* Left Side: MDAS Column */}
+              <motionFramer.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="lg:col-span-6 border border-slate-900 bg-slate-950/40 p-6 rounded-lg flex flex-col justify-between space-y-4 select-text"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-bold text-purple-400 uppercase tracking-widest px-2 py-0.5 rounded bg-purple-950/30 border border-purple-900/40">
+                      [DIRECTORSHIP]
+                    </span>
+                    <span className="text-[10px] text-slate-500">2024 - PRESENT</span>
                   </div>
-                  <div className="space-y-1">
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                      [PILLAR: {card.title.toUpperCase()}]
-                    </h4>
-                    <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
-                      {card.description}
+
+                  <div>
+                    <h3 className="text-base font-bold text-white uppercase tracking-tight">
+                      Monash Data & AI Society (MDAS)
+                    </h3>
+                    <p className="text-[11px] text-purple-400 mt-0.5 font-semibold">
+                      Media & Marketing Director
                     </p>
                   </div>
-                </motion.div>
-              ))}
+
+                  <div className="space-y-2 font-sans text-[11.5px] text-slate-400 leading-relaxed pt-1">
+                    <div className="flex gap-2">
+                      <Megaphone className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                      <span><strong>Marketing Leadership:</strong> Leading visual branding, content publication, and digital campaign schedules for the largest specialized data student society at Monash.</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Calendar className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                      <span><strong>Event Strategy:</strong> Co-designed promotions and logical coordination for developer bootcamps, winter hackathons, and corporate networking nights.</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Users2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                      <span><strong>Cross-Functional Collaboration:</strong> Managing pipelines of copywriters, designers, and web developers to build and distribute marketing assets.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-purple-950/15 border border-purple-900/30 p-3.5 rounded text-[11px] text-purple-400 flex items-start gap-2.5 font-sans mt-2">
+                  <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span><strong>Outcome:</strong> Grew AI workshop reach to 300+ students across 5+ events and boosted overall digital interaction metrics by 40%.</span>
+                </div>
+              </motionFramer.div>
+
+              {/* Right Side: MOSAIC Column */}
+              <motionFramer.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="lg:col-span-6 border border-slate-900 bg-slate-950/40 p-6 rounded-lg flex flex-col justify-between space-y-4 select-text"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-bold text-teal-400 uppercase tracking-widest px-2 py-0.5 rounded bg-teal-950/30 border border-teal-900/40">
+                      [COMMUNITY_LEAD]
+                    </span>
+                    <span className="text-[10px] text-slate-500">2025 - PRESENT</span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-base font-bold text-white uppercase tracking-tight">
+                      MOSAIC
+                    </h3>
+                    <p className="text-[11px] text-teal-400 mt-0.5 font-semibold">
+                      Social Media Coordinator
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 font-sans text-[11.5px] text-slate-400 leading-relaxed pt-1">
+                    <div className="flex gap-2">
+                      <Users className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+                      <span><strong>Community Building:</strong> Fostering active peer support systems and volunteer developer networks around community AI projects.</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Heart className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+                      <span><strong>Student Engagement:</strong> Coordinating cross-campus outreach campaigns connecting peers to AI volunteer programs and local community projects.</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Users2 className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+                      <span><strong>Cross-Functional Collaboration:</strong> Aligning students, university representatives, and non-profits to support monthly social coordination initiatives.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-teal-950/15 border border-teal-900/30 p-3.5 rounded text-[11px] text-teal-400 flex items-start gap-2.5 font-sans mt-2">
+                  <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span><strong>Outcome:</strong> Connected peers to local community volunteer initiatives and increased student participation in volunteering projects.</span>
+                </div>
+              </motionFramer.div>
+
             </div>
 
           </div>
@@ -125,3 +151,6 @@ export default function Leadership() {
     </section>
   );
 }
+
+// Wrapper alias for Framer Motion to prevent dynamic name conflict in compilation
+const motionFramer = motion;

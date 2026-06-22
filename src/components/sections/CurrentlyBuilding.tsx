@@ -1,40 +1,51 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Hammer, Circle } from "lucide-react";
+import { Hammer, ArrowRight, PlayCircle, GitCommit } from "lucide-react";
 
-interface BuildingProject {
+interface ActiveBuild {
   name: string;
-  description: string;
-  status: string;
-  statusType: "active" | "expanding";
+  currentFocus: string;
+  developmentStatus: string;
+  roadmap: string[];
+  activeWork: string[];
 }
 
-export default function CurrentlyBuilding() {
-  const activeProjects: BuildingProject[] = [
-    {
-      name: "Accessible Vision",
-      description: "AI-powered assistive platform helping visually impaired users navigate unfamiliar environments through real-time computer vision models and low-latency audio guidance.",
-      status: "Active Development",
-      statusType: "active"
-    },
-    {
-      name: "ClinicalBrief",
-      description: "Secure clinical intelligence platform that transcribes clinician-patient consultation audio and extracts structured, actionable clinical insights.",
-      status: "Active Development",
-      statusType: "active"
-    },
-    {
-      name: "StudentHub",
-      description: "Melbourne student community resource hub consolidating verified housing checklists, public transit routes, and student events.",
-      status: "Expanding Features",
-      statusType: "expanding"
-    }
-  ];
+const activeBuilds: ActiveBuild[] = [
+  {
+    name: "Accessible Vision",
+    currentFocus: "Model quantization & edge pipeline latency minimization.",
+    developmentStatus: "Active Refinement (Version 1.2-alpha)",
+    roadmap: [
+      "Integrate multi-camera spatial mapping for outdoor path layout parsing.",
+      "Implement client-side offline audio synthesis queues for lightweight screen-free usage."
+    ],
+    activeWork: [
+      "Quantizing YOLOv8 model weights to reduce edge processor memory footprints.",
+      "Testing spoken hazard description scheduling queues to prevent frame-dropping under load.",
+      "Refining distance estimations on edge camera calibration matrices."
+    ]
+  },
+  {
+    name: "ClinicalBrief",
+    currentFocus: "Audio diarization accuracy & secure patient metadata compliance layers.",
+    developmentStatus: "Active Development (Sprint 4)",
+    roadmap: [
+      "Integrate live streaming WebSocket audio transcriptions.",
+      "Add support for offline parsing using local LLM inference engines (Llama-3-8B) on secure servers."
+    ],
+    activeWork: [
+      "Expanding speech diarization libraries to support multiple overlapping speaker voices.",
+      "Hardening client-side metadata sanitization filters before API request dispatches.",
+      "Profiling Next.js client-side polling latency to optimize patient brief loading states."
+    ]
+  }
+];
 
+export default function CurrentlyBuilding() {
   return (
     <section id="currently-building" className="py-24 relative overflow-hidden border-t border-slate-900/60 select-none">
-      <div className="max-w-4xl mx-auto px-6">
+      <div className="max-w-5xl mx-auto px-6">
         
         {/* Section Header CLI Prompt */}
         <div className="font-mono text-xs md:text-sm text-slate-500 mb-8 flex items-center space-x-2 select-none">
@@ -60,11 +71,10 @@ export default function CurrentlyBuilding() {
           </div>
 
           {/* Grid list of active builds */}
-          <div className="p-6 md:p-8 space-y-6 select-text">
+          <div className="p-6 md:p-8 space-y-8 select-text">
             
-            <div className="grid grid-cols-1 gap-4">
-              {activeProjects.map((proj, idx) => {
-                const isActive = proj.statusType === "active";
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+              {activeBuilds.map((proj, idx) => {
                 return (
                   <motion.div
                     key={proj.name}
@@ -72,30 +82,62 @@ export default function CurrentlyBuilding() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: idx * 0.1 }}
-                    className="border border-slate-900 bg-slate-950/40 p-5 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    className="border border-slate-900 bg-slate-950/40 p-6 rounded-lg flex flex-col justify-between space-y-6"
                   >
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-slate-500 text-xs font-bold">📂</span>
-                        <h3 className="text-sm md:text-base font-bold text-white uppercase tracking-tight">
-                          {proj.name}
-                        </h3>
+                    {/* Project Identification */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between border-b border-slate-900 pb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-500 text-xs font-bold">📂</span>
+                          <h3 className="text-base font-bold text-white uppercase tracking-tight">
+                            {proj.name}
+                          </h3>
+                        </div>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-emerald-950/40 border border-emerald-900/50 text-[#10b981] font-mono text-[9px] font-bold uppercase tracking-wider select-none animate-pulse">
+                          <span className="w-1 h-1 rounded-full bg-[#10b981]" />
+                          {proj.developmentStatus}
+                        </span>
                       </div>
-                      
-                      <p className="text-[11.5px] text-slate-400 leading-relaxed font-sans select-text max-w-2xl">
-                        {proj.description}
-                      </p>
-                    </div>
 
-                    <div className="shrink-0 flex items-center">
-                      <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono border ${
-                        isActive
-                          ? "bg-emerald-950/30 border-emerald-900/50 text-emerald-400"
-                          : "bg-cyan-950/30 border-cyan-900/50 text-cyan-400"
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-emerald-500 animate-pulse" : "bg-cyan-400"} shrink-0`} />
-                        {proj.status}
-                      </span>
+                      {/* Current Focus */}
+                      <div className="space-y-1">
+                        <span className="text-[9.5px] text-slate-500 block uppercase font-bold tracking-wider select-none">
+                          [Current Focus]
+                        </span>
+                        <p className="text-xs text-slate-200 font-sans select-text">
+                          {proj.currentFocus}
+                        </p>
+                      </div>
+
+                      {/* Active Work Tasks */}
+                      <div className="space-y-1.5">
+                        <span className="text-[9.5px] text-slate-500 block uppercase font-bold tracking-wider select-none">
+                          [Active Tasks]
+                        </span>
+                        <ul className="space-y-1.5 text-xs text-slate-400 font-sans">
+                          {proj.activeWork.map((task, tIdx) => (
+                            <li key={tIdx} className="flex items-start gap-2 select-text">
+                              <span className="text-cyan-400 select-none shrink-0 mt-0.5">↳</span>
+                              <span>{task}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Roadmap Milestones */}
+                      <div className="space-y-1.5">
+                        <span className="text-[9.5px] text-slate-500 block uppercase font-bold tracking-wider select-none">
+                          [Future Roadmap]
+                        </span>
+                        <ul className="space-y-1.5 text-xs text-slate-400 font-sans">
+                          {proj.roadmap.map((step, rIdx) => (
+                            <li key={rIdx} className="flex items-start gap-2 select-text">
+                              <span className="text-[#10b981] select-none shrink-0 mt-0.5">→</span>
+                              <span>{step}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
 
                   </motion.div>
@@ -107,7 +149,7 @@ export default function CurrentlyBuilding() {
 
           {/* Footer bar */}
           <div className="bg-slate-950/95 px-4 py-2 border-t border-slate-900 flex justify-between items-center text-[9px] text-slate-650 select-none">
-            <span>Tracking 3 active development subroutines</span>
+            <span>Tracking 2 active building modules</span>
             <span>currently-building.md</span>
           </div>
 

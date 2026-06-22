@@ -46,10 +46,10 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "./projects", href: "/#projects", hash: "#projects" },
-    { name: "./system-map", href: "/#system-map", hash: "#system-map" },
     { name: "./career", href: "/#career", hash: "#career" },
-    { name: "./currently-building", href: "/#currently-building", hash: "#currently-building" },
     { name: "./leadership", href: "/#leadership", hash: "#leadership" },
+    { name: "./currently-building", href: "/#currently-building", hash: "#currently-building" },
+    { name: "./system-map", href: "/#system-map", hash: "#system-map" },
     { name: "./contact", href: "/#contact", hash: "#contact" }
   ];
 

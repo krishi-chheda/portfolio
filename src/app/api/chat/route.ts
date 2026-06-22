@@ -50,7 +50,7 @@ export async function POST(req: Request) {
 Key details:
 - Stack: Next.js, FastAPI, Python, and LLM Applications (GPT-4o/Whisper).
 - Status: Active development (optimizing audio diarization and speaker separation).
-- Verified Outcomes: ${proj?.metrics[0]} • ${proj?.metrics[1]}.
+- Verified Outcomes: ${proj?.overview.solution} • ${proj?.impact.achievements[0]} • ${proj?.impact.achievements[1]}.
 
 What would you like to ask next?
 - "How does ClinicalBrief handle secure patient record sanitization?"
@@ -59,26 +59,26 @@ What would you like to ask next?
       } 
       else if (query.includes("student") || query.includes("hub") || query.includes("studenthub")) {
         const proj = aiKnowledgeBase.projects.find((p) => p.id === "studenthub");
-        reply = `I built StudentHub to simplify the relocation friction incoming international students face when moving to Melbourne. It consolidates verified housing checklists, transit routes, and local student events.
+        reply = `I built StudentHub as a community portal consolidated checklist resource for Melbourne international students. It coordinates housing lists, student events, discussions, and marketplaces.
 
 Key details:
-- Stack: Next.js, TypeScript, REST APIs, Tailwind CSS, and Mapbox.
-- Status: Active development (integrating local student network API connections).
-- Verified Outcomes: ${proj?.metrics[0]} • ${proj?.metrics[1]}.
+- Stack: Next.js, Flutter, and Firebase.
+- Status: Completed.
+- Verified Outcomes: ${proj?.impact.achievements[0]} • ${proj?.impact.achievements[1]} • Sub-second data sync sync listener updates.
 
 What would you like to ask next?
-- "What APIs did you integrate for housing and transit data?"
 - "Tell me about your IT intern role at Mysahayak developing StudentHub."
-- "Is StudentHub currently live?"`;
+- "What databases does StudentHub leverage for real-time updates?"
+- "Is the platform optimized for responsive mobile layout?"`;
       } 
       else if (query.includes("traffic") || query.includes("light") || query.includes("rl") || query.includes("sumo") || query.includes("congestion")) {
         const proj = aiKnowledgeBase.projects.find((p) => p.id === "traffic-ai");
-        reply = `I developed Traffic AI to address vehicle congestion caused by fixed-interval traffic lights. It uses live computer vision processing on intersection video streams to track lane queue density and adapt signal timings dynamically.
+        reply = `I developed Traffic AI to optimize traffic congestion at intersections. It uses live computer vision processing on video streams to track lane queue density and adapt signal timings dynamically.
 
 Key details:
 - Stack: YOLO, OpenCV, Python, and NVIDIA Jetson Nano edge hardware.
 - Status: Simulation validated; hardware logic tested on Jetson Nano edge nodes.
-- Verified Outcomes: Achieved a verified 42% reduction in intersection queue wait times in simulated test loops.
+- Verified Outcomes: Achieved a verified 42% reduction in intersection waiting times in simulated intersection models.
 
 What would you like to ask next?
 - "How did you optimize YOLO on the Jetson Nano?"
@@ -87,16 +87,16 @@ What would you like to ask next?
       } 
       else if (query.includes("accessible") || query.includes("vision") || query.includes("assistive") || query.includes("guidance") || query.includes("visually")) {
         const proj = aiKnowledgeBase.projects.find((p) => p.id === "accessible-vision");
-        reply = `I created Accessible Vision to assist visually impaired individuals in navigating unfamiliar environments safely. It maps environmental paths and detects hazards in real-time, providing immediate spoken audio feedback.
+        reply = `I created Accessible Vision to assist visually impaired individuals in navigating environments safely. It maps environmental paths and detects hazards in real-time, providing immediate spoken audio feedback.
 
 Key details:
-- Stack: YOLO, OpenCV, Python, and Real-Time AI.
+- Stack: FastAPI, Next.js, YOLOv8, BLIP, Docker, and Hugging Face.
 - Status: Active development (optimizing spatial hazard orientation models).
-- Verified Outcomes: Achieved sub-100ms scene parsing inference latency with low-latency spoken warning cues.
+- Verified Outcomes: Reduced YOLO inference latency by 92% (from 8.4s to 668ms under concurrent load testing) with grounded reasoning pipelines.
 
 What would you like to ask next?
-- "How did you achieve sub-100ms inference latency?"
-- "What YOLO version was used for obstacle detection?"
+- "How did you achieve a 92% inference latency reduction?"
+- "How did you integrate YOLOv8 and BLIP?"
 - "How does the real-time spoken guidance system function?"`;
       } 
       else if (query.includes("skill") || query.includes("tech") || query.includes("stack") || query.includes("language") || query.includes("python") || query.includes("javascript") || query.includes("typescript") || query.includes("react") || query.includes("yolo") || query.includes("opencv")) {
@@ -112,24 +112,28 @@ What would you like to ask next?
 - "What is your experience with edge AI hardware like Jetson Nano?"
 - "How do you approach securing patient data in LLM pipelines?"`;
       }
-      else if (query.includes("experience") || query.includes("work") || query.includes("career") || query.includes("history") || query.includes("intern") || query.includes("mysahayak")) {
-        reply = `I have built technical and leadership experience across several roles:
-- Mysahayak (IT Intern, 2025): Developed user dashboard components, integrated REST APIs, and fixed critical user interface bugs for StudentHub.
-- Monash Data & AI Society (Media & Marketing Director, 2024 - Present): Managing branding, student engagement, and promoting technical workshops and hackathons.
-- Project Builder: Developed and deployed Accessible Vision, ClinicalBrief, StudentHub, and Traffic AI.
+      else if (query.includes("experience") || query.includes("work") || query.includes("career") || query.includes("history") || query.includes("intern") || query.includes("mysahayak") || query.includes("mosaic") || query.includes("volunteer") || query.includes("sacred")) {
+        reply = `I have built technical, leadership, and community experience across several roles:
+- Mysahayak (IT Intern, 2025): Built AI-assisted content moderation workflows (reducing manual review by 30%), integrated REST APIs, and optimized backend API layers.
+- Monash Data & AI Society (Media & Marketing Director, 2024 - Present): Managing branding and growing technical workshop reach to 300+ students.
+- MOSAIC (Social Media Coordinator, 2025 - Present): Managing community social coordination and event promotion for Monash Students for AI with Communities.
+- Sacred Heart Mission Op Shop (Volunteer, 2026 - Present): Conducting electrical compliance testing and troubleshooting IT network issues.
 
 What would you like to ask next?
 - "What did you accomplish during your internship at Mysahayak?"
-- "How has your MDAS role prepared you for a career in AI?"
-- "Do you have experience in frontend, backend, or ML engineering?"`;
+- "What is your role at MOSAIC?"
+- "What kind of work do you do at the Sacred Heart Mission Op Shop?"`;
       }
-      else if (query.includes("mdas") || query.includes("media") || query.includes("director") || query.includes("society") || query.includes("leadership")) {
-        reply = `I serve as the Media & Marketing Director at the Monash Data & AI Society (MDAS), which is the largest data-focused student organization at Monash University. I lead our branding strategies, manage engagement metrics, and promote technical workshops, hackathons, and industry networking events.
+      else if (query.includes("mdas") || query.includes("media") || query.includes("director") || query.includes("society") || query.includes("leadership") || query.includes("mosaic") || query.includes("volunteer") || query.includes("sacred")) {
+        reply = `I hold key leadership and community roles that balance my technical build experience:
+- Media & Marketing Director at Monash Data & AI Society (MDAS): I lead branding strategies, manage engagement metrics, and coordinate events, growing workshop reach to 300+ students across 5+ events.
+- Social Media Coordinator at MOSAIC (Monash Students for AI with Communities): I manage community social coordination and connect peers to AI volunteer programs and local projects.
+- Volunteer at Sacred Heart Mission Op Shop: I conduct electrical safety compliance testing on donations, troubleshoot local IT network issues, and support cashier operations (50+ customer interactions per shift).
 
 What would you like to ask next?
-- "What campaigns have you run for MDAS?"
-- "How many students are involved in MDAS?"
-- "How do you coordinate with industry partners for hackathons?"`;
+- "How do you balance your technical studies with MDAS leadership?"
+- "What kind of AI volunteer programs does MOSAIC run?"
+- "How has volunteering at Sacred Heart Mission shaped your soft skills?"`;
       } 
       else if (query.includes("monash") || query.includes("master") || query.includes("uni") || query.includes("education") || query.includes("study") || query.includes("grade")) {
         reply = `I am pursuing my Master of Artificial Intelligence at Monash University in Melbourne, Australia, with graduation set for July 2027. My studies focus on deep learning, reinforcement learning, natural language processing, and agentic workflows.

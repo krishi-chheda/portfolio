@@ -47,25 +47,25 @@ export async function POST(req: Request) {
       if (query.includes("clinical") || query.includes("brief") || query.includes("belief")) {
         const proj = aiKnowledgeBase.projects.find((p) => p.id === "clinicalbrief");
         reply = `ClinicalBrief is Krishi's featured AI platform for healthcare. It processes clinical documents and consultation audio to generate structured medical insights.\n\nKey details:\n- Built using Next.js, FastAPI, Python, and LLM Applications.\n- Highlights: ${proj?.metrics[0]} • ${proj?.metrics[1]}. \n- Codebase is available on GitHub.`;
-      } 
+      }
       else if (query.includes("student") || query.includes("hub") || query.includes("studenthub")) {
         const proj = aiKnowledgeBase.projects.find((p) => p.id === "studenthub");
         reply = `StudentHub Melbourne is an active student resource platform built to support international student arrivals in Victoria.\n\nKey metrics:\n- ${proj?.metrics[0]}\n- Tech: Next.js, TypeScript, APIs, and Product Design.`;
-      } 
+      }
       else if (query.includes("traffic") || query.includes("light") || query.includes("rl") || query.includes("sumo")) {
         const proj = aiKnowledgeBase.projects.find((p) => p.id === "traffic-ai");
         reply = `Traffic AI is an intelligent traffic management system that uses computer vision to dynamically optimize signal counts in real-time.\n\nResult:\n- ${proj?.metrics[0]}\n- Tech: YOLO, OpenCV, Python, and NVIDIA Jetson Nano.`;
-      } 
+      }
       else if (query.includes("accessible") || query.includes("vision") || query.includes("assistive") || query.includes("guidance")) {
         const proj = aiKnowledgeBase.projects.find((p) => p.id === "accessible-vision");
         reply = `Accessible Vision is an AI-powered accessibility platform helping visually impaired users understand and navigate environments through computer vision and audio guidance.\n\nKey details:\n- Tech: Computer Vision, YOLO, Python, and Real-Time AI. \n- Features: Real-time scene understanding, obstacle warnings, and spoken audio cues.`;
-      } 
+      }
       else if (query.includes("mdas") || query.includes("media") || query.includes("director") || query.includes("society")) {
         reply = `Krishi serves as the Media & Marketing Director at Monash Data Analytics Society (MDAS). He managed a rebrand that grew digital engagement by 40% and coordinates career events and coding bootcamps for student builders.`;
-      } 
+      }
       else if (query.includes("monash") || query.includes("master") || query.includes("uni") || query.includes("education") || query.includes("study") || query.includes("grade")) {
         reply = `Krishi is pursuing a Master of Artificial Intelligence at Monash University in Melbourne. His academic focus centers on deep learning, reinforcement learning, NLP, and agentic pipelines.`;
-      } 
+      }
       else if (
         query.includes("job") ||
         query.includes("hire") ||
@@ -76,14 +76,14 @@ export async function POST(req: Request) {
         query.includes("cv") ||
         query.includes("offer")
       ) {
-        reply = `Krishi is actively seeking opportunities in Australia (or remote) starting post-graduation. He is aiming for AI Engineer, Founding Software Engineer, or Full-Stack developer roles.\n\nYou can access his career timeline directly in the ./career section on the website or contact him at krishi.chheda@outlook.com to discuss role details.`;
-      } 
+        reply = `Krishi is actively seeking opportunities in Australia (or remote) starting post-graduation. He is aiming for AI Engineer, Founding Software Engineer, or Full-Stack developer roles.\n\nYou can access his career timeline directly in the ./career section on the website or contact him at krishichheda10@gmail.com to discuss role details.`;
+      }
       else if (query.includes("contact") || query.includes("email") || query.includes("reach") || query.includes("linkedin")) {
-        reply = `You can reach Krishi directly:\n- Email: krishi.chheda@outlook.com\n- LinkedIn: linkedin.com/in/krishi-chheda\n- GitHub: github.com/krishi-chheda\n\nYou can also drop a message through the contact form on the home page!`;
-      } 
+        reply = `You can reach Krishi directly:\n- Email: krishichheda10@gmail.com\n- LinkedIn: linkedin.com/in/krishi-chheda\n- GitHub: github.com/krishi-chheda\n\nYou can also drop a message through the contact form on the home page!`;
+      }
       else if (query.includes("interest") || query.includes("f1") || query.includes("hobby") || query.includes("hobbies") || query.includes("fitness")) {
         reply = `When not building AI systems, Krishi is a Formula 1 enthusiast and is dedicated to strength fitness lifting.`;
-      } 
+      }
       else {
         reply = `Hi! I'm Krishi's AI Assistant. Ask me anything about his Monash Master of AI research, MDAS marketing leadership, or projects like ClinicalBrief, Accessible Vision, Traffic AI, and StudentHub.\n\nQuick suggestions:\n- "Tell me about ClinicalBrief"\n- "Is Krishi open to full-time engineering roles?"\n- "What is his role at MDAS?"`;
       }

@@ -8,7 +8,7 @@ export default function Experience() {
   return (
     <section id="career" className="py-24 relative overflow-hidden border-t border-slate-900/60 select-none">
       <div className="max-w-4xl mx-auto px-6">
-        
+
         {/* Section Header CLI Prompt */}
         <div className="font-mono text-xs md:text-sm text-slate-500 mb-8 flex items-center space-x-2 select-none">
           <span className="text-[#10b981]">krishi@stack:~$</span>
@@ -17,7 +17,7 @@ export default function Experience() {
 
         {/* Git Log DAG Console Window */}
         <div className="w-full border border-slate-900 bg-slate-950/20 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl flex flex-col font-mono">
-          
+
           {/* Title Bar */}
           <div className="bg-slate-950/80 px-4 py-2.5 border-b border-slate-900 flex justify-between items-center select-none text-[10px] text-slate-500">
             <div className="flex items-center space-x-1.5">
@@ -34,14 +34,14 @@ export default function Experience() {
 
           {/* Window Body containing the mock git log DAG */}
           <div className="p-6 md:p-8 select-text">
-            
+
             <div className="relative border-l border-dashed border-slate-800 ml-3 md:ml-4 pl-6 md:pl-8 space-y-12 py-2">
               {experienceData.map((item, idx) => {
                 // Generate a mock hash based on item id
                 const mockHash = Math.abs(item.id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) * 12345)
                   .toString(16)
                   .substring(0, 8);
-                
+
                 const isFirst = idx === 0;
 
                 return (
@@ -55,9 +55,8 @@ export default function Experience() {
                   >
                     {/* Git Graph Circle node */}
                     <div className="absolute -left-[30px] md:-left-[39px] top-1 select-none">
-                      <span className={`w-3.5 h-3.5 rounded-full border border-slate-950 flex items-center justify-center text-[10px] leading-none ${
-                        isFirst ? "bg-[#10b981] text-black animate-pulse" : "bg-amber-500 text-black"
-                      }`}>
+                      <span className={`w-3.5 h-3.5 rounded-full border border-slate-950 flex items-center justify-center text-[10px] leading-none ${isFirst ? "bg-[#10b981] text-black animate-pulse" : "bg-amber-500 text-black"
+                        }`}>
                         *
                       </span>
                     </div>
@@ -72,11 +71,11 @@ export default function Experience() {
                           </span>
                         )}
                       </div>
-                      
+
                       <div className="text-slate-400 text-[11px] md:text-xs">
-                        <span className="text-slate-500">Author:</span> Krishi Chheda &lt;krishi.chheda@outlook.com&gt;
+                        <span className="text-slate-500">Author:</span> Krishi Chheda &lt;krishichheda10@gmail.com&gt;
                       </div>
-                      
+
                       <div className="text-slate-400 text-[11px] md:text-xs">
                         <span className="text-slate-500">Date:</span> {item.year} {"->"} <span className="text-white font-bold">{item.role}</span> @ <span className="text-[#10b981] font-semibold">{item.organization}</span>
                       </div>

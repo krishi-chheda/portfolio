@@ -21,12 +21,12 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
       onComplete();
     });
 
-  // Safe timer boundary to ensure loading never exceeds 4.5 seconds
+  // Safe timer boundary to ensure loading never exceeds 2 seconds
   useEffect(() => {
     const safetyTimeout = setTimeout(() => {
       setMounted(false);
       onComplete();
-    }, 4500);
+    }, 2000);
 
     return () => clearTimeout(safetyTimeout);
   }, [onComplete]);
@@ -70,7 +70,11 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="fixed inset-0 z-50 bg-[#000000] overflow-hidden flex flex-col items-stretch"
+          onClick={() => {
+            setMounted(false);
+            onComplete();
+          }}
+          className="fixed inset-0 z-50 bg-[#000000] overflow-hidden flex flex-col items-stretch cursor-pointer select-none"
         >
           {/* CRT Screen Glow Backlight */}
           <div

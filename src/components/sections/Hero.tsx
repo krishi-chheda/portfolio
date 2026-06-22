@@ -198,6 +198,21 @@ export default function Hero() {
                     </li>
                   </ul>
                 </div>
+
+                {currentProcesses.availability && (
+                  <div>
+                    <div className="text-[#10b981] font-bold tracking-wider text-[10px] uppercase mb-1.5 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
+                      STATUS:
+                    </div>
+                    <ul className="space-y-1 pl-2 text-slate-300">
+                      <li className="flex items-start gap-2 select-text">
+                        <span className="text-emerald-500/60">•</span>
+                        <span className="text-[#10b981] font-bold">{currentProcesses.availability}</span>
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
 
               {/* Shell output trailing decoration */}

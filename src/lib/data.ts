@@ -28,12 +28,14 @@ export interface CurrentProcess {
   running: string[];
   learning: string[];
   role: string;
+  availability?: string;
 }
 
 export const currentProcesses: CurrentProcess = {
   running: ["Accessible Vision", "ClinicalBrief", "StudentHub"],
   learning: ["Agentic AI", "Product Design"],
-  role: "Media & Marketing Director @ MDAS"
+  role: "Media & Marketing Director @ MDAS",
+  availability: "Open to Opportunities (AI Engineer / Full-Stack)"
 };
 
 export const projectsData: Project[] = [
@@ -46,9 +48,9 @@ export const projectsData: Project[] = [
     story: "Accessible Vision was built to help visually impaired individuals interact with their environments independently. By combining real-time computer vision models with natural language audio feedback, the system identifies objects and reads scenes dynamically, helping users avoid obstacles and understand spatial structures.",
     techStack: ["Computer Vision", "YOLO", "Python", "Real-Time AI"],
     metrics: [
-      "Performs real-time scene understanding using YOLO object detection models",
-      "Provides low-latency spoken guidance through audio feedback APIs",
-      "Improves user safety by recognizing critical pathway obstacles"
+      "Designed and built an end-to-end edge computer vision model to detect urban obstacles for visually impaired users",
+      "Integrated real-time spoken guidance to deliver low-latency hazard warnings",
+      "Improved spatial navigation assistance by mapping environmental pathway layouts"
     ],
     githubUrl: "https://github.com/krishi-chheda/accessible-vision",
     terminalLog: [
@@ -66,9 +68,9 @@ export const projectsData: Project[] = [
     story: "Navigating scattered medical files and complex consultations is a challenge. ClinicalBrief provides intelligent summarization and clinical information retrieval, converting raw medical dictation and documents into structured, actionable clinical insights. The system optimizes clinical workflows and supports decision processes safely.",
     techStack: ["Next.js", "FastAPI", "Python", "LLM Applications"],
     metrics: [
-      "Converts medical consultation documents into structured clinical briefs",
-      "Improves information retrieval using semantic search workflows",
-      "Protects patient records with custom metadata sanitization"
+      "Built a secure processing pipeline that sanitizes sensitive medical data before summarizing",
+      "Optimized medical query latency by implementing semantic search indexes",
+      "Structured complex medical records into actionable clinical insights for healthcare providers"
     ],
     githubUrl: "https://github.com/krishi-chheda/ClinicalBrief",
     terminalLog: [
@@ -86,9 +88,9 @@ export const projectsData: Project[] = [
     story: "Arriving students face a scattered landscape of web pages, transit guides, and social clubs. StudentHub gathers Melbourne housing checklists, transit guides, and student-friendly social club directories into a single destination, reducing search friction and supporting student communities.",
     techStack: ["Next.js", "TypeScript", "APIs", "Product Design"],
     metrics: [
-      "Aggregates housing checklists, transit, and social events in Melbourne",
-      "Provides interactive maps for discovery of local community resources",
-      "Supports dark theme dashboards with unified database queries"
+      "Engineered a unified community index of verified housing and public transit schedules",
+      "Designed an interactive localized search layout to reduce student information discovery time",
+      "Deployed a responsive dark-mode dashboard tailored to student mobile usage"
     ],
     githubUrl: "https://github.com/krishi-chheda/studenthub-melbourne",
     terminalLog: [
@@ -106,9 +108,9 @@ export const projectsData: Project[] = [
     story: "Traditional traffic lights operate on fixed timers, leading to congestion. The AI Traffic Light System uses real-time vehicle detection from camera feeds to estimate queue density across lanes, dynamically optimizing green phases to maintain smooth flow.",
     techStack: ["YOLO", "OpenCV", "Python", "Jetson Nano"],
     metrics: [
-      "Verified impact: 42% reduction in waiting time.",
-      "Achieved low-latency vehicle detection using YOLO on Jetson Nano",
-      "Optimized intersection queues dynamically based on lane density"
+      "Achieved a verified 42% reduction in average queue waiting time through dynamic signal timing",
+      "Optimized deep learning inference on NVIDIA Jetson Nano edge nodes",
+      "Implemented an automated vehicle detection queuing pipeline using YOLO and OpenCV"
     ],
     githubUrl: "https://github.com/krishi-chheda/ai-traffic-system",
     terminalLog: [

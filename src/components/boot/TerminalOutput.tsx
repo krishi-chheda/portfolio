@@ -58,7 +58,9 @@ export default function TerminalOutput({
           leading-none
           whitespace-pre
           overflow-hidden
-          text-[10px]
+          text-[6px]
+          min-[380px]:text-[8px]
+          min-[480px]:text-[10px]
           sm:text-[14px]
           md:text-[18px]
           lg:text-[22px]
@@ -151,8 +153,8 @@ export default function TerminalOutput({
           )}
         </div>
 
-        <div className="hidden md:block text-slate-600">
-          Press ESC to Skip
+        <div className="text-slate-500 font-mono text-[10px] md:text-xs">
+          Press ESC or Tap to Skip
         </div>
       </div>
     </div>

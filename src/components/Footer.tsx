@@ -12,7 +12,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-slate-900 bg-[#06080e] py-12 px-6">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
-        
+
         {/* Info */}
         <div className="flex flex-col items-center md:items-start space-y-2">
           <div className="flex items-center space-x-2">
@@ -49,7 +49,7 @@ export default function Footer() {
             <Linkedin className="w-5 h-5" />
           </a>
           <a
-            href="mailto:krishi.chheda@outlook.com"
+            href="mailto:krishichheda10@gmail.com"
             className="text-slate-500 hover:text-cyan-400 transition-colors p-1"
             aria-label="Email"
           >

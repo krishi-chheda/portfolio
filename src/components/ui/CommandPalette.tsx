@@ -130,11 +130,29 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     cmd.description.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Lock body scroll and apply layout classes when open
   useEffect(() => {
     if (isOpen) {
-      setSearch("");
-      setActiveIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 100);
+      document.body.classList.add("command-palette-open");
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.classList.remove("command-palette-open");
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.classList.remove("command-palette-open");
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  // Reset search and active index when palette opens
+  useEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => {
+        setSearch("");
+        setActiveIndex(0);
+        setTimeout(() => inputRef.current?.focus(), 100);
+      });
     }
   }, [isOpen]);
 
@@ -185,15 +203,25 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md flex items-start justify-center pt-24 px-4 font-mono"
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.75)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)"
+          }}
+          className="fixed inset-0 z-[100] flex items-start justify-center pt-24 px-4 font-mono"
         >
+          {/* Background Decorative Status */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none select-none font-mono text-[10px] text-cyan-500/20 uppercase tracking-[0.25em] animate-pulse">
+            [system] interactive command mode active
+          </div>
+
           <motion.div
             initial={{ scale: 0.97, y: -8 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.97, y: -8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             ref={containerRef}
-            className="w-full max-w-xl bg-slate-950/90 border border-slate-800 rounded-lg shadow-2xl overflow-hidden"
+            className="w-full max-w-xl bg-slate-950/90 border border-cyan-500/20 rounded-lg shadow-[0_0_30px_rgba(6,182,212,0.15)] overflow-hidden"
           >
             {/* Input Bar */}
             <div className="flex items-center px-4 py-3 bg-slate-950 border-b border-slate-900">

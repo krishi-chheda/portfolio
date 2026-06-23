@@ -33,7 +33,7 @@ export default function Projects() {
   const activeProject = projectsData.find((p) => p.id === selectedId) || projectsData[0];
 
   return (
-    <section id="projects" className="py-24 relative overflow-hidden border-t border-slate-900/60 select-none">
+    <section id="projects" className="py-24 relative overflow-hidden border-t border-slate-900/60">
       <div className="max-w-6xl mx-auto px-6">
         
         {/* Section Header CLI Prompt */}

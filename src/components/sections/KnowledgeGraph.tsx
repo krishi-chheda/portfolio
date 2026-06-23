@@ -557,7 +557,7 @@ export default function KnowledgeGraph() {
   const activeNode = hoveredNode || selectedNode;
 
   return (
-    <section id="system-map" className="w-full bg-[#080c14] py-20 px-4 border-t border-slate-900/60 relative overflow-hidden select-none">
+    <section id="system-map" className="w-full bg-[#080c14] py-20 px-4 border-t border-slate-900/60 relative overflow-hidden">
       
       {/* Visual Screen reader live region */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">

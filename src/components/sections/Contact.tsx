@@ -29,7 +29,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="py-24 relative overflow-hidden border-t border-slate-900/60 select-none">
+    <section id="contact" className="py-24 relative overflow-hidden border-t border-slate-900/60">
       <div className="max-w-4xl mx-auto px-6">
 
         {/* Section Header CLI Prompt */}

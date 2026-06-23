@@ -105,6 +105,18 @@ body.command-palette-open footer {
   background-color: rgba(6, 182, 212, 0.04) !important;
 }
 
+/* Custom text-selection highlights matching terminal branding */
+::selection {
+  background: rgba(34, 211, 238, 0.30);
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background: rgba(34, 211, 238, 0.30);
+  color: #ffffff;
+}
+
+
 
 
 

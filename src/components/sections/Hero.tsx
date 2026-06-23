@@ -1,7 +1,7 @@
 "use client";
 
 import { motion as motionFramer } from "framer-motion";
-import { Bot, ArrowDown, Sparkles, Terminal, Cpu, Search, TerminalSquare } from "lucide-react";
+import { Bot, Sparkles, Terminal, Search, TerminalSquare } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { currentProcesses } from "@/lib/data";
 
@@ -153,7 +153,7 @@ export default function Hero() {
               </div>
 
               {/* Metrics Ribbon (htop/glances inspired) */}
-              <div className="grid grid-cols-2 gap-2 bg-slate-950/40 p-2.5 rounded border border-slate-900/60 text-[10px] font-mono select-none">
+              <div className="grid grid-cols-2 gap-2 bg-slate-950/40 p-2.5 rounded border border-slate-900/60 text-[10px] font-mono">
                 <div>
                   <span className="text-slate-500 block text-[8px] font-bold uppercase">PROCESSES RUNNING:</span>
                   <span className="text-emerald-450 font-bold">{currentProcesses.running.length}</span>
@@ -180,7 +180,7 @@ export default function Hero() {
                   {/* Active Processes */}
                   <div className="space-y-1.5">
                     <span className="text-slate-500 block uppercase font-bold text-[8.5px] tracking-wider select-none">
-                      // ACTIVE PROCESSES
+                      {"// ACTIVE PROCESSES"}
                     </span>
                     <div className="space-y-1">
                       {currentProcesses.running.map((proc) => (
@@ -211,7 +211,7 @@ export default function Hero() {
                   {/* Learning Threads */}
                   <div className="space-y-1.5">
                     <span className="text-slate-500 block uppercase font-bold text-[8.5px] tracking-wider select-none">
-                      // LEARNING THREADS
+                      {"// LEARNING THREADS"}
                     </span>
                     <div className="space-y-1">
                       {currentProcesses.learning.map((skill) => (
@@ -227,7 +227,7 @@ export default function Hero() {
                   {/* Leadership Process */}
                   <div className="space-y-1.5">
                     <span className="text-slate-500 block uppercase font-bold text-[8.5px] tracking-wider select-none">
-                      // LEADERSHIP PROCESS
+                      {"// LEADERSHIP PROCESS"}
                     </span>
                     <div className="border border-slate-900 bg-slate-950/20 p-2 rounded space-y-1 select-text">
                       <div className="flex items-center gap-1.5">
@@ -248,7 +248,7 @@ export default function Hero() {
                   {/* Target Roles */}
                   <div className="space-y-1.5">
                     <span className="text-slate-500 block uppercase font-bold text-[8.5px] tracking-wider select-none">
-                      // TARGET ROLES
+                      {"// TARGET ROLES"}
                     </span>
                     <div className="space-y-1">
                       {currentProcesses.targetRoles.map((role) => (
@@ -263,11 +263,11 @@ export default function Hero() {
 
                   {/* System Status */}
                   <div className="space-y-1.5">
-                    <span className="text-slate-500 block uppercase font-bold text-[8.5px] tracking-wider select-none">
-                      // SYSTEM STATUS
+                    <span className="text-slate-500 block uppercase font-bold text-[8.5px] tracking-wider">
+                      {"// SYSTEM STATUS"}
                     </span>
                     <div className="border border-slate-900 bg-slate-950/25 p-2.5 rounded-lg space-y-2 select-text">
-                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-900/50 text-[#10b981] font-bold text-[9.5px] tracking-wider uppercase animate-pulse select-none">
+                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-900/50 text-[#10b981] font-bold text-[9.5px] tracking-wider uppercase animate-pulse">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
                         ● AVAILABLE FOR OPPORTUNITIES
                       </div>

@@ -162,7 +162,7 @@ export default function Experience() {
   }, [scrollYProgress]);
 
   return (
-    <section id="career" ref={containerRef} className="py-24 relative overflow-hidden border-t border-slate-900/60 select-none">
+    <section id="career" ref={containerRef} className="py-24 relative overflow-hidden border-t border-slate-900/60">
       <div className="max-w-4xl mx-auto px-6">
 
         {/* Section Header CLI Prompt */}
@@ -204,7 +204,7 @@ export default function Experience() {
                 transition: "opacity 0.4s ease-in-out",
                 pointerEvents: headerVisible ? "auto" : "none"
               }}
-              className="mb-8 font-mono text-slate-400 space-y-1 text-xs select-none"
+              className="mb-8 font-mono text-slate-400 space-y-1 text-xs"
             >
               <div><span className="text-emerald-500 font-bold">HEAD {"->"} main</span></div>
               <div className="text-slate-500">origin/main</div>

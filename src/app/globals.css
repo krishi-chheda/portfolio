@@ -74,3 +74,13 @@ body {
   border: 1px solid rgba(6, 182, 212, 0.15);
 }
 
+@keyframes terminal-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: terminal-blink 1s step-end infinite;
+}
+
+

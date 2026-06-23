@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, X, Send, Terminal as TermIcon } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
+import { executeNavigationCommand } from "@/lib/navigation";
 import Button from "@/components/ui/Button";
 
 export default function ChatBubble() {
@@ -105,6 +106,21 @@ export default function ChatBubble() {
                         {isUser ? "USER >" : "AGENT >"}
                       </span>
                       <p className="whitespace-pre-line">{msg.content}</p>
+
+                      {!isUser && msg.suggestedCommand && (
+                        <div className="mt-3 pt-2 border-t border-slate-800/60 font-mono text-[10px]">
+                          <span className="text-slate-500 uppercase tracking-wider block mb-1 select-none">
+                            Suggested Command:
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => executeNavigationCommand(msg.suggestedCommand!)}
+                            className="text-cyan-400 hover:text-cyan-300 transition-colors flex items-center space-x-1 cursor-pointer text-left font-bold"
+                          >
+                            <span>&gt; {msg.suggestedCommand}</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );

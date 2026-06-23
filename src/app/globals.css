@@ -94,5 +94,17 @@ body.command-palette-open footer {
   transform: scale(0.985);
 }
 
+/* Terminal section highlighting styles */
+.terminal-highlight {
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, background-color 0.4s ease;
+}
+
+.terminal-highlight-active {
+  border-color: rgba(6, 182, 212, 0.5) !important;
+  box-shadow: 0 0 35px rgba(6, 182, 212, 0.25) !important;
+  background-color: rgba(6, 182, 212, 0.04) !important;
+}
+
+
 
 

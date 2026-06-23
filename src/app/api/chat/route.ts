@@ -27,7 +27,20 @@ export async function POST(req: Request) {
                 role: "system",
                 content: `You are Krishi Chheda's digital twin. Speak in the first person ("I", "my") as if you are Krishi himself answering a recruiter, hiring manager, or founder. Be confident, direct, authentic, and engineering-focused. Answer using these facts: ${JSON.stringify(
                   aiKnowledgeBase
-                )}. Always structure your response to highlight why I should be hired. After every single response, you must append a set of exactly 3 relevant, contextual follow-up questions that the recruiter or founder might want to ask next. Format these questions as bullet points under a 'What would you like to ask next?' header. If asked about things not in the facts, politely state you don't have that detail and suggest emailing me at krishichheda10@gmail.com.`,
+                )}. Always structure your response to highlight why I should be hired. After every single response, you must append a set of exactly 3 relevant, contextual follow-up questions that the recruiter or founder might want to ask next. Format these questions as bullet points under a 'What would you like to ask next?' header.
+
+Additionally, you have navigation routing capabilities. If the user asks about a project, leadership role, work history, skills, contact info, or what you are currently building, you must recommend a command shortcut at the very end of your response formatted exactly as '[command: <command_string>]'. Choose from these exact command strings only:
+- 'cat projects/accessible-vision/details.md' (for Accessible Vision project)
+- 'cat projects/clinicalbrief/details.md' (for ClinicalBrief project)
+- 'cat projects/studenthub/details.md' (for StudentHub project)
+- 'cat projects/traffic-ai/details.md' (for Traffic AI project)
+- 'cd leadership' (for leadership, MDAS, MOSAIC, or extracurricular activities)
+- 'git log --career' (for career experience, internships, academic background, resume, or timeline)
+- 'tail -f currently-building.log' (for what you are currently building, active builds, current pipeline)
+- 'open system-map' (for skills, technologies, knowledge graph, expertise)
+- 'ssh recruiter@krishi.os' (for contact, email, links, socials, interview setup)
+
+If asked about things not in the facts, politely state you don't have that detail and suggest emailing me at krishichheda10@gmail.com.`,
               },
               { role: "user", content: message },
             ],
@@ -202,7 +215,90 @@ What would you like to ask next?
       }
     }
 
-    return NextResponse.json({ reply });
+    let suggestedCommand = "";
+
+    // 3. Extract command from LLM response if present
+    if (reply) {
+      const commandMatch = reply.match(/\[command:\s*(.*?)\]/);
+      if (commandMatch) {
+        suggestedCommand = commandMatch[1].trim();
+        // Remove the command tag from the clean response text
+        reply = reply.replace(/\[command:\s*.*?\]/g, "").trim();
+      }
+    }
+
+    // 4. Apply robust query keyword mapping fallback if suggestedCommand was not set by LLM
+    if (!suggestedCommand) {
+      if (query.includes("accessible") || query.includes("vision") || query.includes("assistive")) {
+        suggestedCommand = "cat projects/accessible-vision/details.md";
+      } else if (query.includes("clinical") || query.includes("brief") || query.includes("belief")) {
+        suggestedCommand = "cat projects/clinicalbrief/details.md";
+      } else if (query.includes("student") || query.includes("hub") || query.includes("studenthub")) {
+        suggestedCommand = "cat projects/studenthub/details.md";
+      } else if (query.includes("traffic") || query.includes("congestion") || query.includes("signal") || query.includes("rl") || query.includes("sumo")) {
+        suggestedCommand = "cat projects/traffic-ai/details.md";
+      } else if (query.includes("leadership") || query.includes("mdas") || query.includes("mosaic")) {
+        suggestedCommand = "cd leadership";
+      } else if (
+        query.includes("career") ||
+        query.includes("experience") ||
+        query.includes("background") ||
+        query.includes("journey") ||
+        query.includes("resume") ||
+        query.includes("cv") ||
+        query.includes("history") ||
+        query.includes("work") ||
+        query.includes("intern")
+      ) {
+        suggestedCommand = "git log --career";
+      } else if (query.includes("building") || query.includes("current") || query.includes("next")) {
+        suggestedCommand = "tail -f currently-building.log";
+      } else if (
+        query.includes("skill") ||
+        query.includes("tech") ||
+        query.includes("stack") ||
+        query.includes("knowledge") ||
+        query.includes("expert") ||
+        query.includes("graph") ||
+        query.includes("system-map")
+      ) {
+        suggestedCommand = "open system-map";
+      } else if (
+        query.includes("contact") ||
+        query.includes("email") ||
+        query.includes("reach") ||
+        query.includes("connect") ||
+        query.includes("interview")
+      ) {
+        suggestedCommand = "ssh recruiter@krishi.os";
+      }
+    }
+
+    // 5. Apply reply content keyword mapping fallback if suggestedCommand is still not set
+    if (!suggestedCommand && reply) {
+      const lowerReply = reply.toLowerCase();
+      if (lowerReply.includes("accessible vision") || lowerReply.includes("accessible-vision")) {
+        suggestedCommand = "cat projects/accessible-vision/details.md";
+      } else if (lowerReply.includes("clinicalbrief") || lowerReply.includes("clinical brief")) {
+        suggestedCommand = "cat projects/clinicalbrief/details.md";
+      } else if (lowerReply.includes("studenthub") || lowerReply.includes("student hub")) {
+        suggestedCommand = "cat projects/studenthub/details.md";
+      } else if (lowerReply.includes("traffic ai") || lowerReply.includes("traffic-ai")) {
+        suggestedCommand = "cat projects/traffic-ai/details.md";
+      } else if (lowerReply.includes("leadership") || lowerReply.includes("mdas") || lowerReply.includes("mosaic")) {
+        suggestedCommand = "cd leadership";
+      } else if (lowerReply.includes("career") || lowerReply.includes("experience") || lowerReply.includes("journey")) {
+        suggestedCommand = "git log --career";
+      } else if (lowerReply.includes("currently building") || lowerReply.includes("currently-building")) {
+        suggestedCommand = "tail -f currently-building.log";
+      } else if (lowerReply.includes("knowledge graph") || lowerReply.includes("skills") || lowerReply.includes("technologies")) {
+        suggestedCommand = "open system-map";
+      } else if (lowerReply.includes("contact") || lowerReply.includes("email") || lowerReply.includes("linkedin")) {
+        suggestedCommand = "ssh recruiter@krishi.os";
+      }
+    }
+
+    return NextResponse.json({ reply, suggestedCommand });
   } catch (error) {
     console.error("Chat API error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

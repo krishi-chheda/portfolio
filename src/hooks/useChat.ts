@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 interface Message {
   role: "user" | "assistant";
   content: string;
+  suggestedCommand?: string;
 }
 
 export function useChat(initialMessage: string) {
@@ -34,6 +35,7 @@ export function useChat(initialMessage: string) {
         {
           role: "assistant",
           content: data.reply || "Sorry, I lost the connection. Let's try again!",
+          suggestedCommand: data.suggestedCommand,
         },
       ]);
     } catch (err) {
@@ -55,3 +57,4 @@ export function useChat(initialMessage: string) {
     sendMessage,
   };
 }
+

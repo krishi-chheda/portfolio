@@ -724,7 +724,7 @@ export default function KnowledgeGraph() {
           {/* Force Graph Interactive Window */}
           <div 
             ref={containerRef}
-            className="lg:col-span-3 border border-slate-900/80 bg-slate-950/20 rounded-xl relative overflow-hidden h-[380px] md:h-[500px] cursor-grab active:cursor-grabbing shadow-inner flex"
+            className="lg:col-span-3 border border-slate-900/80 bg-slate-950/20 rounded-xl relative overflow-hidden h-[380px] md:h-[500px] cursor-grab active:cursor-grabbing shadow-inner flex terminal-highlight"
           >
             {/* Visual scanline element to simulate old terminal interface */}
             <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,24,38,0)_97%,rgba(0,0,0,0.22)_97%)] bg-[size:100%_4px] opacity-10 z-10" />

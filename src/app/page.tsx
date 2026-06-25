@@ -20,7 +20,7 @@ export default function Home() {
         <Experience />
         <Leadership />
         <CurrentlyBuilding />
-        <KnowledgeGraph />
+        {/* <KnowledgeGraph /> */}
         <Contact />
       </main>
       <Footer />

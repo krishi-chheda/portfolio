@@ -74,6 +74,16 @@ export const navigationRegistry: NavigationSection[] = [
     ]
   },
   {
+    section_id: "readme",
+    scroll_target: "",
+    command_aliases: [
+      "cat readme.md",
+      "cat readme",
+      "man krishi",
+      "readme"
+    ]
+  },
+  {
     section_id: "contact",
     scroll_target: "contact",
     command_aliases: [
@@ -91,6 +101,12 @@ export const executeNavigationCommand = (cmdText: string) => {
   );
 
   if (match) {
+    // 0. Handle page navigation if match is readme
+    if (match.section_id === "readme") {
+      window.location.href = "/readme";
+      return;
+    }
+
     // 1. Dispatch custom event for project selection if applicable
     if (
       match.section_id === "accessible-vision" ||

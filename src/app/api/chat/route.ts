@@ -29,7 +29,8 @@ export async function POST(req: Request) {
                   aiKnowledgeBase
                 )}. Always structure your response to highlight why I should be hired. After every single response, you must append a set of exactly 3 relevant, contextual follow-up questions that the recruiter or founder might want to ask next. Format these questions as bullet points under a 'What would you like to ask next?' header.
 
-Additionally, you have navigation routing capabilities. If the user asks about a project, leadership role, work history, skills, contact info, or what you are currently building, you must recommend a command shortcut at the very end of your response formatted exactly as '[command: <command_string>]'. Choose from these exact command strings only:
+Additionally, you have navigation routing capabilities. If the user asks about a project, leadership role, work history, skills, contact info, what you are currently building, or how to explore/navigate the system, you must recommend a command shortcut at the very end of your response formatted exactly as '[command: <command_string>]'. Choose from these exact command strings only:
+- 'cat README.md' (for README, manual, how to explore, how to navigate, or introduction/onboarding to KRISHI.OS)
 - 'cat projects/accessible-vision/details.md' (for Accessible Vision project)
 - 'cat projects/clinicalbrief/details.md' (for ClinicalBrief project)
 - 'cat projects/studenthub/details.md' (for StudentHub project)
@@ -56,7 +57,28 @@ If asked about things not in the facts, politely state you don't have that detai
 
     // 2. Local High-Agency Conversational Search Engine (Robust Fallback)
     if (!reply) {
-      if (query.includes("clinical") || query.includes("brief") || query.includes("belief")) {
+      if (
+        query.includes("what is krishi.os") ||
+        query.includes("what is this portfolio") ||
+        query.includes("about this portfolio") ||
+        query.includes("how should i navigate") ||
+        query.includes("how to navigate") ||
+        query.includes("readme") ||
+        query.includes("manual")
+      ) {
+        reply = `KRISHI.OS is an operating system-inspired portfolio designed to showcase my AI engineering projects, experience, and system-thinking philosophy in an interactive workspace.
+
+Rather than a static, linear resume, it runs as a mock desktop console where you can explore detailed modules like Projects, Career, and the interactive Knowledge Network topology.
+
+To get the full operating instructions and onboarding details, you should inspect the README page.
+
+What would you like to ask next?
+- "How do I view your career history as a git log?"
+- "What technology stack powers this site?"
+- "How do I use the command palette?"
+
+[command: cat README.md]`;
+      } else if (query.includes("clinical") || query.includes("brief") || query.includes("belief")) {
         const proj = aiKnowledgeBase.projects.find((p) => p.id === "clinicalbrief");
         reply = `I built ClinicalBrief to solve a major bottleneck for healthcare providers: the hours lost transcribing and formatting consultation audio into structured records. It's a secure clinical intelligence platform that transcribes multi-speaker dictations and parses them into action-ready summaries.
 
@@ -229,7 +251,16 @@ What would you like to ask next?
 
     // 4. Apply robust query keyword mapping fallback if suggestedCommand was not set by LLM
     if (!suggestedCommand) {
-      if (query.includes("accessible") || query.includes("vision") || query.includes("assistive")) {
+      if (
+        query.includes("readme") ||
+        query.includes("what is krishi.os") ||
+        query.includes("navigate") ||
+        query.includes("operating manual") ||
+        query.includes("manual") ||
+        query.includes("about this portfolio")
+      ) {
+        suggestedCommand = "cat README.md";
+      } else if (query.includes("accessible") || query.includes("vision") || query.includes("assistive")) {
         suggestedCommand = "cat projects/accessible-vision/details.md";
       } else if (query.includes("clinical") || query.includes("brief") || query.includes("belief")) {
         suggestedCommand = "cat projects/clinicalbrief/details.md";
@@ -277,7 +308,14 @@ What would you like to ask next?
     // 5. Apply reply content keyword mapping fallback if suggestedCommand is still not set
     if (!suggestedCommand && reply) {
       const lowerReply = reply.toLowerCase();
-      if (lowerReply.includes("accessible vision") || lowerReply.includes("accessible-vision")) {
+      if (
+        lowerReply.includes("readme.md") ||
+        lowerReply.includes("readme") ||
+        lowerReply.includes("operating manual") ||
+        lowerReply.includes("what is krishi.os")
+      ) {
+        suggestedCommand = "cat README.md";
+      } else if (lowerReply.includes("accessible vision") || lowerReply.includes("accessible-vision")) {
         suggestedCommand = "cat projects/accessible-vision/details.md";
       } else if (lowerReply.includes("clinicalbrief") || lowerReply.includes("clinical brief")) {
         suggestedCommand = "cat projects/clinicalbrief/details.md";

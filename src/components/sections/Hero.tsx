@@ -1,6 +1,7 @@
 "use client";
 
 import { motion as motionFramer } from "framer-motion";
+import Link from "next/link";
 import { Bot, Sparkles, Terminal, Search, TerminalSquare } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { currentProcesses } from "@/lib/data";
@@ -91,33 +92,49 @@ export default function Hero() {
               </p>
 
               {/* Action inputs (CTA row) */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4">
-                <Button
-                  onClick={triggerChat}
-                  variant="primary"
-                  size="md"
-                  className="flex items-center justify-center space-x-2 font-bold cursor-pointer"
-                >
-                  <Bot className="w-4 h-4" />
-                  <span>./ask-krishi</span>
-                </Button>
-                
-                <Button
-                  onClick={() => {
-                    const event = new KeyboardEvent("keydown", {
-                      key: "k",
-                      ctrlKey: true,
-                      bubbles: true
-                    });
-                    window.dispatchEvent(event);
-                  }}
-                  variant="outline"
-                  size="md"
-                  className="flex items-center justify-center space-x-2 cursor-pointer border-slate-800 text-slate-400"
-                >
-                  <Search className="w-3.5 h-3.5" />
-                  <span>Command Palette [Ctrl+K]</span>
-                </Button>
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <Button
+                    onClick={triggerChat}
+                    variant="primary"
+                    size="md"
+                    className="flex items-center justify-center space-x-2 font-bold cursor-pointer"
+                  >
+                    <Bot className="w-4 h-4" />
+                    <span>./ask-krishi</span>
+                  </Button>
+                  
+                  <Button
+                    onClick={() => {
+                      const event = new KeyboardEvent("keydown", {
+                        key: "k",
+                        ctrlKey: true,
+                        bubbles: true
+                      });
+                      window.dispatchEvent(event);
+                    }}
+                    variant="outline"
+                    size="md"
+                    className="flex items-center justify-center space-x-2 cursor-pointer border-slate-800 text-slate-400"
+                  >
+                    <Search className="w-3.5 h-3.5" />
+                    <span>Command Palette [Ctrl+K]</span>
+                  </Button>
+                </div>
+
+                {/* Subtle easter-egg CLI clue */}
+                <div className="text-[10px] text-slate-500 font-mono flex flex-wrap items-center gap-1 select-none pt-1">
+                  <span>Tip: Try executing</span>
+                  <Link
+                    href="/readme"
+                    className="text-cyan-500 hover:text-cyan-400 transition-colors font-bold underline decoration-dotted"
+                  >
+                    cat README.md
+                  </Link>
+                  <span>or</span>
+                  <span className="text-slate-400 font-bold">man krishi</span>
+                  <span>in the command palette.</span>
+                </div>
               </div>
             </div>
           </motionFramer.div>

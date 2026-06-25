@@ -89,7 +89,7 @@ export default function Navbar() {
               <Link
                 key={link.name}
                 href={link.href}
-                onClick={() => setActiveHash(link.hash)}
+                onClick={() => setActiveHash(link.hash || "")}
                 className={`font-mono text-[12px] transition-colors relative py-1 hover:text-[#10b981] ${isActive ? "text-[#10b981] font-bold" : "text-slate-400"
                   }`}
               >
@@ -155,7 +155,7 @@ export default function Navbar() {
                     <Link
                       href={link.href}
                       onClick={() => {
-                        setActiveHash(link.hash);
+                        setActiveHash(link.hash || "");
                         setIsOpen(false);
                       }}
                       className="text-slate-200 hover:text-[#10b981] hover:font-bold transition-all block flex-1"

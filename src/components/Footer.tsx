@@ -59,12 +59,18 @@ export default function Footer() {
 
         {/* Copyright and Back to Top */}
         <div className="flex items-center space-x-4">
+          <Link
+            href="/readme"
+            className="text-[11px] font-mono text-slate-600 hover:text-cyan-400 transition-colors mr-2 cursor-pointer select-all"
+          >
+            [README.md]
+          </Link>
           <p className="text-[12px] font-mono text-slate-500">
             © {new Date().getFullYear()} • Built with Next.js & Framer Motion
           </p>
           <button
             onClick={scrollToTop}
-            className="text-slate-500 hover:text-cyan-400 transition-colors"
+            className="text-slate-500 hover:text-cyan-400 transition-colors cursor-pointer"
             aria-label="Scroll to top"
           >
             <ArrowUpCircle className="w-5 h-5" />

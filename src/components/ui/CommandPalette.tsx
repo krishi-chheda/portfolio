@@ -24,6 +24,14 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
 
   const commands: CommandItem[] = [
     {
+      id: "readme",
+      name: "README.md",
+      description: "cat README.md // Open KRISHI.OS operating manual & onboarding guide (alias: man krishi)",
+      action: () => {
+        window.location.href = "/readme";
+      }
+    },
+    {
       id: "projects",
       name: "projects",
       description: "ls projects/ // View folder directory of builder applications",

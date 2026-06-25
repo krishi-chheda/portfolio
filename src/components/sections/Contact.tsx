@@ -65,7 +65,7 @@ export default function Contact() {
                   Establish Connection
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                  Whether you are looking for a founding engineer, want to discuss LLM agent design, or need to plan MDAS analytics strategies—reach out.
+                  Whether you are looking for a founding engineer, want to discuss LLM agent design, or need to plan MDAS analytics strategies reach out.
                 </p>
               </div>
 

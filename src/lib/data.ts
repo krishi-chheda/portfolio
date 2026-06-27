@@ -24,6 +24,11 @@ export interface Project {
     achievements: string[];
     lessons: string[];
   };
+  whyBuilt?: string;
+  architectureExplain?: string;
+  challenge?: string;
+  tradeOffs?: string;
+  futureImprovement?: string;
 }
 
 export interface Experience {
@@ -101,7 +106,7 @@ export const projectsData: Project[] = [
     subtitle: "AI Accessibility Platform",
     role: "AI & Computer Vision Developer",
     description: "AI-powered accessibility assistant using grounded multimodal reasoning (YOLOv8 + BLIP) to convert visual feeds into spoken narration.",
-    keyOutcome: "Mitigated hallucinations via crop intent routing and achieved 2.4s p95 latency under 50-user Locust load tests.",
+    keyOutcome: "Mitigated VLM hallucinations and achieved a 2.4s p95 end-to-end latency under 50-user Locust load testing.",
     story: "Problem: Visually impaired users face navigation hazards in unfamiliar environments, but standard vision-language models suffer from high latency and background noise hallucinations.\n\nSolution: Engineered a secure Next.js PWA and FastAPI backend. It routes user questions to YOLOv8 boundary boxes to crop target regions, feeding them into BLIP VQA context to prevent hallucinations. Speeds up mobile loads by resizing and compressing canvas uploads by 90% (from 4MB to ~150KB).\n\nTechnologies: Python, Next.js, FastAPI, YOLOv8, BLIP, OpenCV, WebRTC, Web Speech API.\n\nCurrent Status: Active Refinement (optimizing model quantization & edge pipeline latency).\n\nVerified Outcomes: Reduced network payload sizes by 90% and achieved a stable 2.4s p95 query response under 50-user Locust load tests.",
     techStack: ["Python", "Next.js", "FastAPI", "YOLOv8", "BLIP", "OpenCV"],
     metrics: [
@@ -144,7 +149,12 @@ export const projectsData: Project[] = [
         "Managing Edge AI latency constraints under mobile networking environments.",
         "Designing high-contrast, screen-free interaction models for accessibility."
       ]
-    }
+    },
+    whyBuilt: "I built AccessVision because standard Vision-Language Models describe entire scenes generically. For a visually impaired individual navigating a street, hearing 'a busy sidewalk' is useless—they need to know if the backpack 2 feet in front of them is a tripping risk. I wanted to build a high-speed, targeted visual guidance system that answers specific physical orientation questions safely.",
+    architectureExplain: "I selected a Next.js progressive web app (PWA) coupled with an asynchronous FastAPI backend server. The PWA allows users to snap frames and hear audio cues instantly. By cropping incoming frames to YOLOv8 obstacle bounding boxes before dispatching to BLIP VQA, we avoid feeding background noise to the attention heads, reducing inference processing latency on the server by 92% (from 8.4s to 668ms) and avoiding hallucinations.",
+    challenge: "The biggest engineering challenge was optimizing transfer latency over cellular connections. Uploading raw 4MB image files took up to 8 seconds on 4G networks. I solved this by performing HTML5 canvas resizing and aggressive JPEG quality compression on the client side. This shrunk files by 90% (~150KB) with zero drop in model classification accuracy, lowering end-to-end response time to a 2.4s p95 under Locust concurrent load tests.",
+    tradeOffs: "I traded off broad scene understanding for raw safety and processing speed. By cropping image feeds strictly around YOLOv8 bounding boxes, the system cannot answer questions about the aesthetics of the environment (e.g. 'what color is the sunset?'). However, this constraint was necessary to guarantee the VLM focus remains entirely on immediate tripping and navigation hazards.",
+    futureImprovement: "If I were building this today, I would run quantized YOLOv8 and BLIP models directly on the client using WebNN or ONNX Runtime Web. Executing inference locally on mobile Neural Processing Units (NPUs) would eliminate API roundtrip latency completely, bypass backend server hosting costs, and provide a 100% private, offline navigation assistant."
   },
   {
     id: "clinicalbrief",
@@ -152,7 +162,7 @@ export const projectsData: Project[] = [
     subtitle: "Healthcare AI Platform",
     role: "Full-Stack AI Developer",
     description: "Secure clinical intelligence platform that transcribes clinician consultations and extracts structured EHR insights.",
-    keyOutcome: "Sanitizes sensitive metadata and structures consultation transcripts into action-ready patient briefs.",
+    keyOutcome: "Sanitizes sensitive metadata and structures consultation transcripts into EHR briefs.",
     story: "Problem: Clinicians lose hours transcribing and formatting consultation audio into structured records manually.\n\nSolution: Developed a secure clinical intelligence platform consisting of a Next.js client, SQLite database, and FastAPI server. It transcribes clinician dictations using Whisper API, handles multi-speaker diarization, sanitizes PHI metadata, and queries GPT-4o to extract patient logs, diagnostics, and prescriptions.\n\nTechnologies: Next.js, FastAPI, Python, SQLite, Whisper API, GPT-4o.\n\nCurrent Status: Active Development (Sprint 4: expanding audio diarization overlap checks).\n\nVerified Outcomes: Normalizes patient data structures and sanitizes PHI locally before third-party LLM API dispatches.",
     techStack: ["Next.js", "FastAPI", "Python", "SQLite", "GPT-4o", "Whisper"],
     metrics: [
@@ -195,7 +205,12 @@ export const projectsData: Project[] = [
         "Managing context lengths and prompt reliability in clinical concept extraction.",
         "Working with SQLAlchemy schema migrations in HIPAA-aligned development cycles."
       ]
-    }
+    },
+    whyBuilt: "I built ClinicalBrief because clinicians lose up to a third of their workday manually documenting patient visits. While voice-to-text tools exist, they do not structure raw conversations into Electronic Health Records (EHR), and streaming raw consultation audio directly to public LLM endpoints violates patient privacy and HIPAA standards.",
+    architectureExplain: "I chose a decoupled Next.js web application paired with a local FastAPI backend and an SQLite database. The architecture features a multi-layered sanitization pipeline: audio is transcribed locally, speaker identities (Doctor/Patient) are resolved, and a local regex-based scrubbing middleware masks Protected Health Information (PHI) before forwarding the text payload to GPT-4o for clinical summarization.",
+    challenge: "The biggest engineering challenge was managing overlapping dialogue and speaker switching. Standard transcription APIs frequently merge doctor and patient statements, which can corrupt clinical recommendations. I resolved this by integrating a speaker diarization pipeline that checks audio timestamps and segregates consultation segments before feeding the prompt, ensuring the correct clinician attribution.",
+    tradeOffs: "I traded off real-time transcription speeds for privacy guarantees. Processing diarization and executing the local PHI sanitization filters adds a ~1.2s delay to the dashboard output. However, this trade-off was necessary to establish a secure clinical data boundary and prevent leakage of unmasked medical data to public API logs.",
+    futureImprovement: "To improve this system today, I would run a quantized Whisper model and a diarization pipeline locally on a dedicated GPU cluster inside the hospital intranet. This would eliminate all external network calls entirely, creating a zero-trust clinical boundary with complete data security."
   },
   {
     id: "studenthub",
@@ -244,7 +259,12 @@ export const projectsData: Project[] = [
         "Integrating Mapbox camera bounding boxes with search result filters.",
         "Aggregating and normalizing diverse public transit and event APIs."
       ]
-    }
+    },
+    whyBuilt: "I built StudentHub because international students relocating to Monash University have to search across dozens of fragmented Facebook groups, local transit guides, and student boards. This makes finding verified student housing and adjusting to Melbourne's transit layout stressful.",
+    architectureExplain: "I selected Next.js, Prisma ORM, and MySQL. Next.js App Router allowed us to render listing pages on the server (SSR), providing high SEO discoverability. Prisma was chosen to enforce database integrity, ensuring student reviews, transport stops, and housing properties are linked cleanly via strict foreign key relations.",
+    challenge: "The biggest challenge was normalizing and syncing transit APIs and rent coordinates without triggering high map-load latency. Initial runs with large datasets caused layout shifts and slowed down Mapbox markers. I resolved this by caching normalized listings on the server and using paginated spatial database queries.",
+    tradeOffs: "I chose strict SQL relations over a flexible, schema-less document database (like MongoDB). Although this requires running migration scripts when updating listings metadata, it guarantees that no map markers point to orphaned records or houses without verified landlord reviews.",
+    futureImprovement: "I would implement Next.js Incremental Static Regeneration (ISR) with revalidation rules. This would allow the site to serve static HTML from Vercel edge networks instantly, while background workers re-verify transit changes and housing check-ins every 10 minutes."
   },
   {
     id: "traffic-ai",
@@ -294,7 +314,12 @@ export const projectsData: Project[] = [
         "Quantizing neural models to run on memory-constrained edge processors.",
         "Calibrating visual depth measurements from raw 2D camera grids."
       ]
-    }
+    },
+    whyBuilt: "I built Traffic AI because conventional traffic lights operate on fixed timers, leading to massive vehicle idling, fuel waste, and artificial congestion. I wanted to design an intelligent, reactive scheduling system that optimizes green-light times based on actual vehicular density.",
+    architectureExplain: "I designed a local edge processing pipeline using YOLOv8 for vehicle counting and OpenCV for spatial masking, running directly on an NVIDIA Jetson Nano edge node. Local processing ensures real-time decisions (sub-100ms override loops) and prevents intersection failures if the network drops connection to the cloud.",
+    challenge: "The biggest challenge was running a heavy object detection model like YOLO at a stable 30 FPS on the Jetson Nano's memory-constrained GPU. Frames were initially dropping, leading to inaccurate queue counts. I solved this by quantizing model weights and applying OpenCV masking to search only active lane regions, cutting search grid overhead by 35%.",
+    tradeOffs: "I traded model versatility for speed. The edge classifier was pruned to detect only cars, trucks, and buses. While it ignores pedestrians and cyclists on the road surface, this prioritization allowed us to save precious GPU cycles and maintain real-time performance on edge hardware.",
+    futureImprovement: "I would implement cooperative Reinforcement Learning (RL) agents (e.g. Deep Q-Networks) trained in a SUMO traffic simulator. This would allow multiple adjacent intersections to share queue data and coordinate timing policies, optimizing city-wide vehicle flows rather than running each light in isolation."
   }
 ];
 
@@ -428,7 +453,7 @@ export const aiKnowledgeBase = {
     roleSummary: "Krishi is an international student based in Melbourne, studying for a Master of Artificial Intelligence at Monash University. He holds the role of Media & Marketing Director at Monash Data & AI Society (MDAS). He is passionate about bridging the gap between machine learning models and highly-usable, production-grade applications.",
     interests: ["Formula 1", "Fitness & Lifting", "High-Agency Startups", "Applied ML Research", "Agentic AI"]
   },
-  careerGoals: "Krishi aims to work in high-growth environments where he can deploy AI models to production. He is looking for opportunities as an AI Engineer, Full-Stack Developer, or Founding Engineer in startups, scale-ups, and AI research labs in Australia or globally.",
+  careerGoals: "Krishi aims to work in high-growth environments where he can deploy AI models to production. He is looking for engineering opportunities in AI Engineering, Machine Learning, Software Engineering, or Technology Consulting in Australia or globally.",
   projects: projectsData,
   additionalProjects: additionalProjectsData,
   experience: experienceData,

@@ -122,12 +122,12 @@ What would you like to ask next?
       } 
       else if (query.includes("accessible") || query.includes("vision") || query.includes("assistive") || query.includes("guidance") || query.includes("visually")) {
         const proj = aiKnowledgeBase.projects.find((p) => p.id === "accessible-vision");
-        reply = `I created Accessible Vision to assist visually impaired individuals in navigating environments safely. It maps environmental paths and detects hazards in real-time, providing immediate spoken audio feedback.
+        reply = `I developed AccessVision (Accessible Vision) to assist visually impaired individuals in navigating environments safely. It maps environmental paths and detects hazards in real-time, providing immediate spoken audio feedback.
 
 Key details:
-- Stack: FastAPI, Next.js, YOLOv8, BLIP, Docker, and Hugging Face.
-- Status: Active development (optimizing spatial hazard orientation models).
-- Verified Outcomes: Reduced YOLO inference latency by 92% (from 8.4s to 668ms under concurrent load testing) with grounded reasoning pipelines.
+- Stack: FastAPI, Next.js, YOLOv8, BLIP, Docker, OpenCV, and Hugging Face.
+- Status: Active refinement (optimizing model quantization and edge pipeline latency).
+- Verified Outcomes: Reduced server-side inference latency by 92% (from 8.4s to 668ms) and achieved a stable end-to-end client p95 latency of 2.4s under 50-user concurrent Locust load testing.
 
 What would you like to ask next?
 - "How did you achieve a 92% inference latency reduction?"
@@ -241,7 +241,7 @@ What would you like to ask next?
 - "Are your academic builds open source?"`;
       }
       else if (query.includes("goal") || query.includes("career") || query.includes("future") || query.includes("aspiration")) {
-        reply = `My career goal is to work as an AI Engineer, ML Engineer, or Software/Founding Engineer in high-agency environments like startups, scale-ups, and AI research labs. I am passionate about bridging the gap between raw ML research and highly-usable, production-grade software applications.
+        reply = `My career goal is to work as an AI Engineer, ML Engineer, Software Engineer, or Technology Consultant in high-growth environments like startups, scale-ups, and technology labs. I am passionate about deploying production-grade AI applications and optimizing data pipelines.
 
 What would you like to ask next?
 - "Are you open to relocating globally for the right role?"

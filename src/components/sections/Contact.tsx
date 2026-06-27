@@ -65,7 +65,7 @@ export default function Contact() {
                   Establish Connection
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                  Whether you are looking for a founding engineer, want to discuss LLM agent design, or need to plan MDAS analytics strategies reach out.
+                  Whether you want to discuss AI systems, ML algorithms, software design, or technology consulting strategies, let&apos;s connect.
                 </p>
               </div>
 
@@ -76,7 +76,7 @@ export default function Contact() {
                   Availability Status
                 </div>
                 <p className="text-[11px] text-slate-350 leading-relaxed font-sans select-text">
-                  <strong>Open to Opportunities:</strong> Actively seeking full-time or contract roles as an <strong>AI Engineer</strong>, <strong>Full-Stack Developer</strong>, or <strong>Founding Engineer</strong> in Melbourne, Sydney, or remote.
+                  <strong>Open to Opportunities:</strong> Actively seeking engineering roles in <strong>AI Engineering</strong>, <strong>Machine Learning</strong>, <strong>Software Engineering</strong>, or <strong>Technology Consulting</strong>.
                 </p>
               </div>
 

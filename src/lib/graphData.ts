@@ -96,7 +96,7 @@ export const initialNodes: GraphNode[] = [
     group: "category",
     val: 16,
     description: "Translating community, student, and user problems into production-grade applications.",
-    details: ["Aspirations: Founding AI Engineer, Startups", "Design: Mobile-first student directories"],
+    details: ["Aspirations: AI / ML Engineer", "Design: Mobile-first student directories"],
     status: "SYSTEM",
     techStack: ["Next.js", "TypeScript", "Vercel", "Product Design"],
     baseX: 160,

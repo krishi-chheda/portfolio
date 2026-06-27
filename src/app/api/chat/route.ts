@@ -132,8 +132,70 @@ Key details:
 What would you like to ask next?
 - "How did you achieve a 92% inference latency reduction?"
 - "How did you integrate YOLOv8 and BLIP?"
-- "How does the real-time spoken guidance system function?"`;
-      } 
+- "How does the real-time spoken guidance system function?"
+
+[command: cat projects/accessible-vision/details.md]`;
+      }
+      else if (query.includes("auralens") || query.includes("cull") || query.includes("photo") || query.includes("camera") || query.includes("blurry")) {
+        reply = `I built AuraLens AI, a local photography assistant that optimizes workflows for photographers by culling blurry pictures and allowing semantic vibe searches.
+        
+Key details:
+- Stack: Python (Streamlit), OpenCV (for Laplacian blur variance calculations), ChromaDB, and Hugging Face CLIP models.
+- Features: Blurry photo detection (keeps vs rejects culling) and offline semantic search ('find a happy dog').
+- Outcomes: Runs 100% locally with zero cloud dependencies to ensure photographer data privacy.
+
+What would you like to ask next?
+- "How does the OpenCV blurry culling algorithm calculate variance?"
+- "Why did you use ChromaDB and CLIP for semantic search?"
+- "Is AuraLens AI open source?"
+
+[command: cat projects/auralens/details.md]`;
+      }
+      else if (query.includes("f1") || query.includes("formula") || query.includes("telemetry") || query.includes("race") || query.includes("lap")) {
+        reply = `I designed the F1 Telemetry AI Suite, a telemetry dashboard and analysis package that tracks Formula 1 driver performances and visualizes speed, gear, throttle, and braking profiles.
+        
+Key details:
+- Stack: TypeScript, Next.js, React, Recharts (for the frontend dashboard) and Python, Pandas, Streamlit (for the telemetry parsing engine).
+- Features: Projecting throttle/brake parameters onto 2D track maps, lap log tables, and comparative charts.
+- Outcomes: Helps trace driving lines and performance gaps across sector maps.
+
+What would you like to ask next?
+- "How do you map telemetry variables onto 2D track maps?"
+- "Which library parses the F1 telemetry packets in Python?"
+- "Where is the F1 Telemetry dashboard hosted?"
+
+[command: cat projects/f1-telemetry/details.md]`;
+      }
+      else if (query.includes("pressure") || query.includes("bp") || query.includes("systolic") || query.includes("diastolic") || query.includes("fastapi_backend")) {
+        reply = `I developed the Blood Pressure Prediction API, which predicts blood pressure metrics from facial video feeds using machine learning and computer vision.
+        
+Key details:
+- Stack: Python, FastAPI, OpenCV, Mediapipe (face tracking), and Scikit-learn.
+- Features: Real-time skin region tracking, color variation extraction (photoplethysmography), and linear/lasso/ridge regression models.
+- Outcomes: Implements a clean FastAPI inference endpoint to analyze uploads and forecast metrics.
+
+What would you like to ask next?
+- "How does Photoplethysmography (PPG) work through a camera?"
+- "What ML regression models perform the systolic/diastolic predictions?"
+- "How is facial tracking managed?"
+
+[command: cat projects/blood-pressure/details.md]`;
+      }
+      else if (query.includes("splitter") || query.includes("split") || query.includes("trim") || query.includes("ffmpeg")) {
+        reply = `I created Video Splitter Pro, a web application that allows users to split video files at custom timestamps and extract audio tracks.
+        
+Key details:
+- Stack: Python, Streamlit, and FFmpeg.
+- Features: Custom timestamp splitting and MP3/WAV audio extraction.
+- Outcomes: Provides content creators with an optimized, lightweight media processing UI that runs locally.
+
+What would you like to ask next?
+- "Does Video Splitter Pro support splitting without quality loss?"
+- "How does it execute FFmpeg commands in Python?"
+- "Can it batch process multiple video files?"
+
+[command: cat projects/video-splitter/details.md]`;
+      }
       else if (query.includes("skill") || query.includes("tech") || query.includes("stack") || query.includes("language") || query.includes("python") || query.includes("javascript") || query.includes("typescript") || query.includes("react") || query.includes("yolo") || query.includes("opencv")) {
         reply = `My technical skill set spans artificial intelligence engineering and full-stack software development:
 - AI & ML: Computer Vision (YOLO, OpenCV), LLM Applications, Real-Time Inference, Prompt Engineering, Python.

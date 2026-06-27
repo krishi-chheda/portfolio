@@ -17,8 +17,19 @@
 
 ## SYSTEM MODULES
     * Projects (cat projects/overview.md)
-      Detailed architectural specs and achievements for core builds like ClinicalBrief, Accessible Vision, and Traffic AI.
+      Detailed architectural specs and achievements for core builds:
+      - AccessVision: https://github.com/krishi-chheda/AccessVision
+      - ClinicalBrief: https://github.com/krishi-chheda/ClinicalBrief (Private)
+      - StudentHub: https://github.com/krishi-chheda/student-hub
+      - Traffic AI: https://github.com/krishi-chheda/ai-traffic-system (Private)
     
+    * Additional Open Source Work (cat open-source.md)
+      Secondary codebases and utilities:
+      - AuraLens AI: https://github.com/krishi-chheda/AuraLens-AI
+      - F1 Telemetry AI Suite: https://github.com/krishi-chheda/f1-telemetry-ai-dashboard
+      - Blood Pressure Prediction API: https://github.com/krishi-chheda/fastapi_backend
+      - Video Splitter Pro: https://github.com/krishi-chheda/video-splitter
+
     * Career (git log --career)
       Interactive experience git log displaying technical internships, volunteering history, and coursework pipelines.
       

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Hammer, ArrowRight, PlayCircle, GitCommit } from "lucide-react";
 
@@ -43,6 +44,22 @@ const activeBuilds: ActiveBuild[] = [
 ];
 
 export default function CurrentlyBuilding() {
+  const [gitStats, setGitStats] = useState<any>(null);
+  const [loadingGit, setLoadingGit] = useState(false);
+
+  useEffect(() => {
+    setLoadingGit(true);
+    fetch("/api/github")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.repos) {
+          setGitStats(data.repos);
+        }
+      })
+      .catch((err) => console.error("Failed to load GitHub stats:", err))
+      .finally(() => setLoadingGit(false));
+  }, []);
+
   return (
     <section id="currently-building" className="py-24 relative overflow-hidden border-t border-slate-900/60">
       <div className="max-w-5xl mx-auto px-6">
@@ -138,11 +155,69 @@ export default function CurrentlyBuilding() {
                           ))}
                         </ul>
                       </div>
+
+                      {/* Live Commit Telemetry for flagship builds */}
+                      {proj.name === "Accessible Vision" && gitStats?.AccessVision && (
+                        <div className="mt-4 pt-3 border-t border-slate-900/60 flex flex-col space-y-1 text-[10px]">
+                          <div className="flex items-center space-x-1.5 truncate">
+                            <span className="text-slate-500 block uppercase font-bold text-[8.5px] select-none">
+                              [Latest Commit]:
+                            </span>
+                            <span className="text-amber-500 font-mono font-bold shrink-0">
+                              [{gitStats.AccessVision.latestCommit.hash}]
+                            </span>
+                            <span className="text-slate-300 truncate">
+                              &quot;{gitStats.AccessVision.latestCommit.message}&quot;
+                            </span>
+                          </div>
+                          <div className="text-[9px] text-slate-500">
+                            Pushed: {new Date(gitStats.AccessVision.latestCommit.date).toLocaleString()}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                   </motion.div>
                 );
               })}
+            </div>
+
+            {/* Live GitHub Repository Activity Stream */}
+            <div className="border-t border-slate-900 pt-6">
+              <h4 className="text-[#10b981] font-mono text-xs font-bold uppercase tracking-wider mb-4 flex items-center gap-2 select-none">
+                <GitCommit size={14} className="text-[#10b981] animate-pulse" />
+                <span>Live GitHub Repository Activity Stream</span>
+              </h4>
+
+              {loadingGit ? (
+                <div className="text-xs text-slate-500 animate-pulse">Syncing telemetry data...</div>
+              ) : gitStats ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-[10px]">
+                  {Object.values(gitStats)
+                    .filter((repo: any) => repo.name !== "portfolio" && repo.name !== "ClinicalBrief" && repo.name !== "ai-traffic-system")
+                    .sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                    .slice(0, 6)
+                    .map((repo: any) => (
+                      <div key={repo.name} className="border border-slate-900 bg-slate-950/60 p-3 rounded hover:border-slate-800 transition-all flex flex-col justify-between space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="text-slate-100 font-bold truncate" title={repo.name}>{repo.name}</span>
+                          <span className="text-cyan-400 font-semibold px-1 rounded bg-slate-900 border border-slate-850 shrink-0 text-[8.5px]">
+                            {repo.language}
+                          </span>
+                        </div>
+                        <div className="text-slate-400 text-[9.5px] truncate font-mono">
+                          {repo.latestCommit ? `"${repo.latestCommit.message}"` : 'No recent pushes'}
+                        </div>
+                        <div className="flex justify-between items-center text-[8.5px] text-slate-500 pt-1 border-t border-slate-900/60">
+                          <span>Updated: {new Date(repo.updatedAt).toLocaleDateString()}</span>
+                          <span className="flex items-center gap-1">⭐ {repo.stars}</span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="text-xs text-slate-500 italic">Telemetry stream offline.</div>
+              )}
             </div>
 
           </div>

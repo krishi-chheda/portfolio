@@ -67,7 +67,7 @@ export const currentProcesses: CurrentProcess = {
       name: "Accessible Vision",
       description: "AI-powered accessibility platform helping visually impaired users navigate environments safely.",
       stack: "Python • YOLO • Computer Vision",
-      githubUrl: "https://github.com/krishi-chheda/accessible-vision"
+      githubUrl: "https://github.com/krishi-chheda/AccessVision"
     },
     {
       name: "ClinicalBrief",
@@ -79,7 +79,7 @@ export const currentProcesses: CurrentProcess = {
       name: "StudentHub",
       description: "Community resource hub consolidating public transit guides, housing lists, and local student events.",
       stack: "Next.js • TypeScript • REST APIs • Product Design",
-      githubUrl: "https://github.com/krishi-chheda/studenthub-melbourne"
+      githubUrl: "https://github.com/krishi-chheda/student-hub"
     }
   ],
   learning: ["Agentic AI", "RAG Systems", "Product Development", "Production AI"],
@@ -97,52 +97,52 @@ export const currentProcesses: CurrentProcess = {
 export const projectsData: Project[] = [
   {
     id: "accessible-vision",
-    title: "Accessible Vision",
+    title: "AccessVision",
     subtitle: "AI Accessibility Platform",
     role: "AI & Computer Vision Developer",
-    description: "AI-powered accessibility platform helping visually impaired users understand and navigate environments through computer vision and audio guidance.",
-    keyOutcome: "Achieved sub-100ms inference latency on scene parsing with low-latency spoken feedback APIs.",
-    story: "Problem: Visually impaired users face navigation hazards in unfamiliar environments due to a lack of immediate, screen-free hazard detection.\n\nSolution: Built an AI-powered accessibility platform utilizing computer vision and YOLO models to map pathways and obstacles in real-time, coupled with immediate spoken guidance.\n\nTechnologies: Python, PyTorch, YOLO, OpenCV, Real-Time AI.\n\nCurrent Status: Active development (optimizing spatial hazard orientation models).\n\nVerified Outcomes: Achieved sub-100ms inference latency on scene parsing with low-latency spoken feedback APIs.",
-    techStack: ["Python", "YOLO", "OpenCV", "PyTorch"],
+    description: "AI-powered accessibility assistant using grounded multimodal reasoning (YOLOv8 + BLIP) to convert visual feeds into spoken narration.",
+    keyOutcome: "Mitigated hallucinations via crop intent routing and achieved 2.4s p95 latency under 50-user Locust load tests.",
+    story: "Problem: Visually impaired users face navigation hazards in unfamiliar environments, but standard vision-language models suffer from high latency and background noise hallucinations.\n\nSolution: Engineered a secure Next.js PWA and FastAPI backend. It routes user questions to YOLOv8 boundary boxes to crop target regions, feeding them into BLIP VQA context to prevent hallucinations. Speeds up mobile loads by resizing and compressing canvas uploads by 90% (from 4MB to ~150KB).\n\nTechnologies: Python, Next.js, FastAPI, YOLOv8, BLIP, OpenCV, WebRTC, Web Speech API.\n\nCurrent Status: Active Refinement (optimizing model quantization & edge pipeline latency).\n\nVerified Outcomes: Reduced network payload sizes by 90% and achieved a stable 2.4s p95 query response under 50-user Locust load tests.",
+    techStack: ["Python", "Next.js", "FastAPI", "YOLOv8", "BLIP", "OpenCV"],
     metrics: [
-      "Sub-100ms inference latency",
-      "Real-time spoken hazard feedback",
-      "End-to-end computer vision pipeline"
+      "2.4s p95 response time",
+      "90% client-side compression",
+      "Locust concurrent load tested"
     ],
-    githubUrl: "https://github.com/krishi-chheda/accessible-vision",
+    githubUrl: "https://github.com/krishi-chheda/AccessVision",
     terminalLog: [
-      "CORE > Starting scene analyzer inference engine...",
-      "AI   > Detected: Crosswalk (Confidence: 94.1%), Light Pole (Confidence: 89.4%)",
-      "AUDIO> Spoken cue: 'Crosswalk ahead, clear pathway in 3 meters'"
+      "CORE > Initializing grounded VQA intent router...",
+      "AI   > YOLO segment: detected backpack on path (crop size 120x150)",
+      "VQA  > BLIP context restricted to bounding box region",
+      "OUT  > Response: 'Caution: Tripping risk backpack is on the floor.'"
     ],
     overview: {
-      problem: "Visually impaired users face navigation challenges in unfamiliar environments.",
-      solution: "Built an AI-powered accessibility platform using computer vision and spoken guidance.",
-      status: "Active Development"
+      problem: "Visually impaired users face navigation hazards, and standard VLMs suffer from high latency and context hallucinations.",
+      solution: "Built a grounded visual query router restricting BLIP VQA context to YOLOv8 bounding boxes with canvas compression.",
+      status: "Active Refinement"
     },
     architecture: {
       flow: [
-        { label: "Camera", description: "Captures real-time environment stream" },
-        { label: "YOLO", description: "Processes frames to identify surrounding objects" },
-        { label: "Obstacle Detection", description: "Filters and classifies hazards in the path" },
-        { label: "Path Mapping", description: "Computes spatial orientation and distance" },
-        { label: "Voice Guidance", description: "Generates real-time audio cues for user navigation" }
+        { label: "PWA Canvas", description: "Captures environment frame and applies client-side JPEG compression" },
+        { label: "Async Router", description: "FastAPI receives payload (~150KB) and delegates processing to worker thread pool" },
+        { label: "YOLOv8 Bbox", description: "Isolates coordinates of target obstacles and crops image region" },
+        { label: "BLIP VQA", description: "Performs visual question answering restricted to cropped region coordinates" },
+        { label: "Web Speech", description: "Plays spoken guidance queue on browser client" }
       ],
       decisions: [
-        "Chose YOLO for its real-time performance and high detection accuracy in diverse outdoor conditions.",
-        "Implemented lightweight custom threading in Python to handle simultaneous camera capture, model inference, and audio playback without frame dropping."
+        "Used client-side HTML5 canvas compression to reduce payloads from 4MB to ~150KB, ensuring fast uploads on cellular subnets.",
+        "Implemented request-scoped context middleware to inject correlation IDs, tracing queue latency and memory usage."
       ]
     },
     impact: {
       achievements: [
-        "Achieved sub-100ms inference latency for real-time responsiveness.",
-        "Delivered immediate spoken hazard feedback to enhance user safety.",
-        "Designed an end-to-end computer vision pipeline running seamlessly."
+        "Reduced VQA hallucinations by restricting BLIP attention to isolated YOLOv8 boxes.",
+        "Achieved a 73% latency reduction under concurrent load tests using FastAPI async thread pools.",
+        "Validated system stability with 50-user Locust testing showing zero timeouts."
       ],
       lessons: [
-        "Optimizing real-time computer vision models on resource-constrained threads.",
-        "Deploying Edge AI models under latency budgets.",
-        "Designing tactile and audio product tradeoffs for accessibility."
+        "Managing Edge AI latency constraints under mobile networking environments.",
+        "Designing high-contrast, screen-free interaction models for accessibility."
       ]
     }
   },
@@ -151,48 +151,49 @@ export const projectsData: Project[] = [
     title: "ClinicalBrief",
     subtitle: "Healthcare AI Platform",
     role: "Full-Stack AI Developer",
-    description: "Healthcare AI platform that transforms medical information into structured and actionable insights.",
-    keyOutcome: "Accelerates record-keeping workflows and generates highly structured, action-ready clinical briefs.",
-    story: "Problem: Healthcare providers lose valuable hours compiling, transcribing, and formatting patient consultation audio into structured records.\n\nSolution: Engineered a secure clinical intelligence platform that transcribes and parses multi-speaker dictations into action-ready summaries.\n\nTechnologies: Next.js, FastAPI, Python, LLM APIs (GPT-4o), Whisper API.\n\nCurrent Status: Active development (expanding audio diarization accuracy).\n\nVerified Outcomes: Optimizes record-keeping workflows using semantic search indexes and patient record metadata sanitization.",
-    techStack: ["Next.js", "FastAPI", "Python", "LLMs"],
+    description: "Secure clinical intelligence platform that transcribes clinician consultations and extracts structured EHR insights.",
+    keyOutcome: "Sanitizes sensitive metadata and structures consultation transcripts into action-ready patient briefs.",
+    story: "Problem: Clinicians lose hours transcribing and formatting consultation audio into structured records manually.\n\nSolution: Developed a secure clinical intelligence platform consisting of a Next.js client, SQLite database, and FastAPI server. It transcribes clinician dictations using Whisper API, handles multi-speaker diarization, sanitizes PHI metadata, and queries GPT-4o to extract patient logs, diagnostics, and prescriptions.\n\nTechnologies: Next.js, FastAPI, Python, SQLite, Whisper API, GPT-4o.\n\nCurrent Status: Active Development (Sprint 4: expanding audio diarization overlap checks).\n\nVerified Outcomes: Normalizes patient data structures and sanitizes PHI locally before third-party LLM API dispatches.",
+    techStack: ["Next.js", "FastAPI", "Python", "SQLite", "GPT-4o", "Whisper"],
     metrics: [
-      "Faster information extraction",
-      "Structured healthcare insights",
-      "AI-assisted workflows"
+      "Whisper audio diarization",
+      "PHI metadata sanitization",
+      "Automated summary generation"
     ],
     githubUrl: "https://github.com/krishi-chheda/ClinicalBrief",
     terminalLog: [
-      "API  > POST /api/v1/summarize 200 OK",
-      "AI   > Extracting clinical concepts and structured medical data...",
-      "OUT  > Generated structured patient brief and decision outline"
+      "DB   > Synced tables: users, patients, documents",
+      "API  > POST /api/v1/documents/ingest - audio stream upload active",
+      "AI   > Speaker diarization: Doctor (0:00-1:15), Patient (1:16-2:30)",
+      "OUT  > Generated clinical discharge summary (STEMI diagnosis)"
     ],
     overview: {
-      problem: "Healthcare providers lose valuable hours compiling, transcribing, and formatting patient consultation audio into structured records.",
-      solution: "Healthcare AI platform for structuring medical information.",
+      problem: "Healthcare providers lose hours transcribing and formatting consultations into structured patient records.",
+      solution: "Secure clinical intelligence system transcribing dictation and parsing transcripts into EHR-ready layouts.",
       status: "Active Development"
     },
     architecture: {
       flow: [
-        { label: "Input Data", description: "Captures clinician consultation audio or text documents" },
-        { label: "AI Processing", description: "Performs speech-to-text and multi-speaker diarization" },
-        { label: "Clinical Structuring", description: "Sanitizes sensitive data and extracts medical concepts" },
-        { label: "Brief Generation", description: "Produces structured patient briefs and summaries" }
+        { label: "Audio Record", description: "Clinician records patient consult on Next.js client" },
+        { label: "FastAPI Ingest", description: "Streams audio file to upload directory and indexes metadata in SQLite" },
+        { label: "Whisper diarize", description: "Segments speech and assigns tags for overlapping voices" },
+        { label: "LLM Sanitizer", description: "Masks patient identifying details before GPT-4o ingestion" },
+        { label: "EHR Output", description: "Renders structured clinical summaries and prescription lists" }
       ],
       decisions: [
-        "Separated AI processing into an asynchronous worker queue in FastAPI to handle long-running transcription tasks without blocking the web client.",
-        "Implemented strict client-side and server-side metadata sanitization before sending payloads to LLM APIs to ensure privacy."
+        "Designed database models for User (admin/clinician roles), Patient, and Document using SQLAlchemy ORM and SQLite.",
+        "Delegated heavy transcription jobs to FastAPI's background tasks queue to prevent client request timeouts."
       ]
     },
     impact: {
       achievements: [
-        "Accelerated clinical information extraction for healthcare professionals.",
-        "Generated highly structured, action-ready healthcare insights.",
-        "Created seamless AI-assisted workflows integrated with patient record views."
+        "Accelerated records creation by transcribing and formatting consultation audio automatically.",
+        "Hardened clinical privacy using client-side and server-side metadata filters.",
+        "Created an installable, mobile-responsive layout for bedside clinical logging."
       ],
       lessons: [
-        "Handling sensitive patient health information and HIPAA-aligned data patterns.",
-        "Implementing semantic search indexes to optimize clinical query latencies.",
-        "LLM context window management and reliable clinical information extraction."
+        "Managing context lengths and prompt reliability in clinical concept extraction.",
+        "Working with SQLAlchemy schema migrations in HIPAA-aligned development cycles."
       ]
     }
   },
@@ -201,48 +202,47 @@ export const projectsData: Project[] = [
     title: "StudentHub",
     subtitle: "Student Platform",
     role: "Lead Product Developer",
-    description: "Student platform helping Melbourne students discover housing, events, opportunities, and resources.",
-    keyOutcome: "Successfully centralized student discovery resources, providing sub-second housing search directory synchronization.",
-    story: "Problem: Incoming international students in Melbourne struggle to discover reliable housing lists, transit guides, and social connections across fragmented websites.\n\nSolution: Built a community-focused resource hub consolidating verified housing checklists, transit routes, and local student events.\n\nTechnologies: Next.js, TypeScript, REST APIs, Tailwind CSS, Mapbox.\n\nCurrent Status: Expanding features (integrating local Melbourne student network API connections).\n\nVerified Outcomes: Deployed a mobile-optimized platform that centralizes discovery directories for incoming Monash student arrivals.",
-    techStack: ["Next.js", "TypeScript", "REST APIs", "Tailwind CSS"],
+    description: "Melbourne-focused community portal consolidating transit guides, housing lists, and student events.",
+    keyOutcome: "Centralized student resource search directories with sub-second synchronization via Prisma.",
+    story: "Problem: International students arriving in Melbourne find it difficult to navigate housing listings and public transit routes across fragmented channels.\n\nSolution: Created a centralized hub using Next.js, Prisma, and Tailwind CSS. It queries consolidated MySQL/Firebase databases and leverages Mapbox API to display interactive location-based recommendations and checklists.\n\nTechnologies: Next.js, TypeScript, Prisma, Mapbox API, Tailwind CSS.\n\nCurrent Status: Completed (available for incoming Monash student arrival networks).\n\nVerified Outcomes: Centralized essential discovery directories with responsive design and sub-second housing search directory synchronization.",
+    techStack: ["Next.js", "TypeScript", "Prisma", "MySQL", "Mapbox", "Tailwind CSS"],
     metrics: [
-      "Centralized student resources",
-      "Improved discoverability",
-      "Community-focused platform"
+      "Sub-second sync latency",
+      "Interactive Mapbox routes",
+      "Prisma DB schema mapping"
     ],
-    githubUrl: "https://github.com/krishi-chheda/studenthub-melbourne",
+    githubUrl: "https://github.com/krishi-chheda/student-hub",
     terminalLog: [
-      "SYS  > Connecting to database pools...",
-      "DB   > Synced verified student housing checklists and local events",
-      "USER > Search query: 'Melbourne transit guides near campus'"
+      "DB   > Connection established to MySQL database cluster via Prisma",
+      "API  > GET /api/housing?near=monash - synced 24 listings",
+      "MAP  > Mapbox loaded viewport coordinates for Clayton campus"
     ],
     overview: {
-      problem: "Incoming international students in Melbourne struggle to discover reliable housing lists, transit guides, and social connections across fragmented websites.",
-      solution: "Platform helping Melbourne students discover housing, events, and opportunities.",
+      problem: "Incoming students struggle to discover verified housing checklists, transit routes, and student events in Melbourne.",
+      solution: "Consolidated StudentHub platform with database sync and responsive geo-location maps.",
       status: "Completed"
     },
     architecture: {
       flow: [
-        { label: "Student", description: "Accesses the responsive platform via browser" },
-        { label: "Search System", description: "Handles queries across housing, transit, and events" },
-        { label: "Events / Housing / Resources", description: "Queries consolidated databases and external services" },
-        { label: "Personalized Discovery", description: "Renders geo-located resources and maps" }
+        { label: "Browser Client", description: "Accesses Next.js server-rendered directory pages" },
+        { label: "Search Endpoint", description: "Accepts filters (e.g. rent range, campus distance)" },
+        { label: "Prisma Client", description: "Queries MySQL/Firebase databases using indexing for fast retrieval" },
+        { label: "Mapbox Render", description: "Visualizes geo-coordinates and transit stops in real time" }
       ],
       decisions: [
-        "Chose Next.js for its Server Components to optimize initial page loads for resource search directories.",
-        "Integrated Mapbox to provide visual, distance-based housing and transit stop recommendations."
+        "Chose Next.js Server Components to improve search engine indexability and initial render times.",
+        "Utilized Prisma schema relations to perform clean joins between housing providers and student reviews."
       ]
     },
     impact: {
       achievements: [
-        "Centralized essential student resources in a single interface.",
-        "Significantly improved the discoverability of local housing and activities.",
-        "Created a community-focused hub tailored for incoming student cohorts."
+        "Successfully consolidated housing, transit, and event lists in a single UI.",
+        "Achieved sub-second query speeds for search filters.",
+        "Built custom checklists for students arriving at Monash University."
       ],
       lessons: [
-        "Aggregating, normalizing, and caching of fragmented public API sources.",
-        "Building client-side interactive search directories using React hooks.",
-        "Designing responsive layouts optimized for mobile-first student usage patterns."
+        "Integrating Mapbox camera bounding boxes with search result filters.",
+        "Aggregating and normalizing diverse public transit and event APIs."
       ]
     }
   },
@@ -251,51 +251,109 @@ export const projectsData: Project[] = [
     title: "Traffic AI",
     subtitle: "Intelligent Traffic Management System",
     role: "AI Research Lead",
-    description: "Intelligent traffic management system using computer vision to optimize traffic flow.",
-    keyOutcome: "Reduced average intersection queue waiting time by 42% in simulated test loops.",
-    story: "Problem: Fixed-interval traffic signals cause severe traffic congestion and unnecessary engine idling by failing to adapt to real-time lane density.\n\nSolution: Developed an intelligent edge intersection queue optimization system tracking lane congestion via live computer vision processing.\n\nTechnologies: YOLO, OpenCV, Python, NVIDIA Jetson Nano.\n\nCurrent Status: Simulation validated; hardware logic tested on NVIDIA Jetson edge nodes.\n\nVerified Outcomes: Reduced average intersection queue waiting time by 42% in simulated test loops.",
-    techStack: ["YOLO", "OpenCV", "Python", "Jetson Nano"],
+    description: "Intelligent traffic scheduling optimizer using real-time lane vehicle queue tracking to adapt traffic signals.",
+    keyOutcome: "Reduced average intersection queue waiting times by 42% in simulated test environments.",
+    story: "Problem: Standard static traffic timers trigger severe congestion by failing to adapt to dynamic lane queue density.\n\nSolution: Built a density-based queue optimization pipeline. It runs YOLO models on live video streams to track vehicle coordinates, computes lane density, and adapts traffic light timings on Jetson Nano edge nodes.\n\nTechnologies: Python, YOLO, OpenCV, Jetson Nano.\n\nCurrent Status: Simulation validated; hardware logic tested on NVIDIA Jetson edge nodes.\n\nVerified Outcomes: Validated a 42% congestion drop in simulation loops and deployed scheduling logic to NVIDIA Jetson hardware.",
+    techStack: ["Python", "YOLO", "OpenCV", "Jetson Nano"],
     metrics: [
-      "42% reduction in waiting time",
-      "Real-time traffic analysis",
-      "Edge deployment on Jetson Nano"
+      "42% queue time reduction",
+      "30 FPS edge processing",
+      "Dynamic lane adaptation"
     ],
     githubUrl: "https://github.com/krishi-chheda/ai-traffic-system",
     terminalLog: [
-      "EDGE > Initializing Jetson Nano processing pipeline...",
-      "CV   > OpenCV matrix frame captured at 30 FPS",
-      "AI   > YOLO tracked 12 vehicles on Lane A, 4 on Lane B",
-      "SYS  > Switched intersection state: Lane A Green extended (Wait reduced 42%)"
+      "EDGE > Ingesting lane camera feed (1080p @ 30 FPS)...",
+      "AI   > YOLO detection: 14 vehicles on Lane A, 2 on Lane B",
+      "CV   > Bounding box tracking across region of interest",
+      "SYS  > Timer override: Lane A Green extended by 18 seconds (reduced wait 42%)"
     ],
     overview: {
-      problem: "Fixed-interval traffic signals cause severe traffic congestion and unnecessary engine idling.",
-      solution: "Computer vision traffic optimization system.",
+      problem: "Fixed traffic signal cycles cause massive vehicle idling and congestion due to ignoring dynamic lane queues.",
+      solution: "Computer vision pipeline detecting vehicles on edge cameras to adjust green-light timing dynamically.",
       status: "Completed"
     },
     architecture: {
       flow: [
-        { label: "Camera Feed", description: "Streams real-time intersection traffic video" },
-        { label: "Vehicle Detection", description: "Uses YOLO to identify and track vehicle coordinates" },
-        { label: "Density Analysis", description: "Calculates vehicle counts and queue lengths per lane" },
-        { label: "Signal Optimization", description: "Adapts signal durations dynamically based on traffic load" }
+        { label: "IP Camera", description: "Streams live intersection lane video feeds" },
+        { label: "YOLO Detector", description: "Runs on Jetson Nano to calculate bounding boxes of cars/trucks" },
+        { label: "OpenCV Masking", description: "Filters out surroundings to isolate critical lane bounding boxes" },
+        { label: "Signal Control", description: "Executes adaptive timing scheduler overrides based on queue lengths" }
       ],
       decisions: [
-        "Deployed models to an NVIDIA Jetson Nano edge node to ensure processing occurs directly at the intersection.",
-        "Utilized OpenCV for efficient image preprocessing and region-of-interest masking to focus YOLO attention only on critical traffic lanes."
+        "Masked camera regions with OpenCV to focus YOLO on critical queue lanes, saving 35% processing overhead.",
+        "Deployed code on Jetson Nano edge node to guarantee local processing and fail-safe traffic overrides."
       ]
     },
     impact: {
       achievements: [
-        "Achieved a verified 42% reduction in traffic waiting time in simulation loops.",
-        "Provided continuous real-time traffic density analysis.",
-        "Successfully optimized models to deploy on edge hardware (Jetson Nano)."
+        "Cut queue delay times by 42% in simulated intersection grids.",
+        "Achieved real-time frame rates on Jetson Nano hardware.",
+        "Integrated safety fail-safes that return to standard static cycles in case of camera blockages."
       ],
       lessons: [
-        "Optimizing neural network frame rates on memory-constrained edge hardware.",
-        "Bridging simulation-to-real gaps in visual vehicle tracking.",
-        "Developing fail-safe signal logic when cameras are obscured or models fail."
+        "Quantizing neural models to run on memory-constrained edge processors.",
+        "Calibrating visual depth measurements from raw 2D camera grids."
       ]
     }
+  }
+];
+
+export interface AdditionalProject {
+  id: string;
+  title: string;
+  subtitle: string;
+  role: string;
+  description: string;
+  keyOutcome: string;
+  techStack: string[];
+  githubUrl: string;
+  story: string;
+}
+
+export const additionalProjectsData: AdditionalProject[] = [
+  {
+    id: "auralens-ai",
+    title: "AuraLens AI",
+    subtitle: "Local Photography Assistant",
+    role: "AI & Computer Vision Developer",
+    description: "Photography workflow tool that culls blurry images automatically (OpenCV Laplacian variance) and enables semantic vector search (CLIP + ChromaDB) running 100% locally.",
+    keyOutcome: "Eliminated manual image tagging and culled blurry files with local CLIP Vibe Search.",
+    techStack: ["Python", "Streamlit", "OpenCV", "ChromaDB", "Hugging Face CLIP"],
+    githubUrl: "https://github.com/krishi-chheda/AuraLens-AI",
+    story: "Built a Streamlit desktop application that analyzes imported photography folders. It culled blurry pictures by calculating OpenCV Laplacian variance. It built a local vector database (ChromaDB) of OpenAI CLIP image embeddings, allowing users to query their photos semantically (e.g. 'find a happy dog on a rainy night') without any cloud dependencies."
+  },
+  {
+    id: "f1-telemetry",
+    title: "F1 Telemetry AI Suite",
+    subtitle: "AI-powered Telemetry Visualizer",
+    role: "Full-Stack AI Developer",
+    description: "AI platform visualising Formula 1 telemetry data, driver inputs, lap records, and track sector breakdowns.",
+    keyOutcome: "Visualizes driver logs and throttle/braking performance profiles.",
+    techStack: ["TypeScript", "Next.js", "React", "Streamlit", "Python", "Pandas", "Recharts"],
+    githubUrl: "https://github.com/krishi-chheda/f1-telemetry-ai-dashboard",
+    story: "Designed a multi-service telemetry dashboard containing a Next.js web application and a Python Streamlit analyzer. It parses raw F1 session datasets using Pandas, projects telemetry metrics (speed, throttle, brake, gears) onto dynamic 2D track segment coordinate maps, and compares driver performance curves."
+  },
+  {
+    id: "bp-prediction-api",
+    title: "Blood Pressure Prediction API",
+    subtitle: "Healthcare AI API",
+    role: "Backend ML Engineer",
+    description: "FastAPI server providing machine learning inference endpoints for blood pressure prediction from facial videos.",
+    keyOutcome: "Ingests video streams to calculate PPG facial color fluctuations and estimate blood pressure.",
+    techStack: ["Python", "FastAPI", "OpenCV", "Mediapipe", "Scikit-learn"],
+    githubUrl: "https://github.com/krishi-chheda/fastapi_backend",
+    story: "Developed a Python backend that extracts cardiovascular metrics from video files. It runs Mediapipe face tracking to isolate skin regions of interest, calculates color value fluctuations (photoplethysmography), and trains Scikit-learn regressors (Lasso, Ridge) to predict systolic and diastolic blood pressure."
+  },
+  {
+    id: "video-splitter",
+    title: "Video Splitter Pro",
+    subtitle: "Media Utility Tool",
+    role: "Python Developer",
+    description: "Web application enabling content creators to split videos at custom timestamps and extract audio tracks.",
+    keyOutcome: "Optimized FFmpeg process operations via clean Streamlit interface.",
+    techStack: ["Python", "Streamlit", "FFmpeg"],
+    githubUrl: "https://github.com/krishi-chheda/video-splitter",
+    story: "Created an open-source Streamlit utility that wraps FFmpeg commands to split large video assets at user-defined timestamps and extract audio tracks without visual quality loss."
   }
 ];
 
@@ -372,6 +430,7 @@ export const aiKnowledgeBase = {
   },
   careerGoals: "Krishi aims to work in high-growth environments where he can deploy AI models to production. He is looking for opportunities as an AI Engineer, Full-Stack Developer, or Founding Engineer in startups, scale-ups, and AI research labs in Australia or globally.",
   projects: projectsData,
+  additionalProjects: additionalProjectsData,
   experience: experienceData,
   faq: [
     {

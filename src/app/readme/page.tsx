@@ -259,6 +259,105 @@ export default function ReadmePage() {
                 </div>
               </section>
 
+              {/* ADDITIONAL OPEN SOURCE WORK */}
+              <section className="space-y-3">
+                <h2 className="text-[#10b981] font-bold uppercase tracking-wider flex items-center gap-1.5 border-l-2 border-[#10b981] pl-2 text-xs md:text-sm">
+                  3.5. ADDITIONAL OPEN SOURCE WORK
+                </h2>
+                <p className="text-slate-400 text-xs pl-3">
+                  Explore other developer projects, utilities, and integrations:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-3 pt-2">
+                  <div className="border border-slate-900 bg-slate-950/40 p-4 rounded-lg flex flex-col justify-between group transition-all duration-300">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <a
+                          href="https://github.com/krishi-chheda/AuraLens-AI"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-bold text-white hover:text-[#10b981] transition-colors flex items-center gap-1 text-xs md:text-sm cursor-pointer"
+                        >
+                          <span>AuraLens AI</span>
+                          <ExternalLink size={10} className="text-slate-500" />
+                        </a>
+                        <span className="text-[10px] text-slate-500 font-mono select-none">
+                          CLIP + ChromaDB
+                        </span>
+                      </div>
+                      <p className="text-slate-400 text-[11px] md:text-xs mt-2 leading-relaxed font-sans select-text">
+                        Local Streamlit photography culling assistant using Laplacian variance and CLIP semantic vector search in ChromaDB.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border border-slate-900 bg-slate-950/40 p-4 rounded-lg flex flex-col justify-between group transition-all duration-300">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <a
+                          href="https://github.com/krishi-chheda/f1-telemetry-ai-dashboard"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-bold text-white hover:text-[#10b981] transition-colors flex items-center gap-1 text-xs md:text-sm cursor-pointer"
+                        >
+                          <span>F1 Telemetry AI Suite</span>
+                          <ExternalLink size={10} className="text-slate-500" />
+                        </a>
+                        <span className="text-[10px] text-slate-500 font-mono select-none">
+                          Next.js + Pandas
+                        </span>
+                      </div>
+                      <p className="text-slate-400 text-[11px] md:text-xs mt-2 leading-relaxed font-sans select-text">
+                        Formula 1 telemetry dashboard and data parser analyzing lap logs, driver inputs, and speed sectors on 2D track maps.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border border-slate-900 bg-slate-950/40 p-4 rounded-lg flex flex-col justify-between group transition-all duration-300">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <a
+                          href="https://github.com/krishi-chheda/fastapi_backend"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-bold text-white hover:text-[#10b981] transition-colors flex items-center gap-1 text-xs md:text-sm cursor-pointer"
+                        >
+                          <span>BP Prediction API</span>
+                          <ExternalLink size={10} className="text-slate-500" />
+                        </a>
+                        <span className="text-[10px] text-slate-500 font-mono select-none">
+                          FastAPI + ML
+                        </span>
+                      </div>
+                      <p className="text-slate-400 text-[11px] md:text-xs mt-2 leading-relaxed font-sans select-text">
+                        Facial video analysis API predicting blood pressure metrics via color Photoplethysmography (PPG) and Scikit-learn regressors.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border border-slate-900 bg-slate-950/40 p-4 rounded-lg flex flex-col justify-between group transition-all duration-350">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <a
+                          href="https://github.com/krishi-chheda/video-splitter"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-bold text-white hover:text-[#10b981] transition-colors flex items-center gap-1 text-xs md:text-sm cursor-pointer"
+                        >
+                          <span>Video Splitter Pro</span>
+                          <ExternalLink size={10} className="text-slate-500" />
+                        </a>
+                        <span className="text-[10px] text-slate-500 font-mono select-none">
+                          Python + FFmpeg
+                        </span>
+                      </div>
+                      <p className="text-slate-400 text-[11px] md:text-xs mt-2 leading-relaxed font-sans select-text">
+                        Streamlit media processing utility for fast custom timestamp video splitting and audio track extraction.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
               {/* TECH STACK */}
               <section className="space-y-3">
                 <h2 className="text-[#10b981] font-bold uppercase tracking-wider flex items-center gap-1.5 border-l-2 border-[#10b981] pl-2 text-xs md:text-sm">

@@ -9,6 +9,29 @@ import { projectsData } from "@/lib/data";
 export default function Projects() {
   const [selectedId, setSelectedId] = useState("accessible-vision");
   const [blink, setBlink] = useState(true);
+  const [gitStats, setGitStats] = useState<any>(null);
+  const [loadingGit, setLoadingGit] = useState(false);
+
+  useEffect(() => {
+    setLoadingGit(true);
+    fetch("/api/github")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.repos) {
+          setGitStats(data.repos);
+        }
+      })
+      .catch((err) => console.error("Failed to load GitHub stats:", err))
+      .finally(() => setLoadingGit(false));
+  }, []);
+
+  const getRepoKey = (id: string) => {
+    if (id === "accessible-vision") return "AccessVision";
+    if (id === "clinicalbrief") return "ClinicalBrief";
+    if (id === "studenthub") return "student-hub";
+    if (id === "traffic-ai") return "ai-traffic-system";
+    return id;
+  };
 
   // Command Palette event listener
   useEffect(() => {
@@ -199,6 +222,68 @@ export default function Projects() {
                           {activeProject.overview.status}
                         </span>
                       </div>
+
+                      {/* Live GitHub Telemetry */}
+                      {activeProject.githubUrl && (
+                        <div className="mt-4 pt-4 border-t border-slate-900/60 font-mono text-[11px] text-slate-400 space-y-2 select-none">
+                          <div className="text-[9px] text-[#10b981] font-bold uppercase tracking-wider">
+                            [GITHUB_LIVE_TELEMETRY]
+                          </div>
+                          {loadingGit ? (
+                            <div className="flex items-center space-x-2 animate-pulse text-slate-500">
+                              <span className="w-1.5 h-1.5 bg-[#10b981] rounded-full" />
+                              <span>Syncing telemetry packets...</span>
+                            </div>
+                          ) : gitStats && gitStats[getRepoKey(activeProject.id)] ? (
+                            (() => {
+                              const stats = gitStats[getRepoKey(activeProject.id)];
+                              const isPrivate = activeProject.id === "clinicalbrief" || activeProject.id === "traffic-ai";
+                              return (
+                                <div className="bg-slate-950/40 border border-slate-900/80 p-3 rounded space-y-2 select-text">
+                                  <div className="flex flex-wrap items-center justify-between gap-3 text-[10px]">
+                                    <div>
+                                      <span className="text-slate-500">Stars:</span> <span className="text-white font-bold">{stats.stars}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-slate-500">Forks:</span> <span className="text-white font-bold">{stats.forks}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-slate-500">Language:</span> <span className="text-cyan-400 font-bold">{stats.language}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-slate-500">Status:</span>{" "}
+                                      <span className={isPrivate ? "text-amber-500 font-bold" : "text-emerald-500 font-bold"}>
+                                        {isPrivate ? "PRIVATE/LOCAL" : "PUBLIC/SYNCED"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  {!isPrivate && stats.latestCommit && (
+                                    <div className="border-t border-slate-900/60 pt-2 flex flex-col space-y-1 text-[10px]">
+                                      <div className="flex items-center space-x-1.5 truncate">
+                                        <span className="text-[#10b981] font-bold shrink-0">latest_commit:</span>
+                                        <span className="text-amber-500 font-semibold font-mono shrink-0">[{stats.latestCommit.hash}]</span>
+                                        <span className="text-slate-300 truncate font-mono" title={stats.latestCommit.message}>
+                                          &quot;{stats.latestCommit.message}&quot;
+                                        </span>
+                                      </div>
+                                      <div className="text-[9px] text-slate-500">
+                                        Date: {new Date(stats.latestCommit.date).toLocaleString()}
+                                      </div>
+                                    </div>
+                                  )}
+                                  {isPrivate && (
+                                    <div className="border-t border-slate-900/60 pt-2 text-[9.5px] text-slate-500 italic">
+                                      Telemetry loaded via local workspace builds. Working tree clean.
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()
+                          ) : (
+                            <div className="text-slate-500 italic text-[10px]">Telemetry stream offline.</div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 

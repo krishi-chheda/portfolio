@@ -1,6 +1,24 @@
 import { NextResponse } from "next/server";
 import { aiKnowledgeBase } from "@/lib/data";
 
+const COMMAND_KEYWORDS: [command: string, keywords: string[]][] = [
+  ["cat README.md", ["readme", "what is krishi.os", "navigate", "operating manual", "manual", "about this portfolio"]],
+  ["cat projects/accessible-vision/details.md", ["accessible", "vision", "assistive"]],
+  ["cat projects/clinicalbrief/details.md", ["clinical", "brief", "belief"]],
+  ["cat projects/studenthub/details.md", ["student", "hub", "studenthub"]],
+  ["cat projects/traffic-ai/details.md", ["traffic", "congestion", "signal", "rl", "sumo"]],
+  ["cd leadership", ["leadership", "mdas", "mosaic"]],
+  ["git log --career", ["career", "experience", "background", "journey", "resume", "cv", "history", "work", "intern"]],
+  ["tail -f currently-building.log", ["building", "current", "next"]],
+  ["open system-map", ["skill", "tech", "stack", "knowledge", "expert", "graph", "system-map"]],
+  ["ssh recruiter@krishi.os", ["contact", "email", "reach", "connect", "interview", "linkedin"]],
+];
+
+function matchCommand(text: string): string {
+  const match = COMMAND_KEYWORDS.find(([, keywords]) => keywords.some((k) => text.includes(k)));
+  return match?.[0] ?? "";
+}
+
 export async function POST(req: Request) {
   try {
     const { message } = await req.json();
@@ -311,91 +329,12 @@ What would you like to ask next?
       }
     }
 
-    // 4. Apply robust query keyword mapping fallback if suggestedCommand was not set by LLM
+    // 4. Fallback: match either the query or the reply text against a shared keyword table
     if (!suggestedCommand) {
-      if (
-        query.includes("readme") ||
-        query.includes("what is krishi.os") ||
-        query.includes("navigate") ||
-        query.includes("operating manual") ||
-        query.includes("manual") ||
-        query.includes("about this portfolio")
-      ) {
-        suggestedCommand = "cat README.md";
-      } else if (query.includes("accessible") || query.includes("vision") || query.includes("assistive")) {
-        suggestedCommand = "cat projects/accessible-vision/details.md";
-      } else if (query.includes("clinical") || query.includes("brief") || query.includes("belief")) {
-        suggestedCommand = "cat projects/clinicalbrief/details.md";
-      } else if (query.includes("student") || query.includes("hub") || query.includes("studenthub")) {
-        suggestedCommand = "cat projects/studenthub/details.md";
-      } else if (query.includes("traffic") || query.includes("congestion") || query.includes("signal") || query.includes("rl") || query.includes("sumo")) {
-        suggestedCommand = "cat projects/traffic-ai/details.md";
-      } else if (query.includes("leadership") || query.includes("mdas") || query.includes("mosaic")) {
-        suggestedCommand = "cd leadership";
-      } else if (
-        query.includes("career") ||
-        query.includes("experience") ||
-        query.includes("background") ||
-        query.includes("journey") ||
-        query.includes("resume") ||
-        query.includes("cv") ||
-        query.includes("history") ||
-        query.includes("work") ||
-        query.includes("intern")
-      ) {
-        suggestedCommand = "git log --career";
-      } else if (query.includes("building") || query.includes("current") || query.includes("next")) {
-        suggestedCommand = "tail -f currently-building.log";
-      } else if (
-        query.includes("skill") ||
-        query.includes("tech") ||
-        query.includes("stack") ||
-        query.includes("knowledge") ||
-        query.includes("expert") ||
-        query.includes("graph") ||
-        query.includes("system-map")
-      ) {
-        suggestedCommand = "open system-map";
-      } else if (
-        query.includes("contact") ||
-        query.includes("email") ||
-        query.includes("reach") ||
-        query.includes("connect") ||
-        query.includes("interview")
-      ) {
-        suggestedCommand = "ssh recruiter@krishi.os";
-      }
+      suggestedCommand = matchCommand(query);
     }
-
-    // 5. Apply reply content keyword mapping fallback if suggestedCommand is still not set
     if (!suggestedCommand && reply) {
-      const lowerReply = reply.toLowerCase();
-      if (
-        lowerReply.includes("readme.md") ||
-        lowerReply.includes("readme") ||
-        lowerReply.includes("operating manual") ||
-        lowerReply.includes("what is krishi.os")
-      ) {
-        suggestedCommand = "cat README.md";
-      } else if (lowerReply.includes("accessible vision") || lowerReply.includes("accessible-vision")) {
-        suggestedCommand = "cat projects/accessible-vision/details.md";
-      } else if (lowerReply.includes("clinicalbrief") || lowerReply.includes("clinical brief")) {
-        suggestedCommand = "cat projects/clinicalbrief/details.md";
-      } else if (lowerReply.includes("studenthub") || lowerReply.includes("student hub")) {
-        suggestedCommand = "cat projects/studenthub/details.md";
-      } else if (lowerReply.includes("traffic ai") || lowerReply.includes("traffic-ai")) {
-        suggestedCommand = "cat projects/traffic-ai/details.md";
-      } else if (lowerReply.includes("leadership") || lowerReply.includes("mdas") || lowerReply.includes("mosaic")) {
-        suggestedCommand = "cd leadership";
-      } else if (lowerReply.includes("career") || lowerReply.includes("experience") || lowerReply.includes("journey")) {
-        suggestedCommand = "git log --career";
-      } else if (lowerReply.includes("currently building") || lowerReply.includes("currently-building")) {
-        suggestedCommand = "tail -f currently-building.log";
-      } else if (lowerReply.includes("knowledge graph") || lowerReply.includes("skills") || lowerReply.includes("technologies")) {
-        suggestedCommand = "open system-map";
-      } else if (lowerReply.includes("contact") || lowerReply.includes("email") || lowerReply.includes("linkedin")) {
-        suggestedCommand = "ssh recruiter@krishi.os";
-      }
+      suggestedCommand = matchCommand(reply.toLowerCase());
     }
 
     return NextResponse.json({ reply, suggestedCommand });

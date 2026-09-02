@@ -95,42 +95,20 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         window.dispatchEvent(new CustomEvent("open-ai-chat"));
       }
     },
-    {
-      id: "accessible-vision",
-      name: "accessible-vision",
-      description: "cat projects/accessible-vision/overview.md // Inspect AI Accessibility platform",
+    ...[
+      { id: "accessible-vision", label: "Inspect AI Accessibility platform" },
+      { id: "clinicalbrief", label: "Inspect Healthcare AI platform" },
+      { id: "studenthub", label: "Inspect Melbourne Student services guide" },
+      { id: "traffic-ai", label: "Inspect computer vision queue management system" }
+    ].map(({ id, label }) => ({
+      id,
+      name: id,
+      description: `cat projects/${id}/overview.md // ${label}`,
       action: () => {
         document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
-        window.dispatchEvent(new CustomEvent("select-project", { detail: { id: "accessible-vision" } }));
+        window.dispatchEvent(new CustomEvent("select-project", { detail: { id } }));
       }
-    },
-    {
-      id: "clinicalbrief",
-      name: "clinicalbrief",
-      description: "cat projects/clinicalbrief/overview.md // Inspect Healthcare AI platform",
-      action: () => {
-        document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
-        window.dispatchEvent(new CustomEvent("select-project", { detail: { id: "clinicalbrief" } }));
-      }
-    },
-    {
-      id: "studenthub",
-      name: "studenthub",
-      description: "cat projects/studenthub/overview.md // Inspect Melbourne Student services guide",
-      action: () => {
-        document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
-        window.dispatchEvent(new CustomEvent("select-project", { detail: { id: "studenthub" } }));
-      }
-    },
-    {
-      id: "traffic-ai",
-      name: "traffic-ai",
-      description: "cat projects/traffic-ai/overview.md // Inspect computer vision queue management system",
-      action: () => {
-        document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
-        window.dispatchEvent(new CustomEvent("select-project", { detail: { id: "traffic-ai" } }));
-      }
-    }
+    }))
   ];
 
   const filteredCommands = commands.filter((cmd) =>

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { aiKnowledgeBase } from "@/lib/data";
+import { aiKnowledgeBase, projectsData } from "@/lib/data";
 
 const COMMAND_KEYWORDS: [command: string, keywords: string[]][] = [
   ["cat README.md", ["readme", "what is krishi.os", "navigate", "operating manual", "manual", "about this portfolio"]],
@@ -15,6 +15,23 @@ const COMMAND_KEYWORDS: [command: string, keywords: string[]][] = [
 ];
 
 const MAX_MESSAGE_LENGTH = 500;
+
+// Fallback project answers are built from projectsData so they never drift from the Projects section.
+function projectReply(id: string, followUps: string[]): string {
+  const p = projectsData.find((proj) => proj.id === id);
+  if (!p) return "";
+  const links = [p.githubUrl && `- Code: ${p.githubUrl}`, p.liveUrl && `- Live demo: ${p.liveUrl}`].filter(Boolean);
+  return `${p.title}: ${p.description}
+
+Key details:
+- Stack: ${p.techStack.join(", ")}.
+- Status: ${p.overview.status}.
+- Outcome: ${p.keyOutcome}
+${links.join("\n")}
+
+What would you like to ask next?
+${followUps.map((q) => `- "${q}"`).join("\n")}`;
+}
 
 function matchCommand(text: string): string {
   const match = COMMAND_KEYWORDS.find(([, keywords]) => keywords.some((k) => text.includes(k)));
@@ -58,7 +75,7 @@ export async function POST(req: Request) {
 
 Additionally, you have navigation routing capabilities. If the user asks about a project, leadership role, work history, skills, contact info, what you are currently building, or how to explore/navigate the system, you must recommend a command shortcut at the very end of your response formatted exactly as '[command: <command_string>]'. Choose from these exact command strings only:
 - 'cat README.md' (for README, manual, how to explore, how to navigate, or introduction/onboarding to KRISHI.OS)
-- 'cat projects/accessible-vision/details.md' (for Accessible Vision project)
+- 'cat projects/accessible-vision/details.md' (for the AccessVision project)
 - 'cat projects/clinicalbrief/details.md' (for ClinicalBrief project)
 - 'cat projects/studenthub/details.md' (for StudentHub project)
 - 'cat projects/traffic-ai/details.md' (for Traffic AI project)
@@ -109,60 +126,32 @@ What would you like to ask next?
 
 [command: cat README.md]`;
       } else if (query.includes("clinical") || query.includes("brief") || query.includes("belief")) {
-        const proj = aiKnowledgeBase.projects.find((p) => p.id === "clinicalbrief");
-        reply = `I built ClinicalBrief to solve a major bottleneck for healthcare providers: the hours lost transcribing and formatting consultation audio into structured records. It's a secure clinical intelligence platform that transcribes multi-speaker dictations and parses them into action-ready summaries.
-
-Key details:
-- Stack: Next.js, FastAPI, Python, and LLM Applications (GPT-4o/Whisper).
-- Status: Active development (optimizing audio diarization and speaker separation).
-- Verified Outcomes: ${proj?.overview.solution} • ${proj?.impact.achievements[0]} • ${proj?.impact.achievements[1]}.
-
-What would you like to ask next?
-- "How does ClinicalBrief handle secure patient record sanitization?"
-- "Why did you choose FastAPI for the backend?"
-- "Is the codebase open source?"`;
-      } 
+        reply = projectReply("clinicalbrief", [
+          "How does human review of AI findings work in ClinicalBrief?",
+          "How does the copilot stay grounded in the patient record?",
+          "Why does the copilot only use a local model?",
+        ]);
+      }
       else if (query.includes("student") || query.includes("hub") || query.includes("studenthub")) {
-        const proj = aiKnowledgeBase.projects.find((p) => p.id === "studenthub");
-        reply = `I built StudentHub as a community portal consolidated checklist resource for Melbourne international students. It coordinates housing lists, student events, discussions, and marketplaces.
-
-Key details:
-- Stack: Next.js, Flutter, and Firebase.
-- Status: Completed.
-- Verified Outcomes: ${proj?.impact.achievements[0]} • ${proj?.impact.achievements[1]} • Sub-second data sync sync listener updates.
-
-What would you like to ask next?
-- "Tell me about your IT intern role at Mysahayak developing StudentHub."
-- "What databases does StudentHub leverage for real-time updates?"
-- "Is the platform optimized for responsive mobile layout?"`;
-      } 
+        reply = projectReply("studenthub", [
+          "Which external APIs does StudentHub use?",
+          "Why did you choose Supabase?",
+          "Can I try the live portal?",
+        ]);
+      }
       else if (query.includes("traffic") || query.includes("light") || query.includes("rl") || query.includes("sumo") || query.includes("congestion")) {
-        reply = `I developed Traffic AI to optimize traffic congestion at intersections. It uses live computer vision processing on video streams to track lane queue density and adapt signal timings dynamically.
-
-Key details:
-- Stack: YOLO, OpenCV, Python, and NVIDIA Jetson Nano edge hardware.
-- Status: Simulation validated; hardware logic tested on Jetson Nano edge nodes.
-- Verified Outcomes: Achieved a verified 42% reduction in intersection waiting times in simulated intersection models.
-
-What would you like to ask next?
-- "How did you optimize YOLO on the Jetson Nano?"
-- "How was the 42% waiting time reduction verified?"
-- "Can I view the computer vision pipeline code?"`;
-      } 
+        reply = projectReply("traffic-ai", [
+          "How does lane density decide green time?",
+          "Why run detection on a Jetson Nano?",
+          "How would you coordinate multiple intersections?",
+        ]);
+      }
       else if (query.includes("accessible") || query.includes("vision") || query.includes("assistive") || query.includes("guidance") || query.includes("visually")) {
-        reply = `I developed AccessVision (Accessible Vision) to assist visually impaired individuals in navigating environments safely. It maps environmental paths and detects hazards in real-time, providing immediate spoken audio feedback.
-
-Key details:
-- Stack: FastAPI, Next.js, YOLOv8, BLIP, Docker, OpenCV, and Hugging Face.
-- Status: Active refinement (optimizing model quantization and edge pipeline latency).
-- Verified Outcomes: Reduced server-side inference latency by 92% (from 8.4s to 668ms) and achieved a stable end-to-end client p95 latency of 2.4s under 50-user concurrent Locust load testing.
-
-What would you like to ask next?
-- "How did you achieve a 92% inference latency reduction?"
-- "How did you integrate YOLOv8 and BLIP?"
-- "How does the real-time spoken guidance system function?"
-
-[command: cat projects/accessible-vision/details.md]`;
+        reply = projectReply("accessible-vision", [
+          "How does grounding with YOLOv8 crops reduce hallucinations?",
+          "How did you cut p95 latency by 73% under load?",
+          "How does the voice-first interface work?",
+        ]);
       }
       else if (query.includes("auralens") || query.includes("cull") || query.includes("photo") || query.includes("camera") || query.includes("blurry")) {
         reply = `I built AuraLens AI, a local photography assistant that optimizes workflows for photographers by culling blurry pictures and allowing semantic vibe searches.
@@ -240,7 +229,7 @@ What would you like to ask next?
       else if (query.includes("experience") || query.includes("work") || query.includes("career") || query.includes("history") || query.includes("intern") || query.includes("mysahayak") || query.includes("mosaic") || query.includes("volunteer") || query.includes("sacred")) {
         reply = `I have built technical, leadership, and community experience across several roles:
 - Mysahayak (IT Intern, 2025): Built AI-assisted content moderation workflows (reducing manual review by 30%), integrated REST APIs, and optimized backend API layers.
-- Monash Data & AI Society (Media & Marketing Director, 2024 - Present): Managing branding and growing technical workshop reach to 300+ students.
+- Monash Data & AI Society (Vice President, Jul 2026 - Present; previously Media & Marketing Director, Jan - May 2026, and Media & Marketing Officer, Oct 2025 - Jan 2026).
 - MOSAIC (Social Media Coordinator, 2025 - Present): Managing community social coordination and event promotion for Monash Students for AI with Communities.
 - Sacred Heart Mission Op Shop (Volunteer, 2026 - Present): Conducting electrical compliance testing and troubleshooting IT network issues.
 
@@ -251,7 +240,7 @@ What would you like to ask next?
       }
       else if (query.includes("mdas") || query.includes("media") || query.includes("director") || query.includes("society") || query.includes("leadership") || query.includes("mosaic") || query.includes("volunteer") || query.includes("sacred")) {
         reply = `I hold key leadership and community roles that balance my technical build experience:
-- Media & Marketing Director at Monash Data & AI Society (MDAS): I lead branding strategies, manage engagement metrics, and coordinate events, growing workshop reach to 300+ students across 5+ events.
+- Monash Data & AI Society (MDAS): Vice President since July 2026, after serving as Media & Marketing Officer (Oct 2025 - Jan 2026) and Media & Marketing Director (Jan - May 2026).
 - Social Media Coordinator at MOSAIC (Monash Students for AI with Communities): I manage community social coordination and connect peers to AI volunteer programs and local projects.
 - Volunteer at Sacred Heart Mission Op Shop: I conduct electrical safety compliance testing on donations, troubleshoot local IT network issues, and support cashier operations (50+ customer interactions per shift).
 
@@ -289,7 +278,7 @@ What would you like to ask next?
         query.includes("visa") ||
         query.includes("rights")
       ) {
-        reply = `I am actively seeking opportunities starting after my graduation in July 2027. I am targeted at AI Engineering, ML Engineering, and Software Engineering roles in Melbourne, Sydney, or remote. I hold standard student visa working rights in Australia and am open to sponsorship/global relocation.
+        reply = `I am open to opportunities in AI Engineering, Machine Learning Engineering, Software Engineering and Technology Consulting. I graduate from Monash's Master of AI in July 2027. For details on timing or work arrangements, the best route is to email me directly.
 
 What would you like to ask next?
 - "Would you consider a part-time role or internship before July 2027?"
@@ -302,7 +291,7 @@ What would you like to ask next?
 - LinkedIn: linkedin.com/in/krishi-chheda
 - GitHub: github.com/krishi-chheda
 
-I usually respond to email and LinkedIn messages within 24 hours. You can also use the contact form at the bottom of the page!
+You can also use the contact form at the bottom of the page, which opens a pre-filled email.
 
 What would you like to ask next?
 - "Can we set up a short intro call?"
@@ -318,7 +307,7 @@ What would you like to ask next?
 - "What is your favorite F1 team?"`;
       } 
       else {
-        reply = `Hi! I am Krishi Chheda, an AI Engineer. Ask me anything about my Monash Master of AI studies, my leadership as MDAS Media & Marketing Director, or projects like ClinicalBrief, Accessible Vision, Traffic AI, and StudentHub.
+        reply = `Hi! I am Krishi Chheda, an AI Engineer. Ask me anything about my Monash Master of AI studies, my leadership as Vice President of MDAS, or projects like ClinicalBrief, AccessVision, Traffic AI, and StudentHub.
 
 What would you like to ask next?
 - "Tell me about ClinicalBrief"

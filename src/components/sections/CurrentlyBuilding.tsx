@@ -12,34 +12,28 @@ interface ActiveBuild {
   activeWork: string[];
 }
 
+// Roadmap items come from each project's README; add activeWork only for verified in-progress tasks.
 const activeBuilds: ActiveBuild[] = [
   {
-    name: "Accessible Vision",
-    currentFocus: "Model quantization & edge pipeline latency minimization.",
-    developmentStatus: "Active Refinement (Version 1.2-alpha)",
+    name: "AccessVision",
+    currentFocus: "Grounded visual question answering and predictable latency under concurrent load.",
+    developmentStatus: "Active Refinement",
     roadmap: [
-      "Integrate multi-camera spatial mapping for outdoor path layout parsing.",
-      "Implement client-side offline audio synthesis queues for lightweight screen-free usage."
+      "Port YOLO to ONNX and run models in the browser via WebAssembly.",
+      "Navigation mode that announces path obstructions and depth changes.",
+      "Multi-language speech (Spanish, French, German)."
     ],
-    activeWork: [
-      "Quantizing YOLOv8 model weights to reduce edge processor memory footprints.",
-      "Testing spoken hazard description scheduling queues to prevent frame-dropping under load.",
-      "Refining distance estimations on edge camera calibration matrices."
-    ]
+    activeWork: []
   },
   {
     name: "ClinicalBrief",
-    currentFocus: "Audio diarization accuracy & secure patient metadata compliance layers.",
-    developmentStatus: "Active Development (Sprint 4)",
+    currentFocus: "Human-reviewed AI findings, a grounded local-LLM copilot and record search over synthetic FHIR data.",
+    developmentStatus: "Research Prototype",
     roadmap: [
-      "Integrate live streaming WebSocket audio transcriptions.",
-      "Add support for offline parsing using local LLM inference engines (Llama-3-8B) on secure servers."
+      "Embedding-based semantic search over clinical records.",
+      "Evaluate extraction against labelled data before reporting any accuracy figure."
     ],
-    activeWork: [
-      "Expanding speech diarization libraries to support multiple overlapping speaker voices.",
-      "Hardening client-side metadata sanitization filters before API request dispatches.",
-      "Profiling Next.js client-side polling latency to optimize patient brief loading states."
-    ]
+    activeWork: []
   }
 ];
 
@@ -225,6 +219,7 @@ export default function CurrentlyBuilding() {
                       </div>
 
                       {/* Active Work Tasks */}
+                      {proj.activeWork.length > 0 && (
                       <div className="space-y-1.5">
                         <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider select-none">
                           [Active Tasks]
@@ -238,6 +233,7 @@ export default function CurrentlyBuilding() {
                           ))}
                         </ul>
                       </div>
+                      )}
 
                       {/* Roadmap Milestones */}
                       <div className="space-y-1.5">
@@ -255,7 +251,7 @@ export default function CurrentlyBuilding() {
                       </div>
 
                       {/* Live Commit Telemetry for flagship builds */}
-                      {proj.name === "Accessible Vision" && gitStats?.AccessVision && (
+                      {proj.name === "AccessVision" && gitStats?.AccessVision && (
                         <div className="mt-4 pt-3 border-t border-slate-900/60 flex flex-col space-y-1 text-[10px]">
                           <div className="flex items-center space-x-1.5 truncate">
                             <span className="text-slate-500 block uppercase font-bold text-[10px] select-none">
@@ -322,7 +318,7 @@ export default function CurrentlyBuilding() {
 
           {/* Footer bar */}
           <div className="bg-slate-950/95 px-4 py-2 border-t border-slate-900 flex justify-between items-center text-[10px] text-slate-650 select-none">
-            <span>Tracking 2 active building modules</span>
+            <span>Tracking {activeBuilds.length} active building modules</span>
             <span>currently-building.md</span>
           </div>
 

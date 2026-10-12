@@ -65,7 +65,7 @@ export default function ReadmePage() {
     {
       name: "./ask-krishi",
       command: "./ask-krishi",
-      desc: "Chat directly with an AI trained on my experience.",
+      desc: "Chat with an AI assistant grounded in my portfolio data.",
       action: () => {
         window.location.href = "/";
         setTimeout(() => {

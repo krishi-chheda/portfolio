@@ -58,9 +58,9 @@ export default function Leadership() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest px-2 py-0.5 rounded bg-purple-950/30 border border-purple-900/40">
-                      [DIRECTORSHIP]
+                      [EXECUTIVE]
                     </span>
-                    <span className="text-[10px] text-slate-500">2024 - PRESENT</span>
+                    <span className="text-[10px] text-slate-500">OCT 2025 - PRESENT</span>
                   </div>
 
                   <div>
@@ -68,14 +68,18 @@ export default function Leadership() {
                       Monash Data & AI Society (MDAS)
                     </h3>
                     <p className="text-[11px] text-purple-400 mt-0.5 font-semibold">
-                      Media & Marketing Director
+                      Vice President <span className="text-slate-500 font-normal">· Jul 2026 – Present</span>
                     </p>
+                    <ul className="mt-1.5 space-y-0.5 text-[10px] text-slate-500 font-mono">
+                      <li>Media & Marketing Director · Jan 2026 – May 2026</li>
+                      <li>Media & Marketing Officer · Oct 2025 – Jan 2026</li>
+                    </ul>
                   </div>
 
                   <div className="space-y-2 font-sans text-[11.5px] text-slate-400 leading-relaxed pt-1">
                     <div className="flex gap-2">
                       <Megaphone className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                      <span><strong>Marketing Leadership:</strong> Leading visual branding, content publication, and digital campaign schedules for the largest specialized data student society at Monash.</span>
+                      <span><strong>Marketing Leadership:</strong> Led visual branding, content publication, and digital campaign schedules for the largest specialized data student society at Monash.</span>
                     </div>
                     <div className="flex gap-2">
                       <Calendar className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
@@ -83,7 +87,7 @@ export default function Leadership() {
                     </div>
                     <div className="flex gap-2">
                       <Users2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                      <span><strong>Cross-Functional Collaboration:</strong> Managing pipelines of copywriters, designers, and web developers to build and distribute marketing assets.</span>
+                      <span><strong>Cross-Functional Collaboration:</strong> Managed pipelines of copywriters, designers, and web developers to build and distribute marketing assets.</span>
                     </div>
                   </div>
                 </div>

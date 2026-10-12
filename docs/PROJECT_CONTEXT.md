@@ -9,10 +9,18 @@ Principle: *featured projects tell the story, everything else supports it.*
 ## Approved flagship projects (exactly four)
 | id (data.ts) | Title | Repo | Demo |
 |---|---|---|---|
-| `accessible-vision` | AccessVision | github.com/krishi-chheda/AccessVision (public, 200) | — |
-| `clinicalbrief` | ClinicalBrief | github.com/krishi-chheda/clinicalbrief (**public as of 2026-10**, 200) | clinicalbrief.vercel.app (200) |
-| `studenthub` | StudentHub | github.com/krishi-chheda/student-hub (public, 200) | — |
-| `traffic-ai` | Traffic AI | **none public** (`ai-traffic-system` → 404) | — |
+| `accessible-vision` | AccessVision | github.com/krishi-chheda/AccessVision | access-vision-xi.vercel.app |
+| `clinicalbrief` | ClinicalBrief | github.com/krishi-chheda/clinicalbrief (public) | clinicalbrief.vercel.app |
+| `studenthub` | StudentHub | github.com/krishi-chheda/student-hub | mystudenthub.vercel.app |
+| `traffic-ai` | Traffic AI | **none public** (`ai-traffic-system` → 404) | none |
+
+Evidence for claims (Phase 2, 2026-10-12):
+- AccessVision metrics come from the repo README benchmark table (50 concurrent Locust users: p95 8,920→2,406 ms, success 11.2%→100%, detection 1,450→176 ms) and project_showcase.md (~4MB→~150KB). The old "92% / 8.4s→668ms" claim had no source and was removed.
+- ClinicalBrief was **re-scoped to match the current repo**: FHIR R4 ingestion, canonical model with provenance, rule-based note extraction, human review queue, grounded local-LLM copilot (Ollama), FHIR export, Supabase Postgres + RLS. The repo has no Whisper, GPT-4o or audio. It's a research prototype on synthetic Synthea data.
+- StudentHub stack comes from package.json and the repo tree: Next 14, Supabase, Tailwind, Eventbrite, Foursquare, ABS data. No Prisma, MySQL or Mapbox.
+- Traffic AI: only "approximately 42% reduction in waiting time" plus the stack (from the owner's brief). Every other number was removed.
+
+MDAS (owner-confirmed): Media & Marketing Officer Oct 2025 – Jan 2026; Media & Marketing Director Jan – May 2026; Vice President Jul 2026 – present.
 
 Supporting repos (Ask Krishi / README only, never flagship cards): AuraLens-AI, f1-telemetry-ai-dashboard, F1-telemetry-analyzer, fastapi_backend (BP prediction), video-splitter.
 
@@ -58,16 +66,16 @@ See the Phase 0 report in the session transcript. Headline items:
 1. ~~Contact form simulates success~~ — fixed in Phase 1: it now opens a pre-filled `mailto:` draft. Email `krishichheda10@gmail.com` confirmed by owner.
 2. `./system-map` nav, palette entry, README entry, and Ask Krishi command all target a deleted section.
 3. GitHub telemetry shows invented data. Hard-coded fake commit hashes are the initial state. The API's default commit text is a placeholder. GitHub PushEvent payloads no longer include `commits`, so no real commit message is ever extracted. ClinicalBrief is shown as "PRIVATE/LOCAL … Working tree clean".
-4. Traffic AI links to a 404 repo. ClinicalBrief is public now but has no `liveUrl`.
+4. ~~Broken or missing project links~~ fixed in Phase 2.
 5. Unverified metrics in data.ts and chat fallback (see list in report). The StudentHub stack claim (Prisma/MySQL/Mapbox) doesn't match the repo's package.json.
 6. ~~Global `select-none` on body~~ — fixed in Phase 1.
 7. Chat API: input validation, a 500-character cap, and the `response.ok` check were added in Phase 1. Still missing: rate limiting (Phase 4). Fallback keyword routing misfires (e.g. "github" → StudentHub because "hub" matches).
 8. Lint: 15 errors remain, all `any` in telemetry code (api/github, Projects and CurrentlyBuilding fallbacks). They're deferred to the Phase 3 rewrite.
-9. MDAS director start year is inconsistent (2024 in Leadership/data.ts, 2026 in the career timeline).
+9. ~~MDAS dates~~ fixed in Phase 2.
 
 ## Deferred / blocked
 - ASCII profile: no source photo in repo (`public/` has only og-image.png). Blocked on an authorised photo.
-- Topology rebuild: needs an owner decision (rebuild vs drop the nav item). Old implementation is recoverable from git (`2f3426b`).
+- Topology: **owner chose an SVG rebuild** (Phase 5). The old implementation is in git at `2f3426b` for reference. Until then `./system-map` links to nothing.
 - Boot: the `accessGranted` branch is unreachable (no BootLine fires onComplete at index == length), so the 2s safety timeout always ends the boot. Phase 6.
 
 ## Verification commands

@@ -18,10 +18,10 @@
 ## SYSTEM MODULES
     * Projects (cat projects/overview.md)
       Detailed architectural specs and achievements for core builds:
-      - AccessVision: https://github.com/krishi-chheda/AccessVision
-      - ClinicalBrief: https://github.com/krishi-chheda/ClinicalBrief (Private)
-      - StudentHub: https://github.com/krishi-chheda/student-hub
-      - Traffic AI: https://github.com/krishi-chheda/ai-traffic-system (Private)
+      - AccessVision: https://github.com/krishi-chheda/AccessVision (demo: https://access-vision-xi.vercel.app)
+      - ClinicalBrief: https://github.com/krishi-chheda/clinicalbrief (demo: https://clinicalbrief.vercel.app)
+      - StudentHub: https://github.com/krishi-chheda/student-hub (live: https://mystudenthub.vercel.app)
+      - Traffic AI: no public repository
     
     * Additional Open Source Work (cat open-source.md)
       Secondary codebases and utilities:
@@ -39,11 +39,12 @@
     * Currently Building (tail -f currently-building.log)
       Continuous feed tracking active feature pushes and sprint logs.
       
-    * Knowledge Network (open system-map)
-      Predefined topology node map visualising my tech stack competencies and domain linkages.
+    * System Map (open system-map)
+      Topology of domains, projects and skills. Currently being rebuilt; not yet on the site.
       
     * Ask Krishi (./ask-krishi)
-      An AI chat bubble powered by GPT-4o, trained directly on my engineering logs and experience queries.
+      A chat assistant (OpenAI gpt-4o-mini when OPENAI_API_KEY is set, otherwise a local keyword fallback),
+      prompted with the portfolio's own project and career data.
 
 ## TECH STACK
     - Next.js 16 (App Router)
@@ -57,7 +58,8 @@
     - ROLE: AI / ML / Software Graduate Engineer
     - LOCATION: Melbourne, Australia
     - GRADUATION: July 2027
-    - AVAILABILITY: Open to Graduate & Founding Developer opportunities.
+    - AVAILABILITY: Open to AI Engineering, Machine Learning Engineering, Software Engineering
+      and Technology Consulting opportunities.
 
 ---
 See you in the terminal.

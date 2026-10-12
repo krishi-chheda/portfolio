@@ -48,8 +48,10 @@ export default function NowPage() {
                 Academics & Builders Mode
               </h2>
               <p className="text-slate-300 text-sm leading-relaxed">
-                Currently wrapping up complex units in my **Master of Artificial Intelligence at Monash University**. 
-                My current focus is building robust agentic systems. I am dedicating coding hours to refining [ClinicalBrief](https://github.com/krishi-chheda/ClinicalBrief)&mdash;specifically optimizing the speaker diarization pipeline to support simultaneous clinical speakers and adding low-latency transcription stream buffers.
+                Currently studying for my <strong>Master of Artificial Intelligence at Monash University</strong>.
+                I am dedicating coding hours to{" "}
+                <a href="https://github.com/krishi-chheda/clinicalbrief" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 underline decoration-dotted">ClinicalBrief</a>,
+                a clinical intelligence research prototype built around provenance, human review of AI findings and a grounded local-LLM copilot.
               </p>
             </Card>
 
@@ -60,7 +62,7 @@ export default function NowPage() {
                 MDAS Leadership
               </h2>
               <p className="text-slate-300 text-sm leading-relaxed">
-                As the **Media & Marketing Director at MDAS**, we are preparing our winter hackathon cycle and corporate engagement sessions. I am redesigning our media design system to increase interactive web visibility for Monash student projects, aiming for maximum student attendance at our upcoming technical bootcamps.
+                I am <strong>Vice President of the Monash Data &amp; AI Society (MDAS)</strong>, after serving as Media &amp; Marketing Officer and then Media &amp; Marketing Director.
               </p>
             </Card>
 

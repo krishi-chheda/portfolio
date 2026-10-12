@@ -22,11 +22,25 @@ const careerCommits: Commit[] = [
     title: "building next-generation AI products"
   },
   {
-    hash: "m2d7a9b",
-    date: "2026",
+    hash: "v7p3a1c",
+    date: "JUL 2026",
     type: "feat",
     scope: "leadership",
-    title: "became Media & Marketing Director @ MDAS"
+    title: "became Vice President @ MDAS"
+  },
+  {
+    hash: "m2d7a9b",
+    date: "JAN 2026",
+    type: "feat",
+    scope: "leadership",
+    title: "promoted to Media & Marketing Director @ MDAS"
+  },
+  {
+    hash: "o4k8m2d",
+    date: "OCT 2025",
+    type: "feat",
+    scope: "leadership",
+    title: "joined MDAS as Media & Marketing Officer"
   },
   {
     hash: "m1y9s8a",
@@ -57,6 +71,14 @@ const careerCommits: Commit[] = [
     title: "started Master of AI @ Monash"
   }
 ];
+
+// Commits reveal one by one between 25% and 100% scroll progress through the section
+function revealedFor(progress: number) {
+  const total = careerCommits.length;
+  if (progress >= 1) return total;
+  if (progress < 0.25) return 0;
+  return Math.min(total - 1, Math.floor(((progress - 0.25) / 0.75) * (total - 1)) + 1);
+}
 
 const GitGraphNode = ({ index, total, isNextRevealed }: { index: number; total: number; isNextRevealed: boolean }) => {
   // Linear vertical timeline rail SVG
@@ -111,20 +133,7 @@ export default function Experience() {
       setHeaderVisible(true);
     }
     
-    let currentCount = 0;
-    if (latest >= 1.00) {
-      currentCount = 6;
-    } else if (latest >= 0.85) {
-      currentCount = 5;
-    } else if (latest >= 0.70) {
-      currentCount = 4;
-    } else if (latest >= 0.55) {
-      currentCount = 3;
-    } else if (latest >= 0.40) {
-      currentCount = 2;
-    } else if (latest >= 0.25) {
-      currentCount = 1;
-    }
+    const currentCount = revealedFor(latest);
     
     setRevealedCount((prev) => Math.max(prev, currentCount));
     
@@ -141,20 +150,9 @@ export default function Experience() {
         setHeaderVisible(true);
       }
       
-      let currentCount = 0;
+      const currentCount = revealedFor(initialProgress);
       if (initialProgress >= 1.00) {
-        currentCount = 6;
         setFooterVisible(true);
-      } else if (initialProgress >= 0.85) {
-        currentCount = 5;
-      } else if (initialProgress >= 0.70) {
-        currentCount = 4;
-      } else if (initialProgress >= 0.55) {
-        currentCount = 3;
-      } else if (initialProgress >= 0.40) {
-        currentCount = 2;
-      } else if (initialProgress >= 0.25) {
-        currentCount = 1;
       }
       
       setRevealedCount((prev) => Math.max(prev, currentCount));
@@ -182,14 +180,14 @@ export default function Experience() {
               <span className="w-2 h-2 rounded-full bg-green-500/40 border border-green-500/20" />
             </div>
             <span className="font-mono text-slate-400">
-              {revealedCount === 6 ? (
+              {revealedCount === careerCommits.length ? (
                 <span className="text-emerald-500">Career history synchronized ✓</span>
               ) : (
-                <span>Loading commits... {revealedCount}/6</span>
+                <span>Loading commits... {revealedCount}/{careerCommits.length}</span>
               )}
             </span>
             <div className="flex items-center space-x-2">
-              <span className={`w-1.5 h-1.5 rounded-full ${revealedCount === 6 ? "bg-emerald-500" : "bg-amber-500"} animate-pulse`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${revealedCount === careerCommits.length ? "bg-emerald-500" : "bg-amber-500"} animate-pulse`} />
               <span>bash</span>
             </div>
           </div>

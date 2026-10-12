@@ -86,7 +86,7 @@ export default function Hero() {
               <p className="text-slate-300 font-sans text-xs md:text-sm leading-relaxed max-w-2xl font-normal select-text">
                 Currently pursuing a <span className="text-[#10b981] font-semibold">Master of Artificial Intelligence at Monash University</span>.
                 <br /><br />
-                Builder of <span className="text-emerald-400 font-semibold">Accessible Vision</span>, <span className="text-cyan-400 font-semibold">ClinicalBrief</span>, <span className="text-slate-200 font-semibold">StudentHub</span>, and <span className="text-amber-400 font-semibold">Traffic AI</span>.
+                Builder of <span className="text-emerald-400 font-semibold">AccessVision</span>, <span className="text-cyan-400 font-semibold">ClinicalBrief</span>, <span className="text-slate-200 font-semibold">StudentHub</span>, and <span className="text-amber-400 font-semibold">Traffic AI</span>.
                 <br /><br />
                 Open to opportunities in <span className="text-cyan-400 font-semibold">AI Engineering</span>, <span className="text-cyan-400 font-semibold">Machine Learning</span>, <span className="text-cyan-400 font-semibold">Software Engineering</span>, and <span className="text-cyan-400 font-semibold">Technology Consulting</span>.
               </p>

@@ -4,13 +4,10 @@ export interface Project {
   subtitle: string;
   description: string;
   keyOutcome: string;
-  story: string;
   role: string;
   techStack: string[];
-  metrics: string[];
   githubUrl?: string;
   liveUrl?: string;
-  terminalLog: string[];
   overview: {
     problem: string;
     solution: string;
@@ -69,27 +66,21 @@ export interface CurrentProcess {
 export const currentProcesses: CurrentProcess = {
   running: [
     {
-      name: "Accessible Vision",
-      description: "AI-powered accessibility platform helping visually impaired users navigate environments safely.",
-      stack: "Python • YOLO • Computer Vision",
+      name: "AccessVision",
+      description: "AI camera assistant that describes surroundings aloud and answers spoken questions for visually impaired users.",
+      stack: "Python • FastAPI • YOLOv8 • BLIP",
       githubUrl: "https://github.com/krishi-chheda/AccessVision"
     },
     {
       name: "ClinicalBrief",
-      description: "Secure clinical intelligence platform that transcribes clinician consultations and extracts structured insights.",
-      stack: "Next.js • FastAPI • Python • LLM Applications",
-      githubUrl: "https://github.com/krishi-chheda/ClinicalBrief"
-    },
-    {
-      name: "StudentHub",
-      description: "Community resource hub consolidating public transit guides, housing lists, and local student events.",
-      stack: "Next.js • TypeScript • REST APIs • Product Design",
-      githubUrl: "https://github.com/krishi-chheda/student-hub"
+      description: "Clinical intelligence research prototype: FHIR ingestion with provenance, human-reviewed AI findings, and a grounded local-LLM copilot.",
+      stack: "Next.js • FastAPI • PostgreSQL • Local LLM",
+      githubUrl: "https://github.com/krishi-chheda/clinicalbrief"
     }
   ],
   learning: ["Agentic AI", "RAG Systems", "Product Development", "Production AI"],
   leadership: {
-    role: "Media & Marketing Director",
+    role: "Vice President",
     org: "Monash Data & AI Society"
   },
   targetRoles: ["AI Engineer", "Machine Learning Engineer", "Software Engineer", "Technology Consultant"],
@@ -103,223 +94,182 @@ export const projectsData: Project[] = [
   {
     id: "accessible-vision",
     title: "AccessVision",
-    subtitle: "AI Accessibility Platform",
+    subtitle: "AI Accessibility Assistant",
     role: "AI & Computer Vision Developer",
-    description: "AI-powered accessibility assistant using grounded multimodal reasoning (YOLOv8 + BLIP) to convert visual feeds into spoken narration.",
-    keyOutcome: "Mitigated VLM hallucinations and achieved a 2.4s p95 end-to-end latency under 50-user Locust load testing.",
-    story: "Problem: Visually impaired users face navigation hazards in unfamiliar environments, but standard vision-language models suffer from high latency and background noise hallucinations.\n\nSolution: Engineered a secure Next.js PWA and FastAPI backend. It routes user questions to YOLOv8 boundary boxes to crop target regions, feeding them into BLIP VQA context to prevent hallucinations. Speeds up mobile loads by resizing and compressing canvas uploads by 90% (from 4MB to ~150KB).\n\nTechnologies: Python, Next.js, FastAPI, YOLOv8, BLIP, OpenCV, WebRTC, Web Speech API.\n\nCurrent Status: Active Refinement (optimizing model quantization & edge pipeline latency).\n\nVerified Outcomes: Reduced network payload sizes by 90% and achieved a stable 2.4s p95 query response under 50-user Locust load tests.",
-    techStack: ["Python", "Next.js", "FastAPI", "YOLOv8", "BLIP", "OpenCV"],
-    metrics: [
-      "2.4s p95 response time",
-      "90% client-side compression",
-      "Locust concurrent load tested"
-    ],
+    description: "Mobile PWA camera assistant for visually impaired users that describes scenes aloud and answers spoken follow-up questions using grounded multimodal reasoning (YOLOv8 + BLIP).",
+    keyOutcome: "Cut grounded-query p95 latency by 73% (8.9s → 2.4s) and raised request success from 11.2% to 100% in 50-user Locust load tests.",
+    techStack: ["Python", "FastAPI", "Next.js", "YOLOv8", "BLIP", "Web Speech API"],
     githubUrl: "https://github.com/krishi-chheda/AccessVision",
-    terminalLog: [
-      "CORE > Initializing grounded VQA intent router...",
-      "AI   > YOLO segment: detected backpack on path (crop size 120x150)",
-      "VQA  > BLIP context restricted to bounding box region",
-      "OUT  > Response: 'Caution: Tripping risk backpack is on the floor.'"
-    ],
+    liveUrl: "https://access-vision-xi.vercel.app",
     overview: {
-      problem: "Visually impaired users face navigation hazards, and standard VLMs suffer from high latency and context hallucinations.",
-      solution: "Built a grounded visual query router restricting BLIP VQA context to YOLOv8 bounding boxes with canvas compression.",
+      problem: "Visually impaired users need fast, specific answers about their surroundings, but general vision-language models are slow and can describe objects that aren't there.",
+      solution: "A voice-first PWA that routes each question by intent, localises the target with YOLOv8, and runs BLIP VQA only on the cropped region before reading the answer aloud.",
       status: "Active Refinement"
     },
     architecture: {
       flow: [
-        { label: "PWA Canvas", description: "Captures environment frame and applies client-side JPEG compression" },
-        { label: "Async Router", description: "FastAPI receives payload (~150KB) and delegates processing to worker thread pool" },
-        { label: "YOLOv8 Bbox", description: "Isolates coordinates of target obstacles and crops image region" },
-        { label: "BLIP VQA", description: "Performs visual question answering restricted to cropped region coordinates" },
-        { label: "Web Speech", description: "Plays spoken guidance queue on browser client" }
+        { label: "Camera Capture", description: "Browser MediaDevices stream; frame resized to 800px on a canvas and exported as a ~150KB JPEG" },
+        { label: "API Proxy", description: "Next.js route forwards the frame and question to the FastAPI backend" },
+        { label: "Intent Router", description: "Chooses an execution path: object, colour and count questions vs general scene description" },
+        { label: "YOLOv8 + Crop", description: "Localises the target object and crops its bounding box" },
+        { label: "BLIP VQA", description: "Answers the question on the crop only; general descriptions use BLIP captioning" },
+        { label: "Web Speech", description: "Browser reads the answer aloud; voice dictation captures follow-up questions" }
       ],
       decisions: [
-        "Used client-side HTML5 canvas compression to reduce payloads from 4MB to ~150KB, ensuring fast uploads on cellular subnets.",
-        "Implemented request-scoped context middleware to inject correlation IDs, tracing queue latency and memory usage."
+        "Client-side canvas resizing cuts upload payloads by about 90% (from ~4MB to ~150KB).",
+        "Duplicate frames skip model execution entirely via an MD5-keyed inference cache.",
+        "Synchronous model passes run in background thread pools behind concurrency semaphores, keeping the FastAPI event loop free.",
+        "Request-scoped correlation IDs in the logs trace queue latency, memory use and cache hits per request."
       ]
     },
     impact: {
       achievements: [
-        "Reduced VQA hallucinations by restricting BLIP attention to isolated YOLOv8 boxes.",
-        "Achieved a 73% latency reduction under concurrent load tests using FastAPI async thread pools.",
-        "Validated system stability with 50-user Locust testing showing zero timeouts."
+        "Grounded-query p95 latency reduced from 8,920 ms to 2,406 ms (73%) under 50 concurrent Locust users.",
+        "Object-detection latency reduced from 1,450 ms to 176 ms (87%) in the same load test.",
+        "API success rate raised from 11.2% to 100% under 50 concurrent users.",
+        "Scene narration filters out objects BLIP mentions that detection does not support."
       ],
       lessons: [
-        "Managing Edge AI latency constraints under mobile networking environments.",
-        "Designing high-contrast, screen-free interaction models for accessibility."
+        "Keeping model latency predictable under concurrent load on CPU-class servers.",
+        "Designing high-contrast, voice-first interaction for low-vision users."
       ]
     },
-    whyBuilt: "I built AccessVision because standard Vision-Language Models describe entire scenes generically. For a visually impaired individual navigating a street, hearing 'a busy sidewalk' is useless—they need to know if the backpack 2 feet in front of them is a tripping risk. I wanted to build a high-speed, targeted visual guidance system that answers specific physical orientation questions safely.",
-    architectureExplain: "I selected a Next.js progressive web app (PWA) coupled with an asynchronous FastAPI backend server. The PWA allows users to snap frames and hear audio cues instantly. By cropping incoming frames to YOLOv8 obstacle bounding boxes before dispatching to BLIP VQA, we avoid feeding background noise to the attention heads, reducing inference processing latency on the server by 92% (from 8.4s to 668ms) and avoiding hallucinations.",
-    challenge: "The biggest engineering challenge was optimizing transfer latency over cellular connections. Uploading raw 4MB image files took up to 8 seconds on 4G networks. I solved this by performing HTML5 canvas resizing and aggressive JPEG quality compression on the client side. This shrunk files by 90% (~150KB) with zero drop in model classification accuracy, lowering end-to-end response time to a 2.4s p95 under Locust concurrent load tests.",
-    tradeOffs: "I traded off broad scene understanding for raw safety and processing speed. By cropping image feeds strictly around YOLOv8 bounding boxes, the system cannot answer questions about the aesthetics of the environment (e.g. 'what color is the sunset?'). However, this constraint was necessary to guarantee the VLM focus remains entirely on immediate tripping and navigation hazards.",
-    futureImprovement: "If I were building this today, I would run quantized YOLOv8 and BLIP models directly on the client using WebNN or ONNX Runtime Web. Executing inference locally on mobile Neural Processing Units (NPUs) would eliminate API roundtrip latency completely, bypass backend server hosting costs, and provide a 100% private, offline navigation assistant."
+    whyBuilt: "General vision-language models describe whole scenes generically. A visually impaired user usually needs a specific answer (what is this object, what colour is it, what does this label say) quickly and without invented details. I wanted a voice-first assistant that answers those targeted questions reliably.",
+    architectureExplain: "A Next.js PWA captures and compresses frames in the browser and sends them through an API proxy to a FastAPI backend. An intent router picks the execution path: object, colour and count questions go to YOLOv8, whose bounding box is cropped and passed to BLIP VQA, while general descriptions use BLIP captioning. Restricting VQA to the crop keeps background clutter out of the answer.",
+    challenge: "Under 50 concurrent users the unoptimised backend completed only 11.2% of requests, and p95 latency reached 8.9s. Offloading model passes to thread pools, adding concurrency semaphores and an inference cache, and resizing images in the browser brought the success rate to 100% and p95 latency to 2.4s.",
+    tradeOffs: "Grounding answers on a cropped region trades breadth for reliability: questions about the wider scene fall back to general captioning, which is less precise. Benchmarking YOLOv8 Nano against Small showed Small at about 2.3x the CPU latency (81 ms vs 35 ms) in exchange for better localisation.",
+    futureImprovement: "Port YOLO to ONNX and run it in the browser via WebAssembly to remove the server round trip, then add a navigation mode that announces path obstructions, and multi-language speech."
   },
   {
     id: "clinicalbrief",
     title: "ClinicalBrief",
-    subtitle: "Healthcare AI Platform",
+    subtitle: "Clinical Intelligence Platform (Research Prototype)",
     role: "Full-Stack AI Developer",
-    description: "Secure clinical intelligence platform that transcribes clinician consultations and extracts structured EHR insights.",
-    keyOutcome: "Sanitizes sensitive metadata and structures consultation transcripts into EHR briefs.",
-    story: "Problem: Clinicians lose hours transcribing and formatting consultation audio into structured records manually.\n\nSolution: Developed a secure clinical intelligence platform consisting of a Next.js client, SQLite database, and FastAPI server. It transcribes clinician dictations using Whisper API, handles multi-speaker diarization, sanitizes PHI metadata, and queries GPT-4o to extract patient logs, diagnostics, and prescriptions.\n\nTechnologies: Next.js, FastAPI, Python, SQLite, Whisper API, GPT-4o.\n\nCurrent Status: Active Development (Sprint 4: expanding audio diarization overlap checks).\n\nVerified Outcomes: Normalizes patient data structures and sanitizes PHI locally before third-party LLM API dispatches.",
-    techStack: ["Next.js", "FastAPI", "Python", "SQLite", "GPT-4o", "Whisper"],
-    metrics: [
-      "Whisper audio diarization",
-      "PHI metadata sanitization",
-      "Automated summary generation"
-    ],
-    githubUrl: "https://github.com/krishi-chheda/ClinicalBrief",
-    terminalLog: [
-      "DB   > Synced tables: users, patients, documents",
-      "API  > POST /api/v1/documents/ingest - audio stream upload active",
-      "AI   > Speaker diarization: Doctor (0:00-1:15), Patient (1:16-2:30)",
-      "OUT  > Generated clinical discharge summary (STEMI diagnosis)"
-    ],
+    description: "Research prototype that ingests clinical records into one canonical model with provenance, runs an AI pipeline over clinical notes, and keeps a human reviewer in control of every AI output.",
+    keyOutcome: "No AI finding is treated as fact until a person approves or edits it. Runs on synthetic (Synthea) data only; no clinical validation is claimed.",
+    techStack: ["Next.js", "FastAPI", "Python", "PostgreSQL (Supabase)", "FHIR R4", "Ollama (local LLM)"],
+    githubUrl: "https://github.com/krishi-chheda/clinicalbrief",
+    liveUrl: "https://clinicalbrief.vercel.app",
     overview: {
-      problem: "Healthcare providers lose hours transcribing and formatting consultations into structured patient records.",
-      solution: "Secure clinical intelligence system transcribing dictation and parsing transcripts into EHR-ready layouts.",
-      status: "Active Development"
+      problem: "Clinical data arrives from many systems in different shapes, and AI extraction from clinical notes can't be trusted without human review and a clear record of where every fact came from.",
+      solution: "A FastAPI + Next.js platform that imports FHIR R4 records into a canonical model with provenance, extracts findings from notes into a human review queue, and answers questions with a local-LLM copilot grounded in one patient's record.",
+      status: "Active Development (Research Prototype)"
     },
     architecture: {
       flow: [
-        { label: "Audio Record", description: "Clinician records patient consult on Next.js client" },
-        { label: "FastAPI Ingest", description: "Streams audio file to upload directory and indexes metadata in SQLite" },
-        { label: "Whisper diarize", description: "Segments speech and assigns tags for overlapping voices" },
-        { label: "LLM Sanitizer", description: "Masks patient identifying details before GPT-4o ingestion" },
-        { label: "EHR Output", description: "Renders structured clinical summaries and prescription lists" }
+        { label: "FHIR Ingestion", description: "Synthea FHIR R4 adapter with dry run, per-record validation, rejected-record log and idempotent re-import" },
+        { label: "Canonical Model", description: "Patients, encounters, notes, diagnoses, medications and more, each carrying source system, source id and provenance" },
+        { label: "Note Pipeline", description: "Rule-based extraction with negation and family-history handling, plus an extractive summary" },
+        { label: "Human Review", description: "Review queue to approve, reject or edit AI findings; every decision is audited" },
+        { label: "Grounded Copilot", description: "Local LLM answers from cited patient evidence; unsupported sentences are removed and treatment advice is withheld" },
+        { label: "FHIR Export", description: "R4 transaction bundle built from the canonical record, structurally validated on every export" }
       ],
       decisions: [
-        "Designed database models for User (admin/clinician roles), Patient, and Document using SQLAlchemy ORM and SQLite.",
-        "Delegated heavy transcription jobs to FastAPI's background tasks queue to prevent client request timeouts."
+        "Patient data is only ever sent to a model on the same machine: the copilot accepts loopback LLM URLs only.",
+        "Authorization is enforced in the API and mirrored in Postgres row-level security (six roles plus a read-only demo role).",
+        "The rule-based extractor reports confidence as null rather than an uncalibrated number.",
+        "Server access logs are disabled because URLs contain patient ids; the app records route templates only."
       ]
     },
     impact: {
       achievements: [
-        "Accelerated records creation by transcribing and formatting consultation audio automatically.",
-        "Hardened clinical privacy using client-side and server-side metadata filters.",
-        "Created an installable, mobile-responsive layout for bedside clinical logging."
+        "Postgres full-text search across 35,103 synthetic notes and the structured record, scoped to the patients a user may access.",
+        "Manual copilot check (not an evaluation): 6 grounded, correct answers and 5 correct refusals across 11 questions; the six defects found are now covered by regression tests.",
+        "FHIR R4 export with per-export structural validation reported to the client."
       ],
       lessons: [
-        "Managing context lengths and prompt reliability in clinical concept extraction.",
-        "Working with SQLAlchemy schema migrations in HIPAA-aligned development cycles."
+        "Designing AI features whose output is 'not yet trusted' until a person reviews it.",
+        "Stating limits explicitly: no accuracy figure is shown until it is measured on labelled data."
       ]
     },
-    whyBuilt: "I built ClinicalBrief because clinicians lose up to a third of their workday manually documenting patient visits. While voice-to-text tools exist, they do not structure raw conversations into Electronic Health Records (EHR), and streaming raw consultation audio directly to public LLM endpoints violates patient privacy and HIPAA standards.",
-    architectureExplain: "I chose a decoupled Next.js web application paired with a local FastAPI backend and an SQLite database. The architecture features a multi-layered sanitization pipeline: audio is transcribed locally, speaker identities (Doctor/Patient) are resolved, and a local regex-based scrubbing middleware masks Protected Health Information (PHI) before forwarding the text payload to GPT-4o for clinical summarization.",
-    challenge: "The biggest engineering challenge was managing overlapping dialogue and speaker switching. Standard transcription APIs frequently merge doctor and patient statements, which can corrupt clinical recommendations. I resolved this by integrating a speaker diarization pipeline that checks audio timestamps and segregates consultation segments before feeding the prompt, ensuring the correct clinician attribution.",
-    tradeOffs: "I traded off real-time transcription speeds for privacy guarantees. Processing diarization and executing the local PHI sanitization filters adds a ~1.2s delay to the dashboard output. However, this trade-off was necessary to establish a secure clinical data boundary and prevent leakage of unmasked medical data to public API logs.",
-    futureImprovement: "To improve this system today, I would run a quantized Whisper model and a diarization pipeline locally on a dedicated GPU cluster inside the hospital intranet. This would eliminate all external network calls entirely, creating a zero-trust clinical boundary with complete data security."
+    whyBuilt: "AI summaries of clinical records are only useful if every output can be traced to its source and checked by a person. I built ClinicalBrief to explore what a clinical AI platform looks like when provenance and human review are the foundation rather than an afterthought.",
+    architectureExplain: "A Next.js frontend reads only through a FastAPI backend, authenticated with Supabase Auth tokens. The backend stores data in Postgres on Supabase (SQLite for local development), with SQL migrations as the schema's source of truth and a test that fails if the ORM drifts from them. Ingestion adapters map source systems into the canonical model; services handle the AI pipeline, search, FHIR export and risk scoring.",
+    challenge: "Keeping the copilot honest. A manual live check surfaced six defects, including citation spam, a drug-class miss, an outdated 'most recent' lab value and runaway generation. Each was fixed and covered by a regression test, and a verification step now removes unsupported sentences and withholds any answer that gives treatment or dosing advice.",
+    tradeOffs: "Running the copilot only on a local model keeps patient data on the machine, but the hosted demo can't reach a local model, so online it gives labelled rule-based answers instead. The default extractor is rule-based: transparent and testable, but with a small vocabulary (~60 terms) that hasn't been evaluated against labelled data.",
+    futureImprovement: "Add embedding-based semantic search over records, evaluate extraction against a labelled dataset before showing any accuracy figure, and validate FHIR exports against Australian (AU Base / AU Core) profiles."
   },
   {
     id: "studenthub",
     title: "StudentHub",
-    subtitle: "Student Platform",
+    subtitle: "Melbourne Student Resource Portal",
     role: "Lead Product Developer",
-    description: "Melbourne-focused community portal consolidating transit guides, housing lists, and student events.",
-    keyOutcome: "Centralized student resource search directories with sub-second synchronization via Prisma.",
-    story: "Problem: International students arriving in Melbourne find it difficult to navigate housing listings and public transit routes across fragmented channels.\n\nSolution: Created a centralized hub using Next.js, Prisma, and Tailwind CSS. It queries consolidated MySQL/Firebase databases and leverages Mapbox API to display interactive location-based recommendations and checklists.\n\nTechnologies: Next.js, TypeScript, Prisma, Mapbox API, Tailwind CSS.\n\nCurrent Status: Completed (available for incoming Monash student arrival networks).\n\nVerified Outcomes: Centralized essential discovery directories with responsive design and sub-second housing search directory synchronization.",
-    techStack: ["Next.js", "TypeScript", "Prisma", "MySQL", "Mapbox", "Tailwind CSS"],
-    metrics: [
-      "Sub-second sync latency",
-      "Interactive Mapbox routes",
-      "Prisma DB schema mapping"
-    ],
+    description: "Resource portal for students arriving in Melbourne: accommodation and roommate listings, a Q&A forum, events, restaurant and suburb guides, an arrival checklist and scam alerts.",
+    keyOutcome: "Brought housing, roommates, events, local guides and arrival checklists into one deployed portal.",
+    techStack: ["Next.js", "JavaScript", "TypeScript", "Supabase", "Tailwind CSS", "Eventbrite API", "Foursquare API"],
     githubUrl: "https://github.com/krishi-chheda/student-hub",
-    terminalLog: [
-      "DB   > Connection established to MySQL database cluster via Prisma",
-      "API  > GET /api/housing?near=monash - synced 24 listings",
-      "MAP  > Mapbox loaded viewport coordinates for Clayton campus"
-    ],
+    liveUrl: "https://mystudenthub.vercel.app",
     overview: {
-      problem: "Incoming students struggle to discover verified housing checklists, transit routes, and student events in Melbourne.",
-      solution: "Consolidated StudentHub platform with database sync and responsive geo-location maps.",
+      problem: "International students arriving in Melbourne find housing, local information and events scattered across many channels.",
+      solution: "A Next.js portal combining community-submitted accommodation, roommate and city-tip listings with event and restaurant data from external APIs, plus checklists and scam alerts for new arrivals.",
       status: "Completed"
     },
     architecture: {
       flow: [
-        { label: "Browser Client", description: "Accesses Next.js server-rendered directory pages" },
-        { label: "Search Endpoint", description: "Accepts filters (e.g. rent range, campus distance)" },
-        { label: "Prisma Client", description: "Queries MySQL/Firebase databases using indexing for fast retrieval" },
-        { label: "Mapbox Render", description: "Visualizes geo-coordinates and transit stops in real time" }
+        { label: "Next.js Pages", description: "Accommodation, roommates, forum, events, explore, checklist, city tips and scam alerts" },
+        { label: "Supabase", description: "Authentication and storage for listings, forum questions and community submissions" },
+        { label: "External APIs", description: "Eventbrite for events, Foursquare for restaurants, ABS data for suburb information" },
+        { label: "Admin", description: "Admin page for managing community submissions" }
       ],
       decisions: [
-        "Chose Next.js Server Components to improve search engine indexability and initial render times.",
-        "Utilized Prisma schema relations to perform clean joins between housing providers and student reviews."
+        "Used Supabase for authentication and data, so community submissions need no custom backend.",
+        "Pulled events and restaurants from Eventbrite and Foursquare instead of maintaining those datasets by hand."
       ]
     },
     impact: {
       achievements: [
-        "Successfully consolidated housing, transit, and event lists in a single UI.",
-        "Achieved sub-second query speeds for search filters.",
-        "Built custom checklists for students arriving at Monash University."
+        "Deployed at mystudenthub.vercel.app.",
+        "Covers accommodation, roommates, forum, events, restaurants, suburbs, checklists, city tips and scam alerts in one place."
       ],
       lessons: [
-        "Integrating Mapbox camera bounding boxes with search result filters.",
-        "Aggregating and normalizing diverse public transit and event APIs."
+        "Normalising third-party APIs (Eventbrite, Foursquare, ABS) with different data shapes.",
+        "Designing submission flows for community-contributed content."
       ]
     },
-    whyBuilt: "I built StudentHub because international students relocating to Monash University have to search across dozens of fragmented Facebook groups, local transit guides, and student boards. This makes finding verified student housing and adjusting to Melbourne's transit layout stressful.",
-    architectureExplain: "I selected Next.js, Prisma ORM, and MySQL. Next.js App Router allowed us to render listing pages on the server (SSR), providing high SEO discoverability. Prisma was chosen to enforce database integrity, ensuring student reviews, transport stops, and housing properties are linked cleanly via strict foreign key relations.",
-    challenge: "The biggest challenge was normalizing and syncing transit APIs and rent coordinates without triggering high map-load latency. Initial runs with large datasets caused layout shifts and slowed down Mapbox markers. I resolved this by caching normalized listings on the server and using paginated spatial database queries.",
-    tradeOffs: "I chose strict SQL relations over a flexible, schema-less document database (like MongoDB). Although this requires running migration scripts when updating listings metadata, it guarantees that no map markers point to orphaned records or houses without verified landlord reviews.",
-    futureImprovement: "I would implement Next.js Incremental Static Regeneration (ISR) with revalidation rules. This would allow the site to serve static HTML from Vercel edge networks instantly, while background workers re-verify transit changes and housing check-ins every 10 minutes."
+    whyBuilt: "Students relocating to Melbourne search across scattered social-media groups and websites for housing, local tips and events. I wanted one place that covers the essentials of arriving and settling in.",
+    architectureExplain: "A Next.js App Router frontend, with Supabase handling authentication and storage for community content. API routes and helper modules wrap the external data sources (Eventbrite, Foursquare and ABS data) so pages work with one consistent interface.",
+    challenge: "Combining data from several external APIs, each with its own format and limits, into consistent listings and search results.",
+    tradeOffs: "Building on a hosted backend (Supabase) and public APIs made the portal fast to build, at the cost of depending on third-party availability and rate limits.",
+    futureImprovement: "Serve listing pages statically with incremental static regeneration and refresh them in the background, so pages load instantly while data stays current."
   },
   {
     id: "traffic-ai",
     title: "Traffic AI",
-    subtitle: "Intelligent Traffic Management System",
+    subtitle: "Density-Based Traffic Signal Scheduling",
     role: "AI Research Lead",
-    description: "Intelligent traffic scheduling optimizer using real-time lane vehicle queue tracking to adapt traffic signals.",
-    keyOutcome: "Reduced average intersection queue waiting times by 42% in simulated test environments.",
-    story: "Problem: Standard static traffic timers trigger severe congestion by failing to adapt to dynamic lane queue density.\n\nSolution: Built a density-based queue optimization pipeline. It runs YOLO models on live video streams to track vehicle coordinates, computes lane density, and adapts traffic light timings on Jetson Nano edge nodes.\n\nTechnologies: Python, YOLO, OpenCV, Jetson Nano.\n\nCurrent Status: Simulation validated; hardware logic tested on NVIDIA Jetson edge nodes.\n\nVerified Outcomes: Validated a 42% congestion drop in simulation loops and deployed scheduling logic to NVIDIA Jetson hardware.",
-    techStack: ["Python", "YOLO", "OpenCV", "Jetson Nano"],
-    metrics: [
-      "42% queue time reduction",
-      "30 FPS edge processing",
-      "Dynamic lane adaptation"
-    ],
-    githubUrl: "https://github.com/krishi-chheda/ai-traffic-system",
-    terminalLog: [
-      "EDGE > Ingesting lane camera feed (1080p @ 30 FPS)...",
-      "AI   > YOLO detection: 14 vehicles on Lane A, 2 on Lane B",
-      "CV   > Bounding box tracking across region of interest",
-      "SYS  > Timer override: Lane A Green extended by 18 seconds (reduced wait 42%)"
-    ],
+    description: "Traffic light scheduling system that detects vehicles with YOLO, estimates lane density, and uses it to inform signal timing on an NVIDIA Jetson Nano.",
+    keyOutcome: "Approximately 42% reduction in waiting time.",
+    techStack: ["Python", "YOLO", "OpenCV", "NVIDIA Jetson Nano"],
     overview: {
-      problem: "Fixed traffic signal cycles cause massive vehicle idling and congestion due to ignoring dynamic lane queues.",
-      solution: "Computer vision pipeline detecting vehicles on edge cameras to adjust green-light timing dynamically.",
+      problem: "Fixed-timer traffic signals ignore how many vehicles are actually waiting in each lane, which causes unnecessary idling and congestion.",
+      solution: "A computer-vision pipeline that counts vehicles per lane from camera video and allocates green time according to lane density.",
       status: "Completed"
     },
     architecture: {
       flow: [
-        { label: "IP Camera", description: "Streams live intersection lane video feeds" },
-        { label: "YOLO Detector", description: "Runs on Jetson Nano to calculate bounding boxes of cars/trucks" },
-        { label: "OpenCV Masking", description: "Filters out surroundings to isolate critical lane bounding boxes" },
-        { label: "Signal Control", description: "Executes adaptive timing scheduler overrides based on queue lengths" }
+        { label: "Camera Feed", description: "Video of the intersection approaches" },
+        { label: "YOLO Detection", description: "Detects vehicles in each frame on the Jetson Nano" },
+        { label: "Lane Density", description: "OpenCV lane regions turn detections into per-lane vehicle density" },
+        { label: "Signal Scheduler", description: "Allocates green time according to relative lane density" }
       ],
       decisions: [
-        "Masked camera regions with OpenCV to focus YOLO on critical queue lanes, saving 35% processing overhead.",
-        "Deployed code on Jetson Nano edge node to guarantee local processing and fail-safe traffic overrides."
+        "Ran detection on a Jetson Nano at the intersection so timing decisions don't depend on a network connection.",
+        "Used lane regions to turn raw detections into per-lane density for scheduling."
       ]
     },
     impact: {
       achievements: [
-        "Cut queue delay times by 42% in simulated intersection grids.",
-        "Achieved real-time frame rates on Jetson Nano hardware.",
-        "Integrated safety fail-safes that return to standard static cycles in case of camera blockages."
+        "Approximately 42% reduction in waiting time."
       ],
       lessons: [
-        "Quantizing neural models to run on memory-constrained edge processors.",
-        "Calibrating visual depth measurements from raw 2D camera grids."
+        "Running object detection within the compute and memory limits of edge hardware.",
+        "Turning per-frame detections into stable lane-density estimates for scheduling."
       ]
     },
-    whyBuilt: "I built Traffic AI because conventional traffic lights operate on fixed timers, leading to massive vehicle idling, fuel waste, and artificial congestion. I wanted to design an intelligent, reactive scheduling system that optimizes green-light times based on actual vehicular density.",
-    architectureExplain: "I designed a local edge processing pipeline using YOLOv8 for vehicle counting and OpenCV for spatial masking, running directly on an NVIDIA Jetson Nano edge node. Local processing ensures real-time decisions (sub-100ms override loops) and prevents intersection failures if the network drops connection to the cloud.",
-    challenge: "The biggest challenge was running a heavy object detection model like YOLO at a stable 30 FPS on the Jetson Nano's memory-constrained GPU. Frames were initially dropping, leading to inaccurate queue counts. I solved this by quantizing model weights and applying OpenCV masking to search only active lane regions, cutting search grid overhead by 35%.",
-    tradeOffs: "I traded model versatility for speed. The edge classifier was pruned to detect only cars, trucks, and buses. While it ignores pedestrians and cyclists on the road surface, this prioritization allowed us to save precious GPU cycles and maintain real-time performance on edge hardware.",
-    futureImprovement: "I would implement cooperative Reinforcement Learning (RL) agents (e.g. Deep Q-Networks) trained in a SUMO traffic simulator. This would allow multiple adjacent intersections to share queue data and coordinate timing policies, optimizing city-wide vehicle flows rather than running each light in isolation."
+    whyBuilt: "Conventional traffic lights run on fixed timers, so green time is often given to empty lanes while queues build elsewhere. I wanted a reactive scheduler that allocates green time based on how many vehicles are actually waiting.",
+    architectureExplain: "Camera frames are processed locally on an NVIDIA Jetson Nano. YOLO detects vehicles, OpenCV maps the detections to lane regions, and the scheduler converts each lane's density into green-light duration.",
+    challenge: "Running detection fast enough on the Jetson Nano's limited GPU and memory to keep lane counts current.",
+    tradeOffs: "Allocating green time from local density is simple and runs at the edge, but each intersection optimises in isolation without coordinating with its neighbours.",
+    futureImprovement: "Train cooperative reinforcement-learning agents in a traffic simulator such as SUMO, so adjacent intersections share queue data and coordinate timing instead of running in isolation."
   }
 ];
 
@@ -384,12 +334,12 @@ export const additionalProjectsData: AdditionalProject[] = [
 
 export const experienceData: Experience[] = [
   {
-    id: "mdas-director",
+    id: "mdas-vp",
     year: "2026",
-    role: "Media & Marketing Director",
+    role: "Vice President (previously Media & Marketing Director, Jan–May 2026; Media & Marketing Officer, Oct 2025–Jan 2026)",
     organization: "Monash Data & AI Society (MDAS)",
     location: "Melbourne, VIC, Australia",
-    period: "2024 - Present",
+    period: "Oct 2025 - Present (Vice President since Jul 2026)",
     description: [
       "Directed media branding and digital campaign strategies for the largest data student society at Monash.",
       "Grew workshop reach to 300+ students across 5+ events by designing and executing targeted promotions and cross-team outreach campaigns.",
@@ -450,7 +400,7 @@ export const aiKnowledgeBase = {
   aboutMe: {
     fullName: "Krishi Chheda",
     tagline: "AI Engineer, Builder, and Community Leader",
-    roleSummary: "Krishi is an international student based in Melbourne, studying for a Master of Artificial Intelligence at Monash University. He holds the role of Media & Marketing Director at Monash Data & AI Society (MDAS). He is passionate about bridging the gap between machine learning models and highly-usable, production-grade applications.",
+    roleSummary: "Krishi is an international student based in Melbourne, studying for a Master of Artificial Intelligence at Monash University. He is Vice President of the Monash Data & AI Society (MDAS), having previously served as Media & Marketing Officer (Oct 2025–Jan 2026) and Media & Marketing Director (Jan–May 2026). He is passionate about bridging the gap between machine learning models and highly-usable, production-grade applications.",
     interests: ["Formula 1", "Fitness & Lifting", "High-Agency Startups", "Applied ML Research", "Agentic AI"]
   },
   careerGoals: "Krishi aims to work in high-growth environments where he can deploy AI models to production. He is looking for engineering opportunities in AI Engineering, Machine Learning, Software Engineering, or Technology Consulting in Australia or globally.",
@@ -460,7 +410,7 @@ export const aiKnowledgeBase = {
   faq: [
     {
       q: "Is Krishi open to job offers?",
-      a: "Yes! Krishi is looking for full-time or contract roles as an AI Engineer or Full-Stack developer in Melbourne, Sydney, or remote. He is graduating from Monash University's Master of AI course soon."
+      a: "Yes. Krishi is open to opportunities in AI Engineering, Machine Learning Engineering, Software Engineering and Technology Consulting. He graduates from Monash University's Master of AI in July 2027."
     },
     {
       q: "Where is Krishi located?",
@@ -468,72 +418,21 @@ export const aiKnowledgeBase = {
     },
     {
       q: "What is his role at MDAS?",
-      a: "He is the Media & Marketing Director, managing branding, student engagement, and promoting major technical and career events."
+      a: "He has been Vice President since July 2026. Before that he was Media & Marketing Director (Jan–May 2026) and Media & Marketing Officer (Oct 2025–Jan 2026)."
     },
     {
       q: "What is ClinicalBrief?",
-      a: "ClinicalBrief is a healthcare AI platform. It uses Next.js and FastAPI, processing medical dictation and documents to generate structured summarization and support clinical workflows."
+      a: "ClinicalBrief is a clinical intelligence research prototype (Next.js, FastAPI, Postgres). It ingests FHIR records into a canonical model with provenance, extracts findings from notes for human review, and offers a local-LLM copilot grounded in one patient's record. It runs on synthetic data only."
     }
   ]
 };
 
-export interface SkillDetail {
-  experience: string;
-  projects: string[];
-}
-
-export interface SkillCategory {
-  title: string;
-  id: string;
-  skills: string[];
-}
-
-export const skillsCategories: SkillCategory[] = [
-  {
-    title: "ai_and_ml",
-    id: "ai_and_ml",
-    skills: ["computer_vision", "yolo", "opencv", "python", "ai_inference", "real_time_systems", "llm_applications"]
-  },
-  {
-    title: "software_engineering",
-    id: "software_engineering",
-    skills: ["nextjs", "typescript", "database_systems", "api_integrations", "vercel", "jetson_nano", "git"]
-  },
-  {
-    title: "leadership",
-    id: "leadership",
-    skills: ["mdas", "media_marketing", "event_management", "public_speaking", "community_building"]
-  }
-];
-
-export const skillsDetails: Record<string, SkillDetail> = {
-  computer_vision: { experience: "2 years", projects: ["Traffic AI", "Accessible Vision"] },
-  yolo: { experience: "1.5 years", projects: ["Traffic AI", "Accessible Vision"] },
-  opencv: { experience: "2 years", projects: ["Traffic AI"] },
-  python: { experience: "3 years", projects: ["ClinicalBrief", "Traffic AI", "Accessible Vision"] },
-  ai_inference: { experience: "1.5 years", projects: ["Accessible Vision"] },
-  real_time_systems: { experience: "1.5 years", projects: ["Accessible Vision", "Traffic AI"] },
-  llm_applications: { experience: "1.5 years", projects: ["ClinicalBrief"] },
-  nextjs: { experience: "2 years", projects: ["ClinicalBrief", "StudentHub"] },
-  typescript: { experience: "2 years", projects: ["StudentHub"] },
-  database_systems: { experience: "2 years", projects: ["StudentHub"] },
-  api_integrations: { experience: "2 years", projects: ["ClinicalBrief", "StudentHub"] },
-  vercel: { experience: "2 years", projects: ["StudentHub"] },
-  jetson_nano: { experience: "1 year", projects: ["Traffic AI"] },
-  git: { experience: "3 years", projects: ["ClinicalBrief", "StudentHub", "Traffic AI", "Accessible Vision"] },
-  mdas: { experience: "1 year", projects: ["MDAS Branding Campaign", "MDAS Event Strategy"] },
-  media_marketing: { experience: "1.5 years", projects: ["MDAS Marketing Campaigns", "MDAS Branding Design"] },
-  event_management: { experience: "1.5 years", projects: ["MDAS Industry Networking Night", "MDAS Winter Hackathon"] },
-  public_speaking: { experience: "2 years", projects: ["MDAS Tech Workshops", "Monash Seminar Panels"] },
-  community_building: { experience: "2 years", projects: ["MDAS Slack Engagement", "Melbourne Student Communities"] }
-};
-
 export const bootLinesData = [
   "master_of_ai.monash",
-  "mdas.marketing_director",
+  "mdas.vice_president",
   "studenthub.platform",
   "traffic_ai.yolo",
-  "accessible_vision.yolo",
+  "accessvision.yolo",
   "clinicalbrief.platform",
   "leadership.framework"
 ];

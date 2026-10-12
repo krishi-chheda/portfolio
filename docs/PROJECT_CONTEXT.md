@@ -82,6 +82,7 @@ src/hooks/useTerminalReveal.ts, useGitHubTelemetry.ts, useChat.ts, useReducedMot
 ## Motion system (GSAP only; framer-motion removed)
 - **Constants** (`src/lib/motion.ts`): ease `power3.out`, durations 0.15 / 0.3 / 0.5s, rise 10–16px. Also `scrambleText(el, duration)`, the terminal decode effect, which returns `{ tween, restore }`. Always call `restore()` on cleanup.
 - **`usePresence(open, MOTION)`** (`src/hooks`) is the GSAP replacement for AnimatePresence: it keeps an element mounted until its exit tween ends. MOTION must be a module-level constant. Used by the boot screen, command palette and chat.
+- **Boot screen** (`src/components/boot/BootScreen.tsx`): a canvas "particle vortex". Particles sampled from the KRISHI.OS wordmark spiral in from the edges (~1.2s) while the readout mounts the real `bootLinesData` modules, the tagline decodes, then BootWrapper's exit collapses the screen to a CRT line. Capped at 2s by a safety timeout; click/Escape skip; static text under reduced motion. The old terminal boot (TerminalOutput, BootLine, useBootSequence) was deleted.
 - **Boot gating:** `useBooted()` makes entrances wait for the boot screen.
 - **Hero:** a post-boot timeline. The prompt types; the name, title and impact figures decode from glyphs while rising; details and impact cells cascade.
 - **`useTerminalReveal()`:** once per section on scroll.
@@ -99,7 +100,7 @@ src/hooks/useTerminalReveal.ts, useGitHubTelemetry.ts, useChat.ts, useReducedMot
   - The only infinite loop is the ticker.
 - **Bundle:** the root 404 imports GSAP dynamically. A static import there was shipping a second GSAP and Navbar chunk alongside every page. The homepage is ~259 KB gzipped JS, down from 294 KB.
 - **Tailwind v4 gotcha:** `scale-*`/`translate-*` use the separate `scale`/`translate` CSS properties, so write `transition-[...,scale]` or `transition-[...,translate]`, not `transform`.
-- **Browser-pane caveat:** a hidden pane throttles rAF, so animations stall until a frame is forced. Never `await requestAnimationFrame` in pane scripts.
+- **Browser-pane caveat:** a hidden pane throttles rAF, so animations stall until a frame is forced (GSAP lag smoothing then advances only ~33ms per frame; the boot needs a resized viewport, since a hidden pane reports innerWidth 0). Never `await requestAnimationFrame` in pane scripts.
 - **Windows caveat:** `pkill` in Git Bash doesn't stop `next start`. Run servers as tracked background tasks or stop them by PID, or stale servers will serve old builds.
 
 ## Env vars (names only)
@@ -120,7 +121,6 @@ src/hooks/useTerminalReveal.ts, useGitHubTelemetry.ts, useChat.ts, useReducedMot
 - **ASCII portrait:** blocked until there's an authorised source photo.
 - **Bundle size:** done; framer-motion was removed and the homepage went from 294 KB to 259 KB gzipped JS.
 - **LCP:** content stays at opacity 0 until the boot screen clears (about 2s, by design from the brief), which delays LCP. That's a product trade-off.
-- **Boot:** the `accessGranted` branch is unreachable, so the 2s safety timeout always ends the boot.
 - **`/now`:** still says "Last updated: June 2026"; its personal content (hobbies, reading) is unverified.
 - **Ask Krishi** is single-turn. The live gpt-4o-mini path is untested locally (no key).
 - **Unverified personal claims:** "300+ students across 5+ events", "40% digital interaction", "largest data society", the Mysahayak 30%/20% figures, and Sacred Heart's 50+ interactions per shift.

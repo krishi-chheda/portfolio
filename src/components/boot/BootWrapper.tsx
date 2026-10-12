@@ -10,8 +10,12 @@ import { usePresence, type PresenceMotion } from "@/hooks/usePresence";
 const BootContext = createContext(true);
 export const useBooted = () => useContext(BootContext);
 
-// Boot screen is already fully visible on load; it only fades out (0.3s) once boot completes.
-const BOOT_PRESENCE: PresenceMotion = { from: { opacity: 1 }, exit: { opacity: 0 }, exitDuration: 0.3 };
+// Boot screen is already fully visible on load. Exit is a CRT power-off: it collapses to a horizontal line, then fades.
+const BOOT_PRESENCE: PresenceMotion = {
+  from: { opacity: 1 },
+  exit: { clipPath: "inset(49.9% 0 49.9% 0)", opacity: 0.4 },
+  exitDuration: 0.35,
+};
 
 interface BootWrapperProps {
   children: ReactNode;

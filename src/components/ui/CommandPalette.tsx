@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useLayoutEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import gsap from "gsap";
+import { DUR, EASE, MOTION_OK } from "@/lib/motion";
 import { Search, Terminal, ArrowRight, X } from "lucide-react";
 
 interface CommandItem {
@@ -21,6 +23,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const commands: CommandItem[] = [
     {
@@ -183,23 +186,42 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, onClose]);
 
+  // Micro-cascade of the command list on open (~25ms apart, capped well under 500ms in total).
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!isOpen || !list) return;
+    const mm = gsap.matchMedia();
+    mm.add(
+      MOTION_OK,
+      () => {
+        gsap.from(list.children, {
+          x: -6,
+          opacity: 0,
+          duration: DUR.standard,
+          ease: EASE,
+          delay: 0.05,
+          stagger: Math.min(0.025, 0.3 / Math.max(1, list.children.length)),
+        });
+      },
+      list
+    );
+    return () => mm.revert();
+  }, [isOpen]);
+
+  const kbd = "inline-block border border-rule px-1.5 py-px text-[11px] leading-none text-ink-soft";
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          style={{
-            backgroundColor: "rgba(0, 0, 0, 0.75)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)"
-          }}
-          className="fixed inset-0 z-[100] flex items-start justify-center pt-24 px-4 font-mono"
+          exit={{ opacity: 0, transition: { duration: 0.12, ease: [0.3, 0, 1, 1] } }}
+          transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+          className="fixed inset-0 z-[100] flex items-start justify-center pt-24 px-4 font-mono bg-bg/80 backdrop-blur-sm"
         >
           {/* Background Decorative Status */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none select-none font-mono text-[10px] text-cyan-500/20 uppercase tracking-[0.25em]">
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none select-none text-[11px] text-ink-faint uppercase tracking-[0.18em]">
             [system] interactive command mode active
           </div>
 
@@ -211,11 +233,11 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             role="dialog"
             aria-modal="true"
             aria-label="Command palette"
-            className="w-full max-w-xl bg-slate-950/90 border border-cyan-500/20 rounded-lg shadow-[0_0_30px_rgba(6,182,212,0.15)] overflow-hidden"
+            className="w-full max-w-xl bg-bg border border-rule overflow-hidden"
           >
             {/* Input Bar */}
-            <div className="flex items-center px-4 py-3 bg-slate-950 border-b border-slate-900">
-              <Search className="w-4 h-4 text-slate-500 mr-3 shrink-0" />
+            <div className="flex items-center px-4 py-3 border-b border-rule">
+              <Search className="w-4 h-4 text-ink-faint mr-3 shrink-0" />
               <input
                 ref={inputRef}
                 type="text"
@@ -230,18 +252,16 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                   setActiveIndex(0);
                 }}
                 placeholder="Type a command (e.g. about, traffic-ai)..."
-                className="flex-1 bg-transparent text-sm text-white placeholder-slate-600 focus:outline-none"
+                className="flex-1 bg-transparent text-sm text-ink placeholder:text-ink-faint focus:outline-none"
               />
-              <span className="text-[10px] text-slate-650 px-2 py-0.5 rounded border border-slate-900 bg-slate-950 mr-2 select-none">
-                ESC
-              </span>
-              <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors cursor-pointer p-2 -m-2" aria-label="Close command palette">
+              <span className={`${kbd} mr-3 select-none`}>ESC</span>
+              <button onClick={onClose} className="text-ink-faint hover:text-accent transition-colors duration-150 cursor-pointer p-2 -m-2" aria-label="Close command palette">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* List */}
-            <div id="command-palette-list" role="listbox" className="max-h-[300px] overflow-y-auto p-2 bg-slate-950/20">
+            <div ref={listRef} id="command-palette-list" role="listbox" className="max-h-[300px] overflow-y-auto py-1">
               {filteredCommands.length > 0 ? (
                 filteredCommands.map((cmd, idx) => {
                   const isActive = idx === activeIndex;
@@ -256,37 +276,35 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                         cmd.action();
                         onClose();
                       }}
-                      className={`w-full text-left flex items-start justify-between p-3.5 rounded transition-all cursor-pointer ${isActive
-                          ? "bg-cyan-950/80 border border-cyan-800/40 text-cyan-200"
-                          : "border border-transparent hover:bg-slate-900/40 text-slate-400"
-                        }`}
+                      className={`w-full text-left flex items-start justify-between px-4 py-3 border-l-2 transition-colors duration-150 cursor-pointer ${
+                        isActive ? "border-accent bg-bg-2" : "border-transparent hover:bg-bg-2"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Terminal className={`w-3.5 h-3.5 ${isActive ? "text-cyan-400" : "text-slate-600"}`} />
+                        <Terminal className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-accent" : "text-ink-faint"}`} />
                         <div>
-                          <div className={`text-xs font-bold ${isActive ? "text-cyan-300" : "text-slate-200"}`}>
-                            {cmd.name}
-                          </div>
-                          <div className="text-[10px] text-slate-500 mt-1">
-                            {cmd.description}
-                          </div>
+                          <div className={`text-xs ${isActive ? "text-accent" : "text-ink"}`}>{cmd.name}</div>
+                          <div className="text-[11px] text-ink-faint mt-1">{cmd.description}</div>
                         </div>
                       </div>
-                      {isActive && <ArrowRight className="w-3.5 h-3.5 text-cyan-400 self-center shrink-0" />}
+                      {isActive && <ArrowRight className="w-3.5 h-3.5 text-accent self-center shrink-0" />}
                     </button>
                   );
                 })
               ) : (
-                <div className="text-center py-6 text-slate-600 text-xs font-mono uppercase tracking-wider">
+                <div className="text-center py-6 text-ink-faint text-[11px] uppercase tracking-[0.18em]">
                   No matching processes found
                 </div>
               )}
             </div>
 
             {/* Footer Status Bar */}
-            <div className="bg-slate-950/95 px-4 py-2 border-t border-slate-900 flex justify-between items-center text-[10px] text-slate-600 select-none">
-              <span>Use ↑↓ to navigate, Enter to run</span>
-              <span>tty_commands</span>
+            <div className="px-4 py-2 border-t border-rule flex justify-between items-center text-[11px] text-ink-faint select-none">
+              <span className="flex items-center gap-1.5">
+                Use <kbd className={kbd}>↑</kbd>
+                <kbd className={kbd}>↓</kbd> to navigate, <kbd className={kbd}>Enter</kbd> to run
+              </span>
+              <span className="uppercase tracking-[0.18em]">tty_commands</span>
             </div>
           </motion.div>
         </motion.div>

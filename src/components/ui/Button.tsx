@@ -13,13 +13,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center font-mono rounded transition-[color,background-color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer disabled:opacity-50 disabled:pointer-events-none select-none",
+          "inline-flex items-center justify-center font-mono transition-[color,background-color,border-color,translate,scale] duration-150 ease-out motion-reduce:transition-none active:scale-[0.97] cursor-pointer disabled:opacity-50 disabled:pointer-events-none select-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-accent",
           // Variant options
-          variant === "primary" && "bg-cyan-500 hover:bg-cyan-400 text-black font-semibold shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.45)]",
-          variant === "secondary" && "bg-slate-950/40 border border-slate-800 text-slate-300 hover:bg-slate-900/60 hover:border-slate-700",
-          variant === "outline" && "border border-slate-700 bg-slate-900/50 text-slate-300 hover:border-cyan-500 hover:text-cyan-400 hover:bg-cyan-950/20",
-          variant === "terminal" && "bg-cyan-950 border border-cyan-800 hover:bg-cyan-500 hover:text-black text-cyan-400",
-          variant === "ghost" && "text-slate-500 hover:text-cyan-450",
+          variant === "primary" && "bg-accent text-bg hover:bg-accent-2 font-semibold",
+          variant === "secondary" && "border border-rule bg-bg-2 text-ink-soft hover:border-accent hover:text-accent",
+          variant === "outline" && "border border-rule text-ink-soft hover:border-accent hover:text-accent",
+          variant === "terminal" && "border border-rule text-accent hover:border-accent hover:bg-accent hover:text-bg",
+          variant === "ghost" && "text-ink-faint hover:text-accent",
           // Sizes
           size === "sm" && "text-[11px] px-3.5 py-1.5",
           size === "md" && "text-xs px-4 py-2.5",

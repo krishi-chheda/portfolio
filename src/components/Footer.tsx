@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, ArrowUpCircle } from "lucide-react";
+import { Mail, ArrowUp } from "lucide-react";
 import { Github, Linkedin } from "@/components/ui/Icons";
+
+const iconLink = "p-1 text-ink-faint hover:text-accent transition-colors duration-150";
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -10,73 +12,39 @@ export default function Footer() {
   };
 
   return (
-    <footer className="border-t border-slate-900 bg-[#06080e] py-12 px-6">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
+    <footer className="border-t border-rule">
+      <div className="mx-auto max-w-6xl px-6 py-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 text-[11px] text-ink-faint">
+        <p className="min-w-0">
+          <span className="font-bold uppercase tracking-[0.18em] text-ink">Krishi Chheda</span>
+          <span className="mx-2">·</span>
+          Melbourne, VIC, Australia • Master of Artificial Intelligence @ Monash
+        </p>
 
-        {/* Info */}
-        <div className="flex flex-col items-center md:items-start space-y-2">
-          <div className="flex items-center space-x-2">
-            <span className="w-6 h-6 rounded-md bg-cyan-950/80 border border-cyan-800/80 flex items-center justify-center font-mono font-bold text-xs text-cyan-400">
-              K
-            </span>
-            <span className="font-heading font-semibold text-xs tracking-wider text-slate-300">
-              KRISHI CHHEDA
-            </span>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex items-center gap-2">
+            <a href="https://github.com/krishi-chheda" target="_blank" rel="noopener noreferrer" className={iconLink} aria-label="GitHub">
+              <Github className="w-4 h-4" />
+            </a>
+            <a href="https://linkedin.com/in/krishi-chheda" target="_blank" rel="noopener noreferrer" className={iconLink} aria-label="LinkedIn">
+              <Linkedin className="w-4 h-4" />
+            </a>
+            <a href="mailto:krishichheda10@gmail.com" className={iconLink} aria-label="Email">
+              <Mail className="w-4 h-4" />
+            </a>
           </div>
-          <p className="text-[12px] font-mono text-slate-500 text-center md:text-left">
-            Melbourne, VIC, Australia • Master of Artificial Intelligence @ Monash
-          </p>
-        </div>
-
-        {/* Social Links */}
-        <div className="flex items-center space-x-6">
-          <a
-            href="https://github.com/krishi-chheda"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-slate-500 hover:text-cyan-400 transition-colors p-1"
-            aria-label="GitHub"
-          >
-            <Github className="w-5 h-5" />
-          </a>
-          <a
-            href="https://linkedin.com/in/krishi-chheda"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-slate-500 hover:text-cyan-400 transition-colors p-1"
-            aria-label="LinkedIn"
-          >
-            <Linkedin className="w-5 h-5" />
-          </a>
-          <a
-            href="mailto:krishichheda10@gmail.com"
-            className="text-slate-500 hover:text-cyan-400 transition-colors p-1"
-            aria-label="Email"
-          >
-            <Mail className="w-5 h-5" />
-          </a>
-        </div>
-
-        {/* Copyright and Back to Top */}
-        <div className="flex items-center space-x-4">
-          <Link
-            href="/readme"
-            className="text-[11px] font-mono text-slate-600 hover:text-cyan-400 transition-colors mr-2 cursor-pointer select-all"
-          >
+          <Link href="/readme" className="hover:text-accent transition-colors duration-150">
             [README.md]
           </Link>
-          <p className="text-[12px] font-mono text-slate-500">
-            © {new Date().getFullYear()} • Built with Next.js & Framer Motion
-          </p>
+          <span>© {new Date().getFullYear()} • Built with Next.js & Framer Motion</span>
           <button
+            type="button"
             onClick={scrollToTop}
-            className="text-slate-500 hover:text-cyan-400 transition-colors cursor-pointer"
+            className="p-1 hover:text-accent transition-colors duration-150 cursor-pointer"
             aria-label="Scroll to top"
           >
-            <ArrowUpCircle className="w-5 h-5" />
+            <ArrowUp className="w-4 h-4" />
           </button>
         </div>
-
       </div>
     </footer>
   );

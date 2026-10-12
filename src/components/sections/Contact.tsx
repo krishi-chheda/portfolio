@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Send, CheckCircle2 } from "lucide-react";
-import { Linkedin } from "@/components/ui/Icons";
-import Button from "@/components/ui/Button";
+import { useLayoutEffect, useState } from "react";
+import gsap from "gsap";
+import { Send, CheckCircle2 } from "lucide-react";
+import SectionHeader from "@/components/ui/SectionHeader";
 import { useTerminalReveal } from "@/hooks/useTerminalReveal";
+import { DUR, EASE, MOTION_OK } from "@/lib/motion";
 
 const CONTACT_EMAIL = "krishichheda10@gmail.com";
 
@@ -17,6 +17,20 @@ export default function Contact() {
     message: "",
   });
   const [status, setStatus] = useState<"idle" | "opened">("idle");
+
+  // Acknowledge the "draft opened" state with a small rise + fade on the button label.
+  useLayoutEffect(() => {
+    if (status !== "opened") return;
+    const mm = gsap.matchMedia();
+    mm.add(
+      MOTION_OK,
+      () => {
+        gsap.from("[data-status-label]", { y: 6, opacity: 0, duration: DUR.standard, ease: EASE });
+      },
+      sectionRef
+    );
+    return () => mm.revert();
+  }, [status, sectionRef]);
 
   // No backend: hand the message to the visitor's own mail client.
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,169 +46,135 @@ export default function Contact() {
   };
 
   return (
-    <section ref={sectionRef} id="contact" className="py-24 relative overflow-hidden border-t border-slate-900/60">
-      <div className="max-w-4xl mx-auto px-6">
+    <section ref={sectionRef} id="contact" className="py-24 border-t border-rule">
+      <div className="mx-auto max-w-6xl px-6">
+        <SectionHeader num="06" title="Contact" command="ssh guest@krishi.os" meta="open to opportunities" />
 
-        {/* Section Header CLI Prompt */}
-        <div className="font-mono text-xs md:text-sm text-slate-500 mb-8 flex items-center space-x-2 select-none justify-center">
-          <span className="text-[#10b981]">krishi@stack:~$</span>
-          <span data-reveal="command" className="text-slate-100">ssh guest@krishi</span>
-        </div>
-
-        {/* OS Terminal Shell Window */}
-        <div className="w-full border border-slate-900 bg-slate-950/20 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl flex flex-col font-mono terminal-highlight" data-reveal="panel">
-
-          {/* Title Bar */}
-          <div className="bg-slate-950/80 px-4 py-2.5 border-b border-slate-900 flex justify-between items-center select-none text-[10px] text-slate-500">
-            <div className="flex items-center space-x-1.5">
-              <span className="w-2 h-2 rounded-full bg-red-500/40 border border-red-500/20" />
-              <span className="w-2 h-2 rounded-full bg-yellow-500/40 border border-yellow-500/20" />
-              <span className="w-2 h-2 rounded-full bg-green-500/40 border border-green-500/20" />
-            </div>
+        <div className="border border-rule bg-bg-2 terminal-highlight" data-reveal="panel">
+          <div className="border-b border-rule px-4 py-2 flex flex-wrap justify-between gap-2 text-[11px] text-ink-faint">
             <span>ssh guest@krishi.os</span>
-            <div className="flex items-center space-x-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
-              <span>tty_ssh_link</span>
-            </div>
+            <span className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+              tty_ssh_link
+            </span>
           </div>
 
-          {/* Window Body */}
-          <div className="p-6 md:p-10 grid grid-cols-1 md:grid-cols-12 gap-8 items-start select-text">
-
-            {/* Quick info column */}
-            <div className="md:col-span-5 space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-white uppercase tracking-tight">
-                  Establish Connection
-                </h3>
-                <p className="text-xs text-slate-400 leading-relaxed font-sans">
+          <div className="p-6 md:p-10 grid grid-cols-1 md:grid-cols-12 gap-10 items-start">
+            {/* Info column */}
+            <div className="md:col-span-5 min-w-0 space-y-8">
+              <div data-reveal="item" className="space-y-3">
+                <h3 className="text-xl font-bold text-ink uppercase tracking-tight">Establish Connection</h3>
+                <p className="text-sm leading-relaxed text-ink-soft">
                   Whether you want to discuss AI systems, ML algorithms, software design, or technology consulting strategies, let&apos;s connect.
                 </p>
               </div>
 
-              {/* Recruiter Availability Widget */}
-              <div className="p-4 rounded border border-emerald-950/60 bg-emerald-950/5 border-emerald-500/10 space-y-2">
-                <div className="flex items-center gap-2 text-[10px] font-bold text-[#10b981] uppercase tracking-wider font-mono">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
+              <div data-reveal="item" className="space-y-2">
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-accent">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent" />
                   Availability Status
                 </div>
-                <p className="text-[11px] text-slate-350 leading-relaxed font-sans select-text">
-                  <strong>Open to Opportunities:</strong> Actively seeking engineering roles in <strong>AI Engineering</strong>, <strong>Machine Learning</strong>, <strong>Software Engineering</strong>, or <strong>Technology Consulting</strong>.
+                <p className="text-sm leading-relaxed text-ink-soft">
+                  <strong className="text-ink">Open to Opportunities:</strong> Actively seeking engineering roles in <strong className="text-ink">AI Engineering</strong>, <strong className="text-ink">Machine Learning</strong>, <strong className="text-ink">Software Engineering</strong>, or <strong className="text-ink">Technology Consulting</strong>.
                 </p>
               </div>
 
-              <div className="space-y-2 font-mono text-[11px] text-slate-400">
-                <a
-                  href={`mailto:${CONTACT_EMAIL}`}
-                  className="flex items-center gap-3 p-3 rounded border border-slate-900 bg-slate-950/40 hover:border-cyan-500/30 hover:text-cyan-400 transition-colors"
-                >
-                  <Mail className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>{CONTACT_EMAIL}</span>
-                </a>
-                <a
-                  href="https://linkedin.com/in/krishi-chheda"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded border border-slate-900 bg-slate-950/40 hover:border-cyan-500/30 hover:text-cyan-400 transition-colors"
-                >
-                  <Linkedin className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>linkedin.com/in/krishi-chheda</span>
-                </a>
-              </div>
+              <dl className="space-y-2 text-sm">
+                <div data-reveal="item" className="flex gap-4 min-w-0">
+                  <dt className="w-20 shrink-0 text-ink-faint">email:</dt>
+                  <dd className="min-w-0 break-all">
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:text-accent-2 transition-colors duration-150">
+                      {CONTACT_EMAIL}
+                    </a>
+                  </dd>
+                </div>
+                <div data-reveal="item" className="flex gap-4 min-w-0">
+                  <dt className="w-20 shrink-0 text-ink-faint">linkedin:</dt>
+                  <dd className="min-w-0 break-all">
+                    <a
+                      href="https://linkedin.com/in/krishi-chheda"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-accent hover:text-accent-2 transition-colors duration-150"
+                    >
+                      linkedin.com/in/krishi-chheda
+                    </a>
+                  </dd>
+                </div>
+              </dl>
             </div>
 
             {/* Form column */}
-            <div className="md:col-span-7">
-              <form onSubmit={handleSubmit} className="space-y-6">
-
-                {/* Form fields styled as shell arguments */}
-                <div className="space-y-4">
-
-                  {/* Name field */}
-                  <div className="flex flex-col space-y-1">
-                    <div className="flex items-center space-x-2 text-[11px] text-slate-500">
-                      <span className="text-[#10b981]">guest@krishi.os:~$</span>
-                      <span>name --set</span>
-                    </div>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full bg-slate-950/60 border border-slate-900 rounded-md px-3 py-2 text-xs text-white placeholder-slate-700 focus:outline-none focus:border-[#10b981]/50 focus:ring-0 transition-colors"
-                      placeholder="e.g. John Doe"
-                    />
-                  </div>
-
-                  {/* Email field */}
-                  <div className="flex flex-col space-y-1">
-                    <div className="flex items-center space-x-2 text-[11px] text-slate-500">
-                      <span className="text-[#10b981]">guest@krishi.os:~$</span>
-                      <span>email --set</span>
-                    </div>
-                    <input
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full bg-slate-950/60 border border-slate-900 rounded-md px-3 py-2 text-xs text-white placeholder-slate-700 focus:outline-none focus:border-[#10b981]/50 focus:ring-0 transition-colors"
-                      placeholder="e.g. john@example.com"
-                    />
-                  </div>
-
-                  {/* Message field */}
-                  <div className="flex flex-col space-y-1">
-                    <div className="flex items-center space-x-2 text-[11px] text-slate-500">
-                      <span className="text-[#10b981]">guest@krishi.os:~$</span>
-                      <span>message --write</span>
-                    </div>
-                    <textarea
-                      required
-                      rows={4}
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full bg-slate-950/60 border border-slate-900 rounded-md px-3 py-2 text-xs text-white placeholder-slate-700 focus:outline-none focus:border-[#10b981]/50 focus:ring-0 transition-colors resize-none"
-                      placeholder="e.g. Hey Krishi, I saw your project ClinicalBrief and..."
-                    />
-                  </div>
-
+            <div className="md:col-span-7 min-w-0">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div data-reveal="item" className="space-y-1.5">
+                  <label htmlFor="contact-name" className="flex flex-wrap gap-x-2 text-[11px] text-ink-faint">
+                    <span className="text-accent">guest@krishi.os:~$</span>
+                    <span>name --set</span>
+                  </label>
+                  <input
+                    id="contact-name"
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full bg-bg border border-rule px-3 py-2 text-sm text-ink placeholder:text-ink-faint/60 outline-none focus:border-accent focus-visible:outline-1 focus-visible:outline-offset-0 focus-visible:outline-accent transition-colors duration-150"
+                    placeholder="e.g. John Doe"
+                  />
                 </div>
 
-                {/* Submit button */}
-                <Button
+                <div data-reveal="item" className="space-y-1.5">
+                  <label htmlFor="contact-email" className="flex flex-wrap gap-x-2 text-[11px] text-ink-faint">
+                    <span className="text-accent">guest@krishi.os:~$</span>
+                    <span>email --set</span>
+                  </label>
+                  <input
+                    id="contact-email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full bg-bg border border-rule px-3 py-2 text-sm text-ink placeholder:text-ink-faint/60 outline-none focus:border-accent focus-visible:outline-1 focus-visible:outline-offset-0 focus-visible:outline-accent transition-colors duration-150"
+                    placeholder="e.g. john@example.com"
+                  />
+                </div>
+
+                <div data-reveal="item" className="space-y-1.5">
+                  <label htmlFor="contact-message" className="flex flex-wrap gap-x-2 text-[11px] text-ink-faint">
+                    <span className="text-accent">guest@krishi.os:~$</span>
+                    <span>message --write</span>
+                  </label>
+                  <textarea
+                    id="contact-message"
+                    required
+                    rows={4}
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="w-full bg-bg border border-rule px-3 py-2 text-sm text-ink placeholder:text-ink-faint/60 outline-none focus:border-accent focus-visible:outline-1 focus-visible:outline-offset-0 focus-visible:outline-accent transition-colors duration-150 resize-none"
+                    placeholder="e.g. Hey Krishi, I saw your project ClinicalBrief and..."
+                  />
+                </div>
+
+                <button
                   type="submit"
-                  variant="terminal"
-                  size="lg"
-                  className="w-full flex items-center justify-center space-x-2 border border-slate-900 hover:border-[#10b981]/30 cursor-pointer"
+                  data-reveal="item"
+                  className="w-full flex items-center justify-center border border-accent px-6 py-3 text-sm text-accent hover:bg-accent hover:text-bg active:scale-[0.98] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-accent transition-[color,background-color,transform] duration-150 ease-out cursor-pointer"
                 >
-                  <AnimatePresence mode="wait">
-                    {status === "idle" && (
-                      <motion.span
-                        key="idle"
-                        className="flex items-center gap-1.5 text-xs text-slate-300 hover:text-[#10b981]"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
+                  <span key={status} data-status-label className="flex items-center gap-2">
+                    {status === "idle" ? (
+                      <>
                         <Send className="w-3.5 h-3.5" />
                         <span>./transmit_transmission</span>
-                      </motion.span>
-                    )}
-                    {status === "opened" && (
-                      <motion.span
-                        key="opened"
-                        className="flex items-center gap-1.5 text-xs text-emerald-450"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
+                      </>
+                    ) : (
+                      <>
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>draft opened in your mail client</span>
-                      </motion.span>
+                      </>
                     )}
-                  </AnimatePresence>
-                </Button>
-                <p aria-live="polite" className="text-[11px] text-slate-500 font-sans">
+                  </span>
+                </button>
+                <p data-reveal="item" aria-live="polite" className="text-[11px] text-ink-faint">
                   {status === "opened"
                     ? `Press send in your mail app to deliver it. Nothing opened? Email ${CONTACT_EMAIL} directly.`
                     : "Opens a pre-filled draft in your own mail client."}
@@ -203,7 +183,6 @@ export default function Contact() {
             </div>
           </div>
         </div>
-
       </div>
     </section>
   );

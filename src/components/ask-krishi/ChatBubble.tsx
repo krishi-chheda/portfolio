@@ -6,6 +6,13 @@ import { Bot, X, Send, Terminal as TermIcon } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
 import { executeNavigationCommand } from "@/lib/navigation";
 import Button from "@/components/ui/Button";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { DUR, RISE } from "@/lib/motion";
+
+// Framer equivalents of the shared GSAP curve: decelerate in, accelerate out (exits shorter than entrances).
+const EASE_OUT = [0.2, 0, 0, 1] as const;
+const EASE_IN = [0.3, 0, 1, 1] as const;
+const EXIT = { duration: 0.12, ease: EASE_IN };
 
 // http(s) URLs (trailing punctuation excluded) and email addresses.
 const LINK_RE = /https?:\/\/[^\s<>"]*[^\s<>".,;:!?)]|[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
@@ -23,7 +30,7 @@ function linkify(text: string): ReactNode[] {
         href={isUrl ? m[0] : `mailto:${m[0]}`}
         target={isUrl ? "_blank" : undefined}
         rel="noopener noreferrer"
-        className="text-cyan-400 underline decoration-dotted underline-offset-2 hover:text-cyan-300 break-all"
+        className="text-accent underline decoration-dotted underline-offset-2 hover:text-accent-2 break-all"
       >
         {m[0]}
       </a>
@@ -41,6 +48,8 @@ export default function ChatBubble() {
     "Hi, I'm the KRISHI.OS assistant. Ask about Krishi's projects, his Master of AI at Monash, his leadership roles, or how to reach him."
   );
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  const enter = { duration: DUR.standard, ease: EASE_OUT };
 
   useEffect(() => {
     // Listen to custom event to open the chat window from external CTAs (e.g. Hero section)
@@ -74,11 +83,11 @@ export default function ChatBubble() {
       <AnimatePresence>
         {!isOpen && (
           <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
+            initial={reduceMotion ? false : { scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1, transition: { duration: 0.2, ease: EASE_OUT } }}
+            exit={{ scale: 0.8, opacity: 0, transition: EXIT }}
             onClick={() => setIsOpen(true)}
-            className="w-14 h-14 rounded-full bg-gradient-to-tr from-cyan-500 to-cyan-600 text-black flex items-center justify-center shadow-lg hover:shadow-[0_0_25px_rgba(6,182,212,0.45)] hover:scale-105 transition-all duration-300 group cursor-pointer"
+            className="w-14 h-14 rounded-full bg-accent text-bg flex items-center justify-center hover:bg-accent-2 transition-colors duration-150 group cursor-pointer focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-accent"
             aria-label="Ask Krishi AI"
           >
             <Bot className="w-6 h-6 group-hover:rotate-6 transition-transform" />
@@ -90,24 +99,24 @@ export default function ChatBubble() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 50, scale: 0.95 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="w-[90vw] sm:w-[380px] h-[500px] rounded-xl overflow-hidden glass-panel border border-cyan-500/20 shadow-2xl flex flex-col mb-2"
+            initial={reduceMotion ? false : { opacity: 0, y: RISE.panel, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1, transition: enter }}
+            exit={{ opacity: 0, y: RISE.item, scale: 0.98, transition: EXIT }}
+            style={{ transformOrigin: "bottom right" }}
+            className="w-[90vw] sm:w-[380px] h-[500px] overflow-hidden bg-bg border border-rule flex flex-col mb-2"
           >
             {/* Header bar */}
-            <div className="bg-slate-950 px-4 py-3 flex items-center justify-between border-b border-slate-900">
+            <div className="bg-bg-2 px-4 py-3 flex items-center justify-between border-b border-rule">
               <div className="flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs text-slate-400 font-bold flex items-center gap-1">
-                  <TermIcon className="w-3 h-3 text-cyan-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                <span className="text-[11px] uppercase tracking-[0.18em] text-ink-soft flex items-center gap-1.5">
+                  <TermIcon className="w-3 h-3 text-accent" />
                   ASK_KRISHI_AGENT.sh
                 </span>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-slate-500 hover:text-white transition-colors cursor-pointer p-2 -m-2"
+                className="text-ink-faint hover:text-accent transition-colors duration-150 cursor-pointer p-2 -m-2"
                 aria-label="Close chat"
               >
                 <X className="w-4 h-4" />
@@ -115,64 +124,70 @@ export default function ChatBubble() {
             </div>
 
             {/* Message Area */}
-            <div role="log" aria-live="polite" aria-label="Ask Krishi conversation" className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs bg-slate-950/20">
+            <div role="log" aria-live="polite" aria-label="Ask Krishi conversation" className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
               {messages.map((msg, index) => {
                 const isUser = msg.role === "user";
                 return (
-                  <div
+                  <motion.div
                     key={index}
+                    initial={reduceMotion ? false : { opacity: 0, y: RISE.item }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={enter}
                     className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[85%] rounded-lg px-3 py-2.5 leading-relaxed ${
-                        isUser
-                          ? "bg-cyan-950/60 border border-cyan-800/40 text-cyan-200"
-                          : "bg-slate-900/60 border border-slate-800/60 text-slate-300"
+                      className={`max-w-[85%] px-3 py-2.5 leading-relaxed ${
+                        isUser ? "bg-bg-2 border border-rule text-ink" : "border-l-2 border-accent text-ink-soft"
                       }`}
                     >
-                      <span className="block text-[10px] text-slate-500 uppercase tracking-widest mb-1 select-none">
-                        {isUser ? "USER >" : "AGENT >"}
+                      <span className="block text-[11px] text-ink-faint uppercase tracking-[0.18em] mb-1 select-none">
+                        {isUser ? "you >" : "agent >"}
                       </span>
                       <p className="whitespace-pre-line">{linkify(msg.content)}</p>
 
                       {!isUser && msg.suggestedCommand && (
-                        <div className="mt-3 pt-2 border-t border-slate-800/60 font-mono text-[10px]">
-                          <span className="text-slate-500 uppercase tracking-wider block mb-1 select-none">
+                        <div className="mt-3 pt-2 border-t border-rule text-[11px]">
+                          <span className="text-ink-faint uppercase tracking-[0.18em] block mb-1 select-none">
                             Suggested Command:
                           </span>
                           <button
                             type="button"
                             onClick={() => executeNavigationCommand(msg.suggestedCommand!)}
-                            className="text-cyan-400 hover:text-cyan-300 transition-colors flex items-center space-x-1 cursor-pointer text-left font-bold"
+                            className="text-accent hover:text-accent-2 hover:translate-x-0.5 active:scale-[0.97] transition-[color,translate,scale] duration-150 ease-out motion-reduce:transition-none flex items-center space-x-1 cursor-pointer text-left"
                           >
                             <span>&gt; {msg.suggestedCommand}</span>
                           </button>
                         </div>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
 
               {loading && (
-                <div className="flex justify-start">
-                  <div className="bg-slate-900/60 border border-slate-800/60 rounded-lg px-3 py-2.5 max-w-[85%]">
-                    <span className="block text-[10px] text-slate-500 uppercase mb-1">AGENT &gt;</span>
+                <motion.div
+                  initial={reduceMotion ? false : { opacity: 0, y: RISE.item }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={enter}
+                  className="flex justify-start"
+                >
+                  <div className="border-l-2 border-accent px-3 py-2.5 max-w-[85%]">
+                    <span className="block text-[11px] text-ink-faint uppercase tracking-[0.18em] mb-1">agent &gt;</span>
                     <span className="flex gap-1 items-center py-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" style={{ animationDelay: "300ms" }} />
                     </span>
                   </div>
-                </div>
+                </motion.div>
               )}
               <div ref={chatEndRef} />
             </div>
 
             {/* Quick Questions tags */}
             {messages.length === 1 && (
-              <div className="px-4 py-2 border-t border-slate-900 bg-slate-950/40 space-y-1.5">
-                <span className="text-[10px] text-slate-600 uppercase tracking-wide">QUICK INQUIRY:</span>
+              <div className="px-4 py-2.5 border-t border-rule space-y-2">
+                <span className="text-[11px] text-ink-faint uppercase tracking-[0.18em]">QUICK INQUIRY:</span>
                 <div className="flex flex-wrap gap-1.5">
                   {quickQuestions.map((q) => (
                     <Button
@@ -180,7 +195,7 @@ export default function ChatBubble() {
                       onClick={() => handleSend(q)}
                       variant="outline"
                       size="sm"
-                      className="text-[10px] px-2 py-1 text-cyan-400 hover:text-black hover:bg-cyan-500 transition-colors text-left font-mono inline-block w-auto border-cyan-900/50"
+                      className="rounded-full text-[11px] px-2.5 py-1 text-left inline-block w-auto hover:-translate-y-px"
                     >
                       {q}
                     </Button>
@@ -195,7 +210,7 @@ export default function ChatBubble() {
                 e.preventDefault();
                 handleSend(input);
               }}
-              className="p-3 bg-slate-950 border-t border-slate-900 flex items-center space-x-2"
+              className="p-3 border-t border-rule flex items-center space-x-2"
             >
               <input
                 type="text"
@@ -204,14 +219,14 @@ export default function ChatBubble() {
                 maxLength={500}
                 aria-label="Ask Krishi a question"
                 placeholder="Ask about studies, skills, projects..."
-                className="flex-1 bg-slate-900/60 border border-slate-800 rounded px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/10"
+                className="flex-1 bg-bg-2 border border-rule px-3 py-2 text-xs text-ink placeholder:text-ink-faint focus:outline-none focus:border-accent disabled:opacity-50"
                 disabled={loading}
               />
               <Button
                 type="submit"
                 disabled={loading || !input.trim()}
                 variant="terminal"
-                className="p-2 min-h-[32px] w-[32px] flex items-center justify-center rounded"
+                className="p-2 min-h-[34px] w-[34px] flex items-center justify-center"
                 aria-label="Send"
               >
                 <Send className="w-3.5 h-3.5" />

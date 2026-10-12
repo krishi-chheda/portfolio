@@ -27,21 +27,21 @@ export default function TerminalOutput({
   }, []);
 
   return (
-    <div className="fixed inset-0 overflow-hidden flex flex-col bg-black text-[#cfcfcf] font-mono z-20">
+    <div className="fixed inset-0 overflow-hidden flex flex-col bg-bg text-ink-soft font-mono z-20">
 
       {/* Header */}
-      <div className="flex justify-between items-center px-6 md:px-12 py-4 border-b border-slate-900/60 text-xs uppercase tracking-wider flex-shrink-0">
+      <div className="flex justify-between items-center px-6 md:px-12 py-4 border-b border-rule text-xs uppercase tracking-wider flex-shrink-0">
         <div className="flex items-center gap-3">
-          <span className="w-2 h-2 rounded-full bg-[#7aff7a] animate-pulse" />
-          <span className="font-bold text-[#7aff7a]">
+          <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+          <span className="font-bold text-accent">
             KRISHI.OS V1.0.4
           </span>
-          <span className="hidden md:inline text-slate-600">
+          <span className="hidden md:inline text-ink-faint">
             | AI ENGINEER PORTFOLIO SYSTEM
           </span>
         </div>
 
-        <div className="hidden md:block text-slate-500">
+        <div className="hidden md:block text-ink-faint">
           {bootTime}
         </div>
       </div>
@@ -55,7 +55,7 @@ export default function TerminalOutput({
 
             <pre
               className="
-          text-[#7aff7a]
+          text-accent
           font-bold
           leading-none
           whitespace-pre
@@ -80,15 +80,15 @@ export default function TerminalOutput({
             </pre>
 
             <div className="mt-6">
-              {/* <h1 className="text-[#7aff7a] text-2xl md:text-4xl font-bold tracking-[0.4em]">
+              {/* <h1 className="text-accent text-2xl md:text-4xl font-bold tracking-[0.4em]">
                 KRISHI.OS
               </h1> */}
 
-              <p className="mt-4 text-[#7aff7a]/80 uppercase tracking-[0.25em] text-sm md:text-lg">
+              <p className="mt-4 text-accent uppercase tracking-[0.25em] text-sm md:text-lg">
                 System Boot Initialization
               </p>
 
-              <p className="mt-2 text-slate-500 uppercase tracking-[0.2em] text-xs md:text-sm">
+              <p className="mt-2 text-ink-faint uppercase tracking-[0.2em] text-xs md:text-sm">
                 Establishing Virtual Machine Memory Pipelines...
               </p>
             </div>
@@ -113,18 +113,18 @@ export default function TerminalOutput({
             })}
 
             {accessGranted && (
-              <div className="mt-6 border-t border-slate-800/80 pt-4 space-y-1.5 text-left w-full max-w-md mx-auto">
-                <div className="text-slate-400 text-xs font-mono">
-                  krishi.os login: <span className="text-[#7aff7a]">guest</span> (auto-authenticating)
+              <div className="mt-6 border-t border-rule pt-4 space-y-1.5 text-left w-full max-w-md mx-auto">
+                <div className="text-ink-soft text-xs font-mono">
+                  krishi.os login: <span className="text-accent">guest</span> (auto-authenticating)
                 </div>
-                <div className="text-[#7aff7a] font-bold text-xs font-mono">
+                <div className="text-accent font-bold text-xs font-mono">
                   [ok] Guest session established. Loading system profile...
                 </div>
-                <div className="text-[#7aff7a] font-bold text-xs font-mono animate-pulse">
+                <div className="text-accent font-bold text-xs font-mono animate-pulse">
                   [ok] portfolio.launch
                 </div>
                 <div className="mt-4 text-center">
-                  <span className="text-[#7aff7a] text-lg md:text-xl font-bold tracking-[0.3em] uppercase">
+                  <span className="text-accent text-lg md:text-xl font-bold tracking-[0.3em] uppercase">
                     ACCESS GRANTED
                   </span>
                 </div>
@@ -136,26 +136,26 @@ export default function TerminalOutput({
       </div>
 
       {/* Footer */}
-      <div className="flex justify-between items-center px-6 md:px-12 py-4 border-t border-slate-900/60 text-xs uppercase tracking-wider flex-shrink-0">
+      <div className="flex justify-between items-center px-6 md:px-12 py-4 border-t border-rule text-xs uppercase tracking-wider flex-shrink-0">
         <div className="flex items-center gap-2">
           {!accessGranted ? (
             <>
-              <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
               <span className="animate-pulse">
                 Connecting to KRISHI.OS
               </span>
             </>
           ) : (
             <>
-              <span className="w-2 h-2 rounded-full bg-[#7aff7a]" />
-              <span className="text-[#7aff7a]">
+              <span className="w-2 h-2 rounded-full bg-accent" />
+              <span className="text-accent">
                 Connection Established
               </span>
             </>
           )}
         </div>
 
-        <div className="text-slate-500 font-mono text-[10px] md:text-xs">
+        <div className="text-ink-faint font-mono text-[11px] md:text-xs">
           Press ESC or Tap to Skip
         </div>
       </div>

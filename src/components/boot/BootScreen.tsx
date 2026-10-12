@@ -56,9 +56,9 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
               setMounted(false);
               onComplete();
             }}
-            className="fixed inset-0 z-50 bg-[#000000] flex items-center justify-center font-mono cursor-pointer"
+            className="fixed inset-0 z-50 bg-bg flex items-center justify-center font-mono cursor-pointer"
           >
-            <div className="text-center text-slate-400 text-xs animate-pulse">
+            <div className="text-center text-ink-soft text-xs animate-pulse">
               LOADING SYSTEM PROFILE...
             </div>
           </motion.div>
@@ -78,34 +78,8 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
             setMounted(false);
             onComplete();
           }}
-          className="fixed inset-0 z-50 bg-[#000000] overflow-hidden flex flex-col items-stretch cursor-pointer select-none"
+          className="fixed inset-0 z-50 bg-bg overflow-hidden flex flex-col items-stretch cursor-pointer select-none"
         >
-          {/* CRT Screen Glow Backlight */}
-          <div
-            className="absolute inset-0 pointer-events-none select-none z-10"
-            style={{
-              background:
-                "radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.025) 0%, rgba(0, 0, 0, 0) 80%)",
-            }}
-          />
-
-          {/* CRT Faint Scanline Pattern */}
-          <div
-            className="absolute inset-0 pointer-events-none select-none z-10 opacity-[0.03]"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(16,185,129,1) 2px, rgba(16,185,129,1) 4px)",
-            }}
-          />
-
-          {/* Subtle Vignette shadow overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none select-none z-10"
-            style={{
-              boxShadow: "inset 0 0 100px rgba(0,0,0,0.9)",
-            }}
-          />
-
           {/* Console Core Output */}
           <TerminalOutput
             currentLineIndex={currentLineIndex}

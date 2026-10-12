@@ -1,150 +1,105 @@
 "use client";
 
-import { Users, Megaphone, Calendar, Users2, Sparkles, Heart } from "lucide-react";
 import { useTerminalReveal } from "@/hooks/useTerminalReveal";
+import SectionHeader from "@/components/ui/SectionHeader";
+
+const label = "text-[11px] uppercase tracking-[0.18em]";
+
+const roles = [
+  {
+    tag: "[EXECUTIVE]",
+    period: "OCT 2025 - PRESENT",
+    org: "Monash Data & AI Society (MDAS)",
+    role: "Vice President",
+    roleDate: "Jul 2026 – Present",
+    progression: ["Media & Marketing Director · Jan 2026 – May 2026", "Media & Marketing Officer · Oct 2025 – Jan 2026"],
+    points: [
+      ["Marketing Leadership", "Led visual branding, content publication, and digital campaign schedules for the largest specialized data student society at Monash."],
+      ["Event Strategy", "Co-designed promotions and logistical coordination for developer bootcamps, winter hackathons, and corporate networking nights."],
+      ["Cross-Functional Collaboration", "Managed pipelines of copywriters, designers, and web developers to build and distribute marketing assets."],
+    ],
+    outcome: "Grew AI workshop reach to 300+ students across 5+ events and boosted overall digital interaction metrics by 40%.",
+  },
+  {
+    tag: "[COMMUNITY_LEAD]",
+    period: "2025 - PRESENT",
+    org: "MOSAIC",
+    role: "Social Media Coordinator",
+    points: [
+      ["Community Building", "Fostering active peer support systems and volunteer developer networks around community AI projects."],
+      ["Student Engagement", "Coordinating cross-campus outreach campaigns connecting peers to AI volunteer programs and local community projects."],
+      ["Cross-Functional Collaboration", "Aligning students, university representatives, and non-profits to support monthly social coordination initiatives."],
+    ],
+    outcome: "Connected peers to local community volunteer initiatives and increased student participation in volunteering projects.",
+  },
+];
 
 export default function Leadership() {
   const sectionRef = useTerminalReveal<HTMLElement>();
   return (
-    <section ref={sectionRef} id="leadership" className="py-24 relative overflow-hidden border-t border-slate-900/60">
-      <div className="max-w-6xl mx-auto px-6">
-        
-        {/* Section Header CLI Prompt */}
-        <div className="font-mono text-xs md:text-sm text-slate-500 mb-8 flex items-center space-x-2 select-none">
-          <span className="text-[#10b981]">krishi@stack:~$</span>
-          <span data-reveal="command" className="text-slate-100">cat leadership.md</span>
-        </div>
+    <section ref={sectionRef} id="leadership" className="py-24 border-t border-rule">
+      <div className="mx-auto max-w-6xl px-6">
+        <SectionHeader num="03" title="Leadership" command="cat leadership.md" meta="monash · student societies" />
 
-        {/* OS Terminal Shell Window */}
-        <div className="w-full border border-slate-900 bg-slate-950/20 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl flex flex-col font-mono terminal-highlight" data-reveal="panel">
-          
-          {/* Title Bar */}
-          <div className="bg-slate-950/80 px-4 py-2.5 border-b border-slate-900 flex justify-between items-center select-none text-[10px] text-slate-500">
-            <div className="flex items-center space-x-1.5">
-              <span className="w-2 h-2 rounded-full bg-red-500/40 border border-red-500/20" />
-              <span className="w-2 h-2 rounded-full bg-yellow-500/40 border border-yellow-500/20" />
-              <span className="w-2 h-2 rounded-full bg-green-500/40 border border-green-500/20" />
-            </div>
-            <span>leadership.md // system_contributions</span>
-            <div className="flex items-center space-x-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
-              <span>markdown</span>
-            </div>
+        <div data-reveal="panel" className="border border-rule terminal-highlight">
+          {/* Overview statement */}
+          <div className="border-b border-rule p-6">
+            <h3 className="font-bold text-ink">
+              <span className="text-accent">Can Krishi lead?</span>
+            </h3>
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-ink-soft">
+              Yes. I drive growth in student organizations by leading cross-functional teams, structuring event marketing campaigns, and building developer networks. I coordinate campaign schedules and lead design pipelines to translate community needs into successful events.
+            </p>
           </div>
 
-          {/* Window Body */}
-          <div className="p-6 md:p-10 space-y-8">
-            
-            {/* Leadership Overview Statement */}
-            <div className="border border-slate-900 bg-slate-950/40 p-5 rounded-lg select-text">
-              <h2 className="text-lg font-bold text-white uppercase tracking-tight flex items-center gap-2">
-                <span className="text-purple-400">Can Krishi lead?</span>
-              </h2>
-              <p className="mt-2 text-slate-400 text-xs md:text-sm leading-relaxed font-sans">
-                Yes. I drive growth in student organizations by leading cross-functional teams, structuring event marketing campaigns, and building developer networks. I coordinate campaign schedules and lead design pipelines to translate community needs into successful events.
-              </p>
-            </div>
-
-            {/* Side-by-Side Roles layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-              
-              {/* Left Side: MDAS Column */}
-              <div data-reveal="item" className="lg:col-span-6 border border-slate-900 bg-slate-950/40 p-6 rounded-lg flex flex-col justify-between space-y-4 select-text"
+          {/* Two flat columns */}
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            {roles.map((r, i) => (
+              <article
+                key={r.org}
+                data-reveal="item"
+                className={`flex min-w-0 flex-col gap-4 p-6 ${i > 0 ? "border-t border-rule lg:border-t-0 lg:border-l" : ""}`}
               >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest px-2 py-0.5 rounded bg-purple-950/30 border border-purple-900/40">
-                      [EXECUTIVE]
-                    </span>
-                    <span className="text-[10px] text-slate-500">OCT 2025 - PRESENT</span>
-                  </div>
+                <div className={`flex flex-wrap items-center justify-between gap-2 ${label}`}>
+                  <span className="text-accent">{r.tag}</span>
+                  <span className="text-ink-faint">{r.period}</span>
+                </div>
 
-                  <div>
-                    <h3 className="text-base font-bold text-white uppercase tracking-tight">
-                      Monash Data & AI Society (MDAS)
-                    </h3>
-                    <p className="text-[11px] text-purple-400 mt-0.5 font-semibold">
-                      Vice President <span className="text-slate-500 font-normal">· Jul 2026 – Present</span>
-                    </p>
-                    <ul className="mt-1.5 space-y-0.5 text-[10px] text-slate-500 font-mono">
-                      <li>Media & Marketing Director · Jan 2026 – May 2026</li>
-                      <li>Media & Marketing Officer · Oct 2025 – Jan 2026</li>
+                <div>
+                  <h3 className="font-bold text-ink">{r.org}</h3>
+                  <p className="mt-1 text-sm text-accent">
+                    {r.role}
+                    {r.roleDate && <span className="text-ink-faint"> · {r.roleDate}</span>}
+                  </p>
+                  {r.progression && (
+                    <ul className="mt-1 space-y-0.5 text-[11px] text-ink-faint">
+                      {r.progression.map((p) => (
+                        <li key={p}>{p}</li>
+                      ))}
                     </ul>
-                  </div>
-
-                  <div className="space-y-2 font-sans text-[11.5px] text-slate-400 leading-relaxed pt-1">
-                    <div className="flex gap-2">
-                      <Megaphone className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                      <span><strong>Marketing Leadership:</strong> Led visual branding, content publication, and digital campaign schedules for the largest specialized data student society at Monash.</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Calendar className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                      <span><strong>Event Strategy:</strong> Co-designed promotions and logistical coordination for developer bootcamps, winter hackathons, and corporate networking nights.</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Users2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                      <span><strong>Cross-Functional Collaboration:</strong> Managed pipelines of copywriters, designers, and web developers to build and distribute marketing assets.</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
-                <div className="bg-purple-950/15 border border-purple-900/30 p-3.5 rounded text-[11px] text-purple-400 flex items-start gap-2.5 font-sans mt-2">
-                  <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span><strong>Outcome:</strong> Grew AI workshop reach to 300+ students across 5+ events and boosted overall digital interaction metrics by 40%.</span>
-                </div>
-              </div>
+                <ul className="space-y-2 text-sm leading-relaxed text-ink-soft">
+                  {r.points.map(([title, body]) => (
+                    <li key={title} data-reveal="item" className="flex gap-2">
+                      <span className="text-accent" aria-hidden>–</span>
+                      <span className="min-w-0">
+                        <strong className="font-bold text-ink">{title}:</strong> {body}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
 
-              {/* Right Side: MOSAIC Column */}
-              <div data-reveal="item" className="lg:col-span-6 border border-slate-900 bg-slate-950/40 p-6 rounded-lg flex flex-col justify-between space-y-4 select-text"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest px-2 py-0.5 rounded bg-teal-950/30 border border-teal-900/40">
-                      [COMMUNITY_LEAD]
-                    </span>
-                    <span className="text-[10px] text-slate-500">2025 - PRESENT</span>
-                  </div>
-
-                  <div>
-                    <h3 className="text-base font-bold text-white uppercase tracking-tight">
-                      MOSAIC
-                    </h3>
-                    <p className="text-[11px] text-teal-400 mt-0.5 font-semibold">
-                      Social Media Coordinator
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 font-sans text-[11.5px] text-slate-400 leading-relaxed pt-1">
-                    <div className="flex gap-2">
-                      <Users className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
-                      <span><strong>Community Building:</strong> Fostering active peer support systems and volunteer developer networks around community AI projects.</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Heart className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
-                      <span><strong>Student Engagement:</strong> Coordinating cross-campus outreach campaigns connecting peers to AI volunteer programs and local community projects.</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Users2 className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
-                      <span><strong>Cross-Functional Collaboration:</strong> Aligning students, university representatives, and non-profits to support monthly social coordination initiatives.</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-teal-950/15 border border-teal-900/30 p-3.5 rounded text-[11px] text-teal-400 flex items-start gap-2.5 font-sans mt-2">
-                  <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span><strong>Outcome:</strong> Connected peers to local community volunteer initiatives and increased student participation in volunteering projects.</span>
-                </div>
-              </div>
-
-            </div>
-
+                <p className="mt-auto border-t border-rule pt-4 text-sm leading-relaxed text-ink-soft">
+                  <span className={`${label} mr-2 text-gold`}>Outcome</span>
+                  {r.outcome}
+                </p>
+              </article>
+            ))}
           </div>
-
         </div>
-
       </div>
     </section>
   );
 }
-
-// Wrapper alias for Framer Motion to prevent dynamic name conflict in compilation

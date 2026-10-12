@@ -64,7 +64,7 @@ export default function Navbar() {
         {/* Left: identity + current path */}
         <div className="flex items-center gap-4 min-w-0">
           <Link href="/" className="font-bold text-ink hover:text-accent transition-colors duration-150 shrink-0">
-            <span className="text-accent">//</span> krishi.os
+            <span className="text-accent">{"//"}</span> krishi.os
           </Link>
           <span className="hidden sm:inline text-ink-faint">v.2026.10</span>
           <span className="hidden sm:inline text-ink-faint truncate">{active ? `~/${active}` : "ready"}</span>

@@ -382,7 +382,7 @@ export const experienceData: Experience[] = [
     role: "IT Intern",
     organization: "Mysahayak",
     location: "Remote / India",
-    period: "2025",
+    period: "Jan 2025 - May 2025",
     description: [
       "Developed cross-platform mobile features (Flutter) integrated with Python backend services in 2-week Agile sprint cycles.",
       "Built AI-assisted content moderation workflows using machine learning filters, reducing manual review overhead by 30%.",

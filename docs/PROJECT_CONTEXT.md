@@ -134,3 +134,4 @@ npm run check:chat   # 20 chat routing/validation/rate-limit checks against a ru
 npm run dev          # .claude/launch.json "dev" on :3000
 ```
 No automated UI tests. Browser checks are manual via the preview tools.
+- **Horizontal overflow** (verified 2026-10-12): `/`, `/readme`, `/now` and the 404 have no page-level or inner horizontal scroll at 320–1920px, including the mobile menu, palette, chat and boot screen. Sweep method: load each page in an offscreen same-origin iframe at each width and flag elements or text nodes past the viewport that no `overflow` ancestor clips. Past offenders: the hero impact value (now scales `text-base`→`text-3xl`) and the Projects file tabs (now wrap).

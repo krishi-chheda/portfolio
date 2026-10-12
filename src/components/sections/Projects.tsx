@@ -170,7 +170,7 @@ export default function Projects() {
             {/* Code Editor Preview Window */}
             <div className="md:col-span-9 min-w-0 p-5 md:p-8 flex flex-col">
               {/* Underlined text tabs */}
-              <div className="flex gap-5 border-b border-rule mb-6 text-[11px] select-none overflow-x-auto whitespace-nowrap">
+              <div className="flex flex-wrap gap-x-5 gap-y-2 border-b border-rule mb-6 text-[11px] select-none">
                 {TABS.map((t) => (
                   <button
                     key={t.id}

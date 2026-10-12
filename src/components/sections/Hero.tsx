@@ -156,7 +156,7 @@ export default function Hero() {
           <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 border-l border-rule">
             {impactLog.map((m) => (
               <div key={m.label} data-hero="row" className="border-r border-rule px-4 py-2">
-                <div data-hero="value" className="text-2xl md:text-3xl font-bold text-accent">{m.value}</div>
+                <div data-hero="value" className="text-base min-[375px]:text-xl sm:text-2xl md:text-3xl font-bold text-accent whitespace-nowrap">{m.value}</div>
                 <div className="mt-2 text-[11px] leading-relaxed text-ink-faint">
                   {m.label} · <span className="text-ink-soft">{m.source}</span>
                 </div>

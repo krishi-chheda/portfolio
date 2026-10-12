@@ -104,8 +104,8 @@ body.command-palette-open footer {
 }
 
 /* Respect OS-level reduced-motion preference for CSS keyframe utilities
-   (animate-pulse/spin/bounce/blink). Framer Motion animations are handled
-   separately via the useReducedMotion hook where they exist. */
+   (animate-pulse/spin/bounce/blink). GSAP animations are gated separately
+   with gsap.matchMedia (see src/lib/motion.ts MOTION_OK). */
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse,
   .animate-spin,

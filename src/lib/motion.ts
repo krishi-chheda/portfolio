@@ -44,3 +44,6 @@ export function scrambleText(el: HTMLElement, duration = 0.6) {
   });
   return { tween, restore };
 }
+
+/** "smooth" unless the visitor asked for reduced motion (then scroll jumps instantly). */
+export const scrollBehavior = (): ScrollBehavior => (window.matchMedia(MOTION_OK).matches ? "smooth" : "instant");

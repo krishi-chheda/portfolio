@@ -6,8 +6,8 @@ import { Send, CheckCircle2 } from "lucide-react";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { useTerminalReveal } from "@/hooks/useTerminalReveal";
 import { DUR, EASE, MOTION_OK } from "@/lib/motion";
+import { CONTACT_EMAIL } from "@/lib/data";
 
-const CONTACT_EMAIL = "krishichheda10@gmail.com";
 
 export default function Contact() {
   const sectionRef = useTerminalReveal<HTMLElement>();

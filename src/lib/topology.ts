@@ -136,7 +136,16 @@ const ids = new Set(NODES.map((n) => n.id));
 export const EDGES: [string, string][] = [
   ...HAND_EDGES,
   ...techLinks.flatMap((t) => t.projects.map((p) => [t.id, p.id] as [string, string])),
-].filter(([a, b]) => ids.has(a) && ids.has(b));
+];
+
+// Integrity check. The graph is static and "/" is prerendered, so a bad id fails `npm run build` (and the dev
+// overlay) instead of silently dropping a node or an edge.
+if (ids.size !== NODES.length) {
+  const dupes = NODES.map((n) => n.id).filter((id, i, all) => all.indexOf(id) !== i);
+  throw new Error(`System Map: duplicate node ids: ${[...new Set(dupes)].join(", ")}`);
+}
+const dangling = EDGES.filter(([a, b]) => !ids.has(a) || !ids.has(b));
+if (dangling.length) throw new Error(`System Map: edges reference missing nodes: ${dangling.map((e) => e.join(" -> ")).join(", ")}`);
 
 export const NODE = Object.fromEntries(NODES.map((n) => [n.id, n])) as Record<string, TopoNode>;
 

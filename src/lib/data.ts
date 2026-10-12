@@ -441,6 +441,12 @@ export const aiKnowledgeBase = {
   ]
 };
 
+// The one contact address (hero, contact section, footer, Ask Krishi).
+export const CONTACT_EMAIL = "krishichheda10@gmail.com";
+
+// The one version string shown in the UI (boot screen, navbar, README). Keep in sync with package.json "version".
+export const SYSTEM_VERSION = "v0.1.0";
+
 export const bootLinesData = [
   "master_of_ai.monash",
   "mdas.vice_president",

@@ -15,15 +15,16 @@ interface Commit {
   isHead?: boolean;
 }
 
+// Styled as a git log for the OS theme; refs are relative positions in this timeline, not real commits.
 const careerCommits: Commit[] = [
   { hash: "HEAD", isHead: true, date: "PRESENT", type: "feat", scope: "current", title: "building next-generation AI products" },
-  { hash: "v7p3a1c", date: "JUL 2026", type: "feat", scope: "leadership", title: "became Vice President @ MDAS" },
-  { hash: "m2d7a9b", date: "JAN 2026", type: "feat", scope: "leadership", title: "promoted to Media & Marketing Director @ MDAS" },
-  { hash: "o4k8m2d", date: "OCT 2025", type: "feat", scope: "leadership", title: "joined MDAS as Media & Marketing Officer" },
-  { hash: "e5d8u2a", date: "JUL 2025", type: "feat", scope: "education", title: "started Master of AI @ Monash" },
-  { hash: "s8t9d2h", date: "JAN–MAY 2025", type: "feat", scope: "product", title: "launched StudentHub" },
-  { hash: "m1y9s8a", date: "JAN–MAY 2025", type: "feat", scope: "industry", title: "joined Mysahayak" },
-  { hash: "t9a2f1c", date: "OCT–DEC 2024", type: "feat", scope: "ai", title: "built Traffic AI" }
+  { hash: "HEAD~1", date: "JUL 2026", type: "feat", scope: "leadership", title: "became Vice President @ MDAS" },
+  { hash: "HEAD~2", date: "JAN 2026", type: "feat", scope: "leadership", title: "promoted to Media & Marketing Director @ MDAS" },
+  { hash: "HEAD~3", date: "OCT 2025", type: "feat", scope: "leadership", title: "joined MDAS as Media & Marketing Officer" },
+  { hash: "HEAD~4", date: "JUL 2025", type: "feat", scope: "education", title: "started Master of AI @ Monash" },
+  { hash: "HEAD~5", date: "JAN–MAY 2025", type: "feat", scope: "product", title: "launched StudentHub" },
+  { hash: "HEAD~6", date: "JAN–MAY 2025", type: "feat", scope: "industry", title: "joined Mysahayak" },
+  { hash: "HEAD~7", date: "OCT–DEC 2024", type: "feat", scope: "ai", title: "built Traffic AI" }
 ];
 
 // Commits reveal one by one between 25% and 100% scroll progress through the section
@@ -105,9 +106,9 @@ export default function Experience() {
             <span className="flex items-center gap-2" aria-live="polite">
               <span className={`h-1.5 w-1.5 rounded-full ${done ? "bg-accent" : "bg-gold"}`} />
               {done ? (
-                <span className="text-accent">Career history synchronized ✓</span>
+                <span className="text-accent">Timeline loaded ✓</span>
               ) : (
-                <span>Loading commits... {revealedCount}/{total}</span>
+                <span>Replaying timeline... {revealedCount}/{total}</span>
               )}
             </span>
           </div>
@@ -158,7 +159,7 @@ export default function Experience() {
             style={{ opacity: footerVisible ? 1 : 0, transition: "opacity 300ms cubic-bezier(0.215, 0.61, 0.355, 1)" }}
             className="flex items-center gap-2 border-t border-rule px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-accent select-none"
           >
-            <span>[ok] career history synchronized</span>
+            <span>[ok] career timeline loaded</span>
             <span className="h-3 w-1.5 bg-accent" aria-hidden />
           </div>
         </div>

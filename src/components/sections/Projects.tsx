@@ -98,7 +98,7 @@ export default function Projects() {
   return (
     <section ref={sectionRef} id="projects" className="py-24 border-t border-rule">
       <div className="mx-auto max-w-6xl px-6">
-        <SectionHeader num="01" title="Projects" command="ls -la projects/" meta="4 featured · sorted by impact" />
+        <SectionHeader num="01" title="Projects" command="ls -la projects/" meta="4 featured" />
 
         {/* Integrated IDE / Explorer Panel */}
         <div className="w-full min-w-0 border border-rule flex flex-col font-mono terminal-highlight" data-reveal="panel">
@@ -385,7 +385,8 @@ export default function Projects() {
                     )}
                   </div>
 
-                  {/* Action Links */}
+                  {/* Action Links (hidden when a project has no public repo or demo) */}
+                  {(activeProject.githubUrl || activeProject.liveUrl) && (
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-rule pt-4 text-xs select-none">
                     {activeProject.githubUrl && (
                       <a
@@ -409,6 +410,7 @@ export default function Projects() {
                       </a>
                     )}
                   </div>
+                  )}
                 </div>
             </div>
           </div>

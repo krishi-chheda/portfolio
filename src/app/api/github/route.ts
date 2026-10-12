@@ -30,7 +30,8 @@ function gh(path: string) {
     "User-Agent": "krishi-portfolio",
   };
   if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-  return fetch(`https://api.github.com${path}`, { headers, next: { revalidate: REVALIDATE_SECONDS } });
+  // Timeout so a hung GitHub call fails into the existing null/503 handling instead of holding the request
+  return fetch(`https://api.github.com${path}`, { headers, next: { revalidate: REVALIDATE_SECONDS }, signal: AbortSignal.timeout(10_000) });
 }
 
 // Missing, empty (409) or rate-limited repos yield null: the UI omits the commit rather than inventing one.

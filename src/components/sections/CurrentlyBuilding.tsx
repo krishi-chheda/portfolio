@@ -18,12 +18,15 @@ interface ActiveBuild {
   activeWork: string[];
 }
 
+// Status comes from data.ts so it can't drift from the Projects section.
+const statusOf = (title: string) => projectsData.find((p) => p.title === title)?.overview.status ?? "";
+
 // Roadmap items come from each project's README; add activeWork only for verified in-progress tasks.
 const activeBuilds: ActiveBuild[] = [
   {
     name: "AccessVision",
     currentFocus: "Grounded visual question answering and predictable latency under concurrent load.",
-    developmentStatus: "Active Refinement",
+    developmentStatus: statusOf("AccessVision"),
     roadmap: [
       "Port YOLO to ONNX and run models in the browser via WebAssembly.",
       "Navigation mode that announces path obstructions and depth changes.",
@@ -34,7 +37,7 @@ const activeBuilds: ActiveBuild[] = [
   {
     name: "ClinicalBrief",
     currentFocus: "Human-reviewed AI findings, a grounded local-LLM copilot and record search over synthetic FHIR data.",
-    developmentStatus: "Research Prototype",
+    developmentStatus: statusOf("ClinicalBrief"),
     roadmap: [
       "Embedding-based semantic search over clinical records.",
       "Evaluate extraction against labelled data before reporting any accuracy figure."

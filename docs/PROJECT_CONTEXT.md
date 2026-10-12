@@ -31,7 +31,7 @@ Principle: *featured projects tell the story, everything else supports it.*
 **Supporting repos** (Ask Krishi and README only, never flagship cards): AuraLens-AI, f1-telemetry-ai-dashboard, fastapi_backend (BP prediction), video-splitter.
 
 ## Stack
-- **Core:** Next.js 16.2.9 (App Router, Turbopack), React 19.2.4, TypeScript 5 strict, Tailwind v4.
+- **Core:** Next.js 16.3.8 (App Router, Turbopack; upgraded from 16.2.9 for the image-optimizer/cache advisories), React 19.2.4, TypeScript 5 strict, Tailwind v4.
 - **Motion and UI:** gsap 3.15.0 (core only, the only animation library), lucide-react, clsx + tailwind-merge.
 - **Delivery:** deploys on Vercel; git remote `krishi-chheda/portfolio`.
 - **Next.js docs:** per `AGENTS.md`, read `node_modules/next/dist/docs/` before writing Next-specific code.
@@ -63,18 +63,22 @@ src/app/api/chat/route.ts   POST. gpt-4o-mini (temp 0.2) if OPENAI_API_KEY, else
 src/app/api/github/route.ts GET. Repos from data.ts githubUrls + latest commit; Next data cache 15 min; 503/stale on failure
 src/components/sections/*   Hero, Projects, Experience (#career), Leadership, CurrentlyBuilding, SystemMap, Contact
 src/components/Navbar.tsx   Top bar: section links (active via IntersectionObserver), ⌘K, UTC clock, mobile menu
-src/lib/data.ts             Single content source (projects, impactLog, experience, aiKnowledgeBase, boot lines)
+src/lib/data.ts             Single content source (projects, impactLog, experience, aiKnowledgeBase, boot lines,
+                            CONTACT_EMAIL, SYSTEM_VERSION — the only copies of the email and the UI version string)
 src/lib/topology.ts         System Map nodes/edges (derived from data.ts) + fixed 3D positions
 src/lib/navigation.ts       Command alias registry (Ask Krishi / palette) → scroll, select-project, README
 src/lib/motion.ts, github.ts  Motion constants; shared GitHub telemetry types/helpers
 src/hooks/useTerminalReveal.ts, useGitHubTelemetry.ts, useChat.ts, useReducedMotion.ts, ...
 ```
 - **Events:** `open-ai-chat` opens the chat; `select-project` {id} is handled by Projects.
+- **Deep links:** `/#section` from any page or a shared URL scrolls there once boot clears (BootWrapper; boot locks scrolling, so the browser's own hash jump is lost). `/?chat=1` opens Ask Krishi after boot and strips the param (the README tile uses it).
+- **Navigation:** in-app page changes go through `router.push` (`executeNavigationCommand(cmd, router.push)`), never `window.location` (Next 16.3 lint rule).
 - **Section ids:** `hero`, `projects`, `career`, `leadership`, `currently-building`, `system-map`, `contact`.
 
 ## System Map (Phase 5)
 - **Content:** 18 nodes (7 domains, 4 projects, 2 roles, 5 shared tech) and 29 edges. Tech links are computed from `techStack`.
 - **Positions:** fixed 3D, no physics, nothing random at runtime.
+- **Integrity:** `topology.ts` throws on duplicate node ids or edges to missing nodes, so `npm run build` (and the dev overlay) fails instead of silently dropping them.
 - **View changes:** dragging past 4px, arrow keys and "reset view" are the ONLY things that change the view.
 - **Highlighting:** hover, focus, click and the legend only change highlighting (opacity and colour). Verified in the browser: selecting a node moves zero nodes.
 - **Mobile:** below 640px only the highlighted node's neighbours, or just the projects, are labelled. Labels for nodes in the right 40% flip to the node's left side to stay inside the panel.
@@ -122,7 +126,9 @@ src/hooks/useTerminalReveal.ts, useGitHubTelemetry.ts, useChat.ts, useReducedMot
 - **Bundle size:** done; framer-motion was removed and the homepage went from 294 KB to 259 KB gzipped JS.
 - **LCP:** content stays at opacity 0 until the boot screen clears (about 2s, by design from the brief), which delays LCP. That's a product trade-off.
 - **`/now`:** still says "Last updated: June 2026"; its personal content (hobbies, reading) is unverified.
-- **Ask Krishi** is single-turn. The live gpt-4o-mini path is untested locally (no key).
+- **Ask Krishi** is single-turn. The live gpt-4o-mini path is untested locally (no key). Both upstream fetches (OpenAI, GitHub) time out after 10s.
+- **Ask Krishi fallback routing:** project + topic word (architecture / challenge / trade-offs / why built / what's next) answers from that project's data.ts field; natural shortcuts (copilot, p95, voice, lane, supabase…) pin both; "which project uses X" answers from techStack. Every suggested follow-up must be answerable: `check:chat` walks them all and fails on the generic reply.
+- **Awaiting owner:** consolidating Leadership roles, career commits, README open-source list and palette commands into data.ts (wording differs, so it changes visible copy); dead code (GridBackground.tsx, useTypingEffect.ts, .animate-blink, unused public/*.svg); `apple-design-skill` gitlink without .gitmodules; whether to link /now or drop it.
 - **Unverified personal claims:** "300+ students across 5+ events", "40% digital interaction", "largest data society", the Mysahayak 30%/20% figures, and Sacred Heart's 50+ interactions per shift.
 
 ## Verification commands
@@ -130,7 +136,7 @@ src/hooks/useTerminalReveal.ts, useGitHubTelemetry.ts, useChat.ts, useReducedMot
 npx tsc --noEmit     # passes
 npm run lint         # passes (0 problems)
 npm run build        # passes; all pages static except the two API routes
-npm run check:chat   # 20 chat routing/validation/rate-limit checks against a running server (fallback mode)
+npm run check:chat   # 26 routing/validation/rate-limit checks + a walk of every suggested follow-up (fallback mode, needs the dev server)
 npm run dev          # .claude/launch.json "dev" on :3000
 ```
 No automated UI tests. Browser checks are manual via the preview tools.

@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent, type PointerEvent } from "react";
 import gsap from "gsap";
+import { useRouter } from "next/navigation";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { useTerminalReveal } from "@/hooks/useTerminalReveal";
 import { useBooted } from "@/components/boot/BootWrapper";
@@ -406,6 +407,7 @@ export default function SystemMap() {
 }
 
 function NodeDetails({ node, onSelect }: { node: TopoNode; onSelect: (id: string) => void }) {
+  const router = useRouter();
   const g = GROUP[node.group];
   const p = node.project;
   const link = "text-accent hover:text-accent-2 transition-colors duration-150 cursor-pointer";
@@ -433,7 +435,7 @@ function NodeDetails({ node, onSelect }: { node: TopoNode; onSelect: (id: string
             ))}
           </ul>
           <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1">
-            <button type="button" onClick={() => executeNavigationCommand(p.id)} className={link}>open in projects →</button>
+            <button type="button" onClick={() => executeNavigationCommand(p.id, router.push)} className={link}>open in projects →</button>
             {p.githubUrl && <a href={p.githubUrl} target="_blank" rel="noopener noreferrer" className={link}>github ↗</a>}
             {p.liveUrl && <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" className={link}>live ↗</a>}
           </div>

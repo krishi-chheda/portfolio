@@ -3,11 +3,10 @@
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import gsap from "gsap";
 import Link from "next/link";
-import { currentProcesses, impactLog } from "@/lib/data";
+import { currentProcesses, impactLog, CONTACT_EMAIL } from "@/lib/data";
 import { useBooted } from "@/components/boot/BootWrapper";
 import { DUR, EASE, MOTION_OK, RISE, scrambleText } from "@/lib/motion";
 
-const CONTACT_EMAIL = "krishichheda10@gmail.com";
 
 const PILLS = [
   { label: "projects", href: "/#projects" },

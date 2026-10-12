@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import CommandPalette from "@/components/ui/CommandPalette";
+import { SYSTEM_VERSION } from "@/lib/data";
 
 const NAV_LINKS = [
   { id: "projects", label: "projects" },
@@ -69,11 +70,14 @@ export default function Navbar() {
 
   // Track which section is in the middle of the viewport
   useEffect(() => {
-    const sections = NAV_LINKS.map((l) => document.getElementById(l.id)).filter((el): el is HTMLElement => el !== null);
+    // Hero is observed too, so scrolling back to the top clears the active link (shown as "ready")
+    const sections = ["hero", ...NAV_LINKS.map((l) => l.id)]
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) setActive(entry.target.id);
+          if (entry.isIntersecting) setActive(entry.target.id === "hero" ? "" : entry.target.id);
         }
       },
       { rootMargin: "-45% 0px -50% 0px" }
@@ -96,7 +100,7 @@ export default function Navbar() {
           <Link href="/" className="font-bold text-ink hover:text-accent transition-colors duration-150 shrink-0">
             <span className="text-accent">{"//"}</span> krishi.os
           </Link>
-          <span className="hidden sm:inline text-ink-faint">v.2026.10</span>
+          <span className="hidden sm:inline text-ink-faint">{SYSTEM_VERSION}</span>
           <span className="hidden sm:inline text-ink-faint truncate">{active ? `~/${active}` : "ready"}</span>
         </div>
 

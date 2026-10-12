@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { bootLinesData } from "@/lib/data";
+import { SYSTEM_VERSION, bootLinesData } from "@/lib/data";
 import { scrambleText } from "@/lib/motion";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 
@@ -39,6 +39,11 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
   useEffect(() => {
     onCompleteRef.current = onComplete;
   });
+
+  // Reduced motion: there's no animation to wait for, so hand over to the site straight away
+  useEffect(() => {
+    if (prefersReducedMotion) onCompleteRef.current();
+  }, [prefersReducedMotion]);
 
   // Client-only timestamp: set after mount so server and client markup match during hydration
   useEffect(() => {
@@ -186,7 +191,7 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
       <div className="relative flex justify-between items-center px-6 md:px-12 py-4 border-b border-rule text-xs uppercase tracking-wider">
         <div className="flex items-center gap-3">
           <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-          <span className="font-bold text-accent">KRISHI.OS V1.0.4</span>
+          <span className="font-bold text-accent">KRISHI.OS {SYSTEM_VERSION.toUpperCase()}</span>
           <span className="hidden md:inline text-ink-faint">| AI ENGINEER PORTFOLIO SYSTEM</span>
         </div>
         <div className="hidden md:block text-ink-faint">{bootTime}</div>

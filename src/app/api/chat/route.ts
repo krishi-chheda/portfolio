@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { additionalProjectsData, aiKnowledgeBase, currentProcesses, experienceData, projectsData } from "@/lib/data";
+import { additionalProjectsData, aiKnowledgeBase, currentProcesses, experienceData, projectsData, CONTACT_EMAIL } from "@/lib/data";
 
 const MAX_MESSAGE_LENGTH = 500;
-const CONTACT_EMAIL = "krishichheda10@gmail.com";
 
 // Navigation commands the assistant may suggest. Each must match an alias in src/lib/navigation.ts;
 // anything else the model emits is dropped.
@@ -46,9 +45,28 @@ function followUps(questions: string[]): string {
 
 // --- Fallback answers, all built from src/lib/data.ts so they never drift from the site ---
 
-function projectReply(id: string, questions: string[]): string {
+// Per-project questions the fallback can answer, each mapped to a data.ts field (see TOPICS below)
+type DetailField = "architectureExplain" | "challenge" | "tradeOffs" | "whyBuilt" | "futureImprovement";
+
+const TOPIC_QUESTIONS: Record<DetailField, (title: string) => string> = {
+  architectureExplain: (t) => `What is ${t}'s architecture?`,
+  challenge: (t) => `What was the hardest challenge in ${t}?`,
+  tradeOffs: (t) => `What trade-offs did ${t} make?`,
+  whyBuilt: (t) => `Why did Krishi build ${t}?`,
+  futureImprovement: (t) => `What's next for ${t}?`,
+};
+
+function topicQuestions(title: string, except?: DetailField): string[] {
+  return (Object.keys(TOPIC_QUESTIONS) as DetailField[])
+    .filter((f) => f !== except)
+    .slice(0, 3)
+    .map((f) => TOPIC_QUESTIONS[f](title));
+}
+
+function projectReply(id: string): string {
   const p = projectsData.find((proj) => proj.id === id);
   if (!p) return "";
+  const questions = topicQuestions(p.title);
   const links = [p.githubUrl && `- Code: ${p.githubUrl}`, p.liveUrl && `- Live demo: ${p.liveUrl}`].filter(Boolean);
   return `${p.title}: ${p.description}
 
@@ -59,6 +77,24 @@ Key details:
 ${links.join("\n")}
 
 ${followUps(questions)}`;
+}
+
+const TOPIC_LABEL: Record<DetailField, string> = {
+  architectureExplain: "how it works",
+  challenge: "the hardest challenge",
+  tradeOffs: "the trade-offs",
+  whyBuilt: "why Krishi built it",
+  futureImprovement: "what's next",
+};
+
+function detailReply(id: string, field: DetailField): string {
+  const p = projectsData.find((proj) => proj.id === id);
+  if (!p) return "";
+  const raw = p[field] ?? "";
+  const text = /\b(I|my|me)\b/.test(raw) ? `In Krishi's words: "${raw}"` : raw;
+  return `${p.title}, ${TOPIC_LABEL[field]}: ${text}
+
+${followUps(topicQuestions(p.title, field))}`;
 }
 
 function supportingReply(id: string): string {
@@ -81,6 +117,74 @@ function rolesReply(ids: string[], intro: string, questions: string[]): string {
 
 const allTech = [...new Set(projectsData.flatMap((p) => p.techStack))];
 
+// Searchable names per tech: "PostgreSQL (Supabase)" -> postgresql, supabase; "YOLOv8" -> yolov8, yolo
+function techNames(tech: string): string[] {
+  const names = tech.toLowerCase().split(/[()]/).map((n) => n.trim()).filter(Boolean);
+  return [...new Set(names.flatMap((n) => [n, n.replace(/v\d+$/, "")]))];
+}
+
+function techLookupReply(query: string): string | null {
+  if (!mentions(query, ["which", "what project", "what projects"])) return null;
+  const techs = allTech.filter((t) => mentions(query, techNames(t)));
+  if (!techs.length) return null;
+  const used = projectsData.filter((p) => p.techStack.some((t) => techs.includes(t)));
+  return `${techs.join(" / ")} is used in:
+${used.map((p) => `- ${p.title}: ${p.subtitle}`).join("\n")}
+
+${followUps(used.slice(0, 3).map((p) => TOPIC_QUESTIONS.architectureExplain(p.title)))}`;
+}
+
+const PROJECT_TERMS: Record<string, string[]> = {
+  clinicalbrief: ["clinicalbrief", "clinical brief", "clinical", "fhir", "healthcare"],
+  studenthub: ["studenthub", "student hub", "student portal"],
+  "traffic-ai": ["traffic", "traffic ai", "jetson", "jetson nano", "signal timing", "congestion"],
+  "accessible-vision": ["accessvision", "access vision", "accessible vision", "accessibility", "visually impaired", "blind"],
+};
+
+const PROJECT_COMMAND: Record<string, string> = {
+  clinicalbrief: COMMANDS.clinicalbrief,
+  studenthub: COMMANDS.studenthub,
+  "traffic-ai": COMMANDS.traffic,
+  "accessible-vision": COMMANDS.accessvision,
+};
+
+// A project + one of these terms answers from that project's matching data.ts field. First match wins.
+const TOPICS: { field: DetailField; terms: string[] }[] = [
+  { field: "futureImprovement", terms: ["next for", "future", "roadmap", "improve", "improvement", "plans"] },
+  { field: "tradeOffs", terms: ["trade-off", "trade-offs", "tradeoff", "tradeoffs", "limitation", "limitations", "downside", "choose", "chose", "chosen"] },
+  { field: "challenge", terms: ["challenge", "hardest", "difficult", "difficulty"] },
+  { field: "whyBuilt", terms: ["why did krishi build", "why build", "why was it built", "motivation"] },
+  { field: "architectureExplain", terms: ["architecture", "how does it work", "how it works", "pipeline", "under the hood"] },
+];
+
+// Terms specific enough to imply one project and topic on their own. Keep generic words ("latency", "voice",
+// "coordinate", "supabase") out: they show up in ordinary questions and would misroute them. First match wins.
+const SHORTCUTS: { terms: string[]; id: string; field: DetailField }[] = [
+  { terms: ["local model", "local llm"], id: "clinicalbrief", field: "tradeOffs" },
+  { terms: ["copilot"], id: "clinicalbrief", field: "challenge" },
+  { terms: ["p95", "load test"], id: "accessible-vision", field: "challenge" },
+  { terms: ["voice-first", "yolov8", "blip"], id: "accessible-vision", field: "architectureExplain" },
+  { terms: ["lane density", "green time"], id: "traffic-ai", field: "architectureExplain" },
+];
+
+const namedProject = (query: string) => Object.keys(PROJECT_TERMS).find((k) => mentions(query, PROJECT_TERMS[k]));
+
+// A project named in the question + a topic word
+function projectDetail(query: string): { reply: string; command: string } | null {
+  const id = namedProject(query);
+  const topic = id && TOPICS.find((t) => mentions(query, t.terms));
+  if (!id || !topic) return null;
+  return { reply: detailReply(id, topic.field), command: PROJECT_COMMAND[id] };
+}
+
+// Shortcut terms, unless the question names a different project (the named project wins)
+function shortcutDetail(query: string): { reply: string; command: string } | null {
+  const shortcut = SHORTCUTS.find((sc) => mentions(query, sc.terms));
+  const named = namedProject(query);
+  if (!shortcut || (named && named !== shortcut.id)) return null;
+  return { reply: detailReply(shortcut.id, shortcut.field), command: PROJECT_COMMAND[shortcut.id] };
+}
+
 interface Intent {
   terms: string[];
   reply: () => string;
@@ -97,23 +201,30 @@ ${followUps(["What are Krishi's featured projects?", "What is Krishi building no
     command: COMMANDS.readme,
   },
   {
-    terms: ["clinicalbrief", "clinical brief", "clinical", "fhir", "healthcare"],
-    reply: () => projectReply("clinicalbrief", ["How does human review of AI findings work?", "How does the copilot stay grounded?", "Why does the copilot only use a local model?"]),
+    terms: ["live demo", "demo", "demos", "live portal", "live site", "try it", "try the"],
+    reply: () => `Live demos you can try:
+${projectsData.filter((p) => p.liveUrl).map((p) => `- ${p.title}: ${p.liveUrl}`).join("\n")}
+
+${followUps(projectsData.filter((p) => p.liveUrl).map((p) => TOPIC_QUESTIONS.architectureExplain(p.title)))}`,
+  },
+  {
+    terms: PROJECT_TERMS["clinicalbrief"],
+    reply: () => projectReply("clinicalbrief"),
     command: COMMANDS.clinicalbrief,
   },
   {
-    terms: ["studenthub", "student hub", "student portal"],
-    reply: () => projectReply("studenthub", ["Which external APIs does StudentHub use?", "Why was Supabase chosen?", "Can I try the live portal?"]),
+    terms: PROJECT_TERMS["studenthub"],
+    reply: () => projectReply("studenthub"),
     command: COMMANDS.studenthub,
   },
   {
-    terms: ["traffic", "traffic ai", "jetson", "jetson nano", "signal timing", "congestion"],
-    reply: () => projectReply("traffic-ai", ["How does lane density decide green time?", "Why run detection on a Jetson Nano?", "How could multiple intersections coordinate?"]),
+    terms: PROJECT_TERMS["traffic-ai"],
+    reply: () => projectReply("traffic-ai"),
     command: COMMANDS.traffic,
   },
   {
-    terms: ["accessvision", "access vision", "accessible vision", "accessibility", "visually impaired", "blind"],
-    reply: () => projectReply("accessible-vision", ["How does grounding with YOLOv8 crops reduce hallucinations?", "How was p95 latency cut by 73% under load?", "How does the voice-first interface work?"]),
+    terms: PROJECT_TERMS["accessible-vision"],
+    reply: () => projectReply("accessible-vision"),
     command: COMMANDS.accessvision,
   },
   { terms: ["auralens", "photo culling", "photography"], reply: () => supportingReply("auralens-ai") },
@@ -138,7 +249,7 @@ ${followUps(["Is Krishi open to opportunities?", "What are Krishi's featured pro
     command: COMMANDS.leadership,
   },
   {
-    terms: ["job", "jobs", "hire", "hiring", "open to work", "available", "availability", "opportunity", "opportunities", "role", "roles", "position", "internship", "visa", "sponsorship", "relocate", "relocation", "salary"],
+    terms: ["job", "jobs", "hire", "hiring", "interview", "interviews", "open to work", "available", "availability", "opportunity", "opportunities", "role", "roles", "position", "internship", "visa", "sponsorship", "relocate", "relocation", "salary"],
     reply: () => `Krishi is open to opportunities in ${currentProcesses.targetRoles.join(", ")}. He graduates from Monash University's Master of Artificial Intelligence in ${currentProcesses.graduation} and is based in ${currentProcesses.location}.
 
 For details such as start dates, work rights or arrangements, email him directly at ${CONTACT_EMAIL}.
@@ -159,11 +270,13 @@ ${followUps(["What are Krishi's featured projects?", "What is Krishi building no
     command: COMMANDS.career,
   },
   {
-    terms: ["building", "working on", "current projects", "currently", "right now", "latest"],
+    terms: ["building", "working on", "current projects", "currently", "right now", "latest", "roadmap", "learning"],
     reply: () => `Krishi is currently working on:
 ${currentProcesses.running.map((p) => `- ${p.name}: ${p.description}`).join("\n")}
 
-${followUps(["Tell me about AccessVision", "Tell me about ClinicalBrief", "What is on Krishi's roadmap?"])}`,
+He is also learning: ${currentProcesses.learning.join(", ")}.
+
+${followUps(["Tell me about AccessVision", "Tell me about ClinicalBrief", "What's next for ClinicalBrief?"])}`,
     command: COMMANDS.building,
   },
   {
@@ -177,7 +290,7 @@ ${followUps(["Tell me about AccessVision", "Tell me about ClinicalBrief", "Tell 
     terms: ["skill", "skills", "tech stack", "stack", "technologies", "technology", "languages", "language", "python", "typescript", "javascript", "react", "nextjs", "next.js", "fastapi", "yolo", "opencv", "computer vision"],
     reply: () => `Technologies Krishi has used across his featured projects: ${allTech.join(", ")}.
 
-${followUps(["Which project uses YOLO?", "Tell me about ClinicalBrief's architecture", "What is Krishi building now?"])}`,
+${followUps(["Which project uses YOLO?", "What is ClinicalBrief's architecture?", "What is Krishi building now?"])}`,
     command: COMMANDS.systemMap,
   },
   {
@@ -189,6 +302,12 @@ ${followUps(["What are Krishi's featured projects?", "What are his leadership ro
 ];
 
 function fallbackReply(query: string): { reply: string; command?: string } {
+  const detail = projectDetail(query);
+  if (detail) return detail;
+  const tech = techLookupReply(query);
+  if (tech) return { reply: tech, command: COMMANDS.systemMap };
+  const shortcut = shortcutDetail(query);
+  if (shortcut) return shortcut;
   const intent = INTENTS.find((i) => mentions(query, i.terms));
   if (intent) return { reply: intent.reply(), command: intent.command };
   return {
@@ -240,6 +359,8 @@ async function llmReply(message: string): Promise<string> {
       temperature: 0.2,
       max_tokens: 450,
     }),
+    // A hung upstream would otherwise hold the request open; on timeout the catch falls back to local answers
+    signal: AbortSignal.timeout(10_000),
   });
   if (!response.ok) throw new Error(`OpenAI returned status ${response.status}`);
   const data = await response.json();

@@ -61,7 +61,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistMono.variable} h-full antialiased scroll-smooth`}
+      className={`${geistMono.variable} h-full antialiased motion-safe:scroll-smooth`}
     >
       <body className="min-h-full bg-bg text-ink flex flex-col font-mono overflow-x-hidden">
         <div className="page-frame" aria-hidden="true" />

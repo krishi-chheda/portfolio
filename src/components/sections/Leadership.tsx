@@ -15,7 +15,7 @@ const roles = [
     progression: ["Media & Marketing Director · Jan 2026 – May 2026", "Media & Marketing Officer · Oct 2025 – Jan 2026"],
     points: [
       ["Marketing Leadership", "Led visual branding, content publication, and digital campaign schedules for the largest specialized data student society at Monash."],
-      ["Event Strategy", "Co-designed promotions and logistical coordination for developer bootcamps, winter hackathons, and corporate networking nights."],
+      ["Event Strategy", "Co-designed promotions and logistical coordination for developer bootcamps, campus hackathons, and corporate networking nights."],
       ["Cross-Functional Collaboration", "Managed pipelines of copywriters, designers, and web developers to build and distribute marketing assets."],
     ],
     outcome: "Grew AI workshop reach to 300+ students across 5+ events and boosted overall digital interaction metrics by 40%.",

@@ -34,6 +34,10 @@ export default function BootWrapper({ children }: BootWrapperProps) {
     } else {
       document.body.classList.remove("overflow-hidden", "h-full");
       document.documentElement.classList.remove("overflow-hidden", "h-full");
+      // Deep links (/#career from another page or a shared URL) can't scroll while boot locks the page, so jump there now
+      // Raw hash, no decodeURIComponent: section ids are plain ASCII, and a malformed escape (e.g. #%E0%A4%A) would throw
+      const target = window.location.hash && document.getElementById(window.location.hash.slice(1));
+      if (target) target.scrollIntoView({ behavior: "instant", block: "start" });
     }
     return () => {
       document.body.classList.remove("overflow-hidden", "h-full");

@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import gsap from "gsap";
+import { useRouter } from "next/navigation";
 import { Bot, X, Send, Terminal as TermIcon } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
 import { executeNavigationCommand } from "@/lib/navigation";
 import Button from "@/components/ui/Button";
 import { usePresence } from "@/hooks/usePresence";
-import { DUR, EASE, MOTION_OK, RISE } from "@/lib/motion";
+import { useBooted } from "@/components/boot/BootWrapper";
+import { DUR, EASE, MOTION_OK, RISE, scrollBehavior } from "@/lib/motion";
 
 const LAUNCHER_MOTION = { from: { scale: 0.8, opacity: 0 }, enterDuration: 0.2 } as const;
 const PANEL_MOTION = {
@@ -57,7 +59,11 @@ export default function ChatBubble() {
   const { messages, loading, sendMessage } = useChat(
     "Hi, I'm the KRISHI.OS assistant. Ask about Krishi's projects, his Master of AI at Monash, his leadership roles, or how to reach him."
   );
+  const booted = useBooted();
+  const router = useRouter();
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const wasOpen = useRef(false);
   const logRef = useRef<HTMLDivElement>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
   const prevCount = useRef(messages.length);
@@ -85,9 +91,34 @@ export default function ChatBubble() {
     return () => window.removeEventListener("open-ai-chat", handleOpenChat);
   }, []);
 
+  // Deep link from other pages (e.g. the README tile): /?chat=1 opens the chat once boot clears, then the param is dropped
+  useEffect(() => {
+    if (!booted) return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("chat") !== "1") return;
+    url.searchParams.delete("chat");
+    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsOpen(true);
+  }, [booted]);
+
+  // Focus moves into the panel on open and back to the launcher on close; Escape closes
   useEffect(() => {
     if (isOpen) {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      wasOpen.current = true;
+      inputRef.current?.focus();
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setIsOpen(false);
+      };
+      window.addEventListener("keydown", onKey);
+      return () => window.removeEventListener("keydown", onKey);
+    }
+    if (wasOpen.current) launcherRef.current?.focus();
+  }, [isOpen, launcherRef]);
+
+  useEffect(() => {
+    if (isOpen) {
+      chatEndRef.current?.scrollIntoView({ behavior: scrollBehavior() });
     }
   }, [messages, isOpen, loading]);
 
@@ -121,7 +152,7 @@ export default function ChatBubble() {
           <div
             ref={panelRef}
             style={{ transformOrigin: "bottom right" }}
-            className="w-[90vw] sm:w-[380px] h-[500px] overflow-hidden bg-bg border border-rule flex flex-col mb-2"
+            className="w-[90vw] sm:w-[380px] h-[min(500px,calc(100dvh-6rem))] overflow-hidden bg-bg border border-rule flex flex-col mb-2"
           >
             {/* Header bar */}
             <div className="bg-bg-2 px-4 py-3 flex items-center justify-between border-b border-rule">
@@ -167,7 +198,7 @@ export default function ChatBubble() {
                           </span>
                           <button
                             type="button"
-                            onClick={() => executeNavigationCommand(msg.suggestedCommand!)}
+                            onClick={() => executeNavigationCommand(msg.suggestedCommand!, router.push)}
                             className="text-accent hover:text-accent-2 hover:translate-x-0.5 active:scale-[0.97] transition-[color,translate,scale] duration-150 ease-out motion-reduce:transition-none flex items-center space-x-1 cursor-pointer text-left"
                           >
                             <span>&gt; {msg.suggestedCommand}</span>
@@ -226,6 +257,7 @@ export default function ChatBubble() {
               className="p-3 border-t border-rule flex items-center space-x-2"
             >
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}

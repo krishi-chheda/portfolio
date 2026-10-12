@@ -2,7 +2,8 @@
 
 import { useEffect, useLayoutEffect, useState, useRef } from "react";
 import gsap from "gsap";
-import { DUR, EASE, MOTION_OK } from "@/lib/motion";
+import { useRouter } from "next/navigation";
+import { DUR, EASE, MOTION_OK, scrollBehavior } from "@/lib/motion";
 import { Search, Terminal, ArrowRight, X } from "lucide-react";
 import { usePresence } from "@/hooks/usePresence";
 
@@ -35,6 +36,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   // The panel only mounts with the overlay, so its own `mounted` flag is unused; its ref doubles as the click-outside container.
   const { ref: containerRef } = usePresence<HTMLDivElement>(isOpen, PANEL_MOTION);
   const listRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const commands: CommandItem[] = [
     {
@@ -42,7 +44,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       name: "README.md",
       description: "cat README.md // Open KRISHI.OS operating manual & onboarding guide (alias: man krishi)",
       action: () => {
-        window.location.assign("/readme");
+        router.push("/readme");
       }
     },
     {
@@ -50,7 +52,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       name: "projects",
       description: "ls projects/ // View folder directory of builder applications",
       action: () => {
-        document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
+        document.getElementById("projects")?.scrollIntoView({ behavior: scrollBehavior() });
       }
     },
     {
@@ -58,7 +60,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       name: "system-map",
       description: "open system-map // Open interactive knowledge graph mapping tech & projects",
       action: () => {
-        document.getElementById("system-map")?.scrollIntoView({ behavior: "smooth" });
+        document.getElementById("system-map")?.scrollIntoView({ behavior: scrollBehavior() });
       }
     },
     {
@@ -66,7 +68,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       name: "career",
       description: "git log --career // View academic, leadership, and volunteering history",
       action: () => {
-        document.getElementById("career")?.scrollIntoView({ behavior: "smooth" });
+        document.getElementById("career")?.scrollIntoView({ behavior: scrollBehavior() });
       }
     },
     {
@@ -74,7 +76,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       name: "currently-building",
       description: "./currently-building --status // View active developer pipeline",
       action: () => {
-        document.getElementById("currently-building")?.scrollIntoView({ behavior: "smooth" });
+        document.getElementById("currently-building")?.scrollIntoView({ behavior: scrollBehavior() });
       }
     },
     {
@@ -82,7 +84,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       name: "leadership",
       description: "cat leadership.md // Display campus directorship & community strategy details",
       action: () => {
-        document.getElementById("leadership")?.scrollIntoView({ behavior: "smooth" });
+        document.getElementById("leadership")?.scrollIntoView({ behavior: scrollBehavior() });
       }
     },
     {
@@ -90,7 +92,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       name: "resume",
       description: "cat resume // Scroll to academic & industry experience logs",
       action: () => {
-        document.getElementById("career")?.scrollIntoView({ behavior: "smooth" });
+        document.getElementById("career")?.scrollIntoView({ behavior: scrollBehavior() });
       }
     },
     {
@@ -98,7 +100,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       name: "contact",
       description: "ssh contact@krishi.os // Send message or view direct emails",
       action: () => {
-        document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+        document.getElementById("contact")?.scrollIntoView({ behavior: scrollBehavior() });
       }
     },
     {
@@ -113,13 +115,13 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       { id: "accessible-vision", label: "Inspect AI Accessibility platform" },
       { id: "clinicalbrief", label: "Inspect Healthcare AI platform" },
       { id: "studenthub", label: "Inspect Melbourne Student services guide" },
-      { id: "traffic-ai", label: "Inspect computer vision queue management system" }
+      { id: "traffic-ai", label: "Inspect density-based traffic signal scheduling system" }
     ].map(({ id, label }) => ({
       id,
       name: id,
       description: `cat projects/${id}/overview.md // ${label}`,
       action: () => {
-        document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
+        document.getElementById("projects")?.scrollIntoView({ behavior: scrollBehavior() });
         window.dispatchEvent(new CustomEvent("select-project", { detail: { id } }));
       }
     }))
@@ -219,6 +221,11 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     return () => mm.revert();
   }, [isOpen]);
 
+  // Keep the arrow-key selection visible inside the scrolling list
+  useEffect(() => {
+    if (isOpen) document.getElementById(`cmd-${filteredCommands[activeIndex]?.id}`)?.scrollIntoView({ block: "nearest" });
+  }, [isOpen, activeIndex, filteredCommands]);
+
   const kbd = "inline-block border border-rule px-1.5 py-px text-[11px] leading-none text-ink-soft";
 
   return (
@@ -256,7 +263,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                   setSearch(e.target.value);
                   setActiveIndex(0);
                 }}
-                placeholder="Type a command (e.g. about, traffic-ai)..."
+                placeholder="Type a command (e.g. career, traffic-ai)..."
                 className="flex-1 bg-transparent text-sm text-ink placeholder:text-ink-faint focus:outline-none"
               />
               <span className={`${kbd} mr-3 select-none`}>ESC</span>

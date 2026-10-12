@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { Mail, ArrowUp } from "lucide-react";
 import { Github, Linkedin } from "@/components/ui/Icons";
+import { scrollBehavior } from "@/lib/motion";
+import { CONTACT_EMAIL } from "@/lib/data";
 
 const iconLink = "p-1 text-ink-faint hover:text-accent transition-colors duration-150";
 
 export default function Footer() {
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: scrollBehavior() });
   };
 
   return (
@@ -28,14 +30,14 @@ export default function Footer() {
             <a href="https://linkedin.com/in/krishi-chheda" target="_blank" rel="noopener noreferrer" className={iconLink} aria-label="LinkedIn">
               <Linkedin className="w-4 h-4" />
             </a>
-            <a href="mailto:krishichheda10@gmail.com" className={iconLink} aria-label="Email">
+            <a href={`mailto:${CONTACT_EMAIL}`} className={iconLink} aria-label="Email">
               <Mail className="w-4 h-4" />
             </a>
           </div>
           <Link href="/readme" className="hover:text-accent transition-colors duration-150">
             [README.md]
           </Link>
-          <span>© {new Date().getFullYear()} • Built with Next.js & Framer Motion</span>
+          <span>© {new Date().getFullYear()} • Built with Next.js & GSAP</span>
           <button
             type="button"
             onClick={scrollToTop}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Terminal, ExternalLink } from "lucide-react";
+import { SYSTEM_VERSION } from "@/lib/data";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -43,7 +44,7 @@ const openSource = [
   },
 ];
 
-const stack = ["Next.js 16 (App Router)", "React 19", "TypeScript", "Tailwind CSS v4", "Framer Motion 12", "Lucide Icons"];
+const stack = ["Next.js 16 (App Router)", "React 19", "TypeScript", "Tailwind CSS v4", "GSAP 3", "Lucide Icons"];
 
 const principles = [
   ["Curiosity over Decoration:", "Every visual element serves an interactive purpose. If it doesn't respond to user action, it doesn't belong in the core interface."],
@@ -119,19 +120,14 @@ export default function ReadmePage() {
       name: "./ask-krishi",
       command: "./ask-krishi",
       desc: "Chat with an AI assistant grounded in my portfolio data.",
-      action: () => {
-        window.location.assign("/");
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent("open-ai-chat"));
-        }, 800);
-      },
+      href: "/?chat=1",
     },
   ];
 
   return (
     <>
       <Navbar />
-      <main ref={revealRef} className="relative min-h-screen pt-28 pb-16 flex flex-col justify-between overflow-x-hidden font-mono">
+      <main ref={revealRef} className="relative flex-1 pt-28 pb-16 overflow-x-hidden font-mono">
         <div className="max-w-4xl mx-auto px-6 w-full relative z-10">
           {/* Back Nav */}
           <Link
@@ -174,7 +170,7 @@ export default function ReadmePage() {
                   <h1 className="text-2xl md:text-3xl font-bold text-ink tracking-tight flex items-center gap-3">
                     KRISHI.OS
                     <span className="text-[11px] border border-accent text-accent px-2 py-0.5 font-normal tracking-normal">
-                      v0.1.0-stable
+                      {SYSTEM_VERSION}
                     </span>
                   </h1>
                   <p className={`${label} mt-2`}>DEVELOPER MANUAL &amp; ONBOARDING SCHEMATIC</p>
@@ -235,17 +231,10 @@ export default function ReadmePage() {
                     <div key={item.name} className={tile}>
                       <div>
                         <div className="flex items-center justify-between gap-3">
-                          {item.action ? (
-                            <button type="button" onClick={item.action} className={tileLink}>
-                              <span>{item.name}</span>
-                              <ExternalLink size={11} className="text-ink-faint" />
-                            </button>
-                          ) : (
-                            <Link href={item.href || "#"} className={tileLink}>
-                              <span>{item.name}</span>
-                              <ExternalLink size={11} className="text-ink-faint" />
-                            </Link>
-                          )}
+                          <Link href={item.href} className={tileLink}>
+                            <span>{item.name}</span>
+                            <ExternalLink size={11} className="text-ink-faint" />
+                          </Link>
                           <span className={`${tileMeta} hidden group-hover:inline`}>{item.command}</span>
                         </div>
                         <p className={tileDesc}>{item.desc}</p>
@@ -343,8 +332,8 @@ export default function ReadmePage() {
             </div>
           </div>
         </div>
-        <Footer />
       </main>
+      <Footer />
     </>
   );
 }

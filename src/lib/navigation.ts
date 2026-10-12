@@ -1,3 +1,5 @@
+import { scrollBehavior } from "@/lib/motion";
+
 export interface NavigationSection {
   section_id: string;
   scroll_target: string;
@@ -94,7 +96,8 @@ export const navigationRegistry: NavigationSection[] = [
   }
 ];
 
-export const executeNavigationCommand = (cmdText: string) => {
+// `navigate` is the caller's router.push, used for commands that leave the page (README)
+export const executeNavigationCommand = (cmdText: string, navigate: (href: string) => void) => {
   const normalized = cmdText.trim().toLowerCase();
   const match = navigationRegistry.find((s) =>
     s.command_aliases.some((alias) => normalized.includes(alias.toLowerCase()))
@@ -103,7 +106,7 @@ export const executeNavigationCommand = (cmdText: string) => {
   if (match) {
     // 0. Handle page navigation if match is readme
     if (match.section_id === "readme") {
-      window.location.href = "/readme";
+      navigate("/readme");
       return;
     }
 
@@ -120,7 +123,7 @@ export const executeNavigationCommand = (cmdText: string) => {
     // 2. Scroll to the scroll target
     const element = document.getElementById(match.scroll_target);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      element.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
 
       // 3. Highlight the core terminal block inside this section
       const terminal =

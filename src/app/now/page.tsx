@@ -16,7 +16,7 @@ export default function NowPage() {
   return (
     <>
       <Navbar />
-      <main ref={revealRef} className="relative min-h-screen pt-32 pb-16 flex flex-col justify-between overflow-hidden font-mono">
+      <main ref={revealRef} className="relative flex-1 pt-32 pb-16 overflow-hidden font-mono">
         <div className="max-w-3xl mx-auto px-6 w-full relative z-10">
           {/* Back Nav */}
           <Link
@@ -107,8 +107,8 @@ export default function NowPage() {
           </div>
         </div>
 
-        <Footer />
       </main>
+      <Footer />
     </>
   );
 }

@@ -25,7 +25,7 @@ const careerCommits: Commit[] = [
   { hash: "e5d8u2a", date: "JUL 2025", type: "feat", scope: "education", title: "started Master of AI @ Monash" },
   { hash: "s8t9d2h", date: "JAN–MAY 2025", type: "feat", scope: "product", title: "launched StudentHub" },
   { hash: "m1y9s8a", date: "JAN–MAY 2025", type: "feat", scope: "industry", title: "joined Mysahayak" },
-  { hash: "t9a2f1c", date: "2025", type: "feat", scope: "ai", title: "built Traffic AI" }
+  { hash: "t9a2f1c", date: "OCT–DEC 2024", type: "feat", scope: "ai", title: "built Traffic AI" }
 ];
 
 // Commits reveal one by one between 25% and 100% scroll progress through the section

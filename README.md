@@ -40,7 +40,8 @@
       Continuous feed tracking active feature pushes and sprint logs.
       
     * System Map (open system-map)
-      Topology of domains, projects and skills. Currently being rebuilt; not yet on the site.
+      A rotatable 3D knowledge graph of 18 nodes (domains, projects, roles, shared tech) built from the site data.
+      Drag or use arrow keys to rotate; hover, focus or click a node to trace its connections in the inspector.
       
     * Ask Krishi (./ask-krishi)
       A chat assistant (OpenAI gpt-4o-mini when OPENAI_API_KEY is set, otherwise a local keyword fallback),

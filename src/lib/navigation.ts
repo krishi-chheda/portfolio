@@ -124,9 +124,7 @@ export const executeNavigationCommand = (cmdText: string) => {
 
       // 3. Highlight the core terminal block inside this section
       const terminal =
-        element.querySelector(".terminal-highlight") ||
-        element.querySelector(".border-slate-900") ||
-        element;
+        element.querySelector(".terminal-highlight") || element;
 
       if (terminal) {
         terminal.classList.add("terminal-highlight-active");

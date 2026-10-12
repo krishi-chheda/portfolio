@@ -5,7 +5,7 @@ const MAX_MESSAGE_LENGTH = 500;
 const CONTACT_EMAIL = "krishichheda10@gmail.com";
 
 // Navigation commands the assistant may suggest. Each must match an alias in src/lib/navigation.ts;
-// anything else the model emits is dropped. (system-map returns with the Phase 5 topology.)
+// anything else the model emits is dropped.
 const COMMANDS = {
   readme: "cat README.md",
   accessvision: "cat projects/accessible-vision/details.md",
@@ -15,6 +15,7 @@ const COMMANDS = {
   leadership: "cd leadership",
   career: "git log --career",
   building: "tail -f currently-building.log",
+  systemMap: "open system-map",
   contact: "ssh recruiter@krishi.os",
 } as const;
 const ALLOWED_COMMANDS = new Set<string>(Object.values(COMMANDS));
@@ -177,6 +178,7 @@ ${followUps(["Tell me about AccessVision", "Tell me about ClinicalBrief", "Tell 
     reply: () => `Technologies Krishi has used across his featured projects: ${allTech.join(", ")}.
 
 ${followUps(["Which project uses YOLO?", "Tell me about ClinicalBrief's architecture", "What is Krishi building now?"])}`,
+    command: COMMANDS.systemMap,
   },
   {
     terms: ["hobby", "hobbies", "interests", "interest", "fitness", "free time", "outside of work"],
@@ -215,6 +217,7 @@ Rules:
 - "${COMMANDS.leadership}": MDAS, MOSAIC, leadership
 - "${COMMANDS.career}": experience, internships, education, career timeline
 - "${COMMANDS.building}": what Krishi is building now
+- "${COMMANDS.systemMap}": skills, technologies, how the projects and domains connect
 - "${COMMANDS.contact}": contact details, availability, opportunities
 
 <facts>

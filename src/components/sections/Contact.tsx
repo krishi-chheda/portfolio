@@ -158,7 +158,7 @@ export default function Contact() {
                 <button
                   type="submit"
                   data-reveal="item"
-                  className="w-full flex items-center justify-center border border-accent px-6 py-3 text-sm text-accent hover:bg-accent hover:text-bg active:scale-[0.98] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-accent transition-[color,background-color,transform] duration-150 ease-out cursor-pointer"
+                  className="w-full flex items-center justify-center border border-accent px-6 py-3 text-sm text-accent hover:bg-accent hover:text-bg active:scale-[0.98] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-accent transition-[color,background-color,scale] duration-150 ease-out cursor-pointer"
                 >
                   <span key={status} data-status-label className="flex items-center gap-2">
                     {status === "idle" ? (

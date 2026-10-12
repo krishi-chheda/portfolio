@@ -12,6 +12,7 @@ const R = {
   career: "git log --career",
   building: "tail -f currently-building.log",
   contact: "ssh recruiter@krishi.os",
+  map: "open system-map",
   none: "",
 };
 
@@ -28,7 +29,7 @@ const cases = [
   ["Tell me about MOSAIC", R.lead],
   ["Is Krishi open to opportunities?", R.contact, "AI Engineer"],
   ["Are you open to work?", R.contact],
-  ["What is your tech stack?", R.none, "Technologies"],
+  ["What is your tech stack?", R.map, "Technologies"],
   ["How do I navigate this site?", R.readme],
   ["What did he do at Mysahayak?", R.career],
   ["When does he graduate?", R.career, "July 2027"],

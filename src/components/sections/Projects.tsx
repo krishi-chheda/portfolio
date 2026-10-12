@@ -97,7 +97,7 @@ export default function Projects() {
                         data-reveal="item"
                         onClick={() => selectProject(project.id)}
                         aria-current={isSelected ? "true" : undefined}
-                        className={`flex w-full min-w-0 items-center gap-1.5 py-1 text-left cursor-pointer transition-[color,transform] duration-150 ease-out motion-safe:active:translate-x-px ${
+                        className={`flex w-full min-w-0 items-center gap-1.5 py-1 text-left cursor-pointer transition-[color,translate] duration-150 ease-out motion-safe:active:translate-x-px ${
                           isSelected ? "text-accent font-bold" : "hover:text-accent-2"
                         }`}
                       >
@@ -119,7 +119,7 @@ export default function Projects() {
                                   data-reveal="item"
                                   onClick={() => setActiveTab(t.id)}
                                   aria-current={isOpen ? "true" : undefined}
-                                  className={`flex w-full min-w-0 items-center gap-1.5 py-0.5 text-left cursor-pointer transition-[color,transform] duration-150 ease-out motion-safe:active:translate-x-px ${
+                                  className={`flex w-full min-w-0 items-center gap-1.5 py-0.5 text-left cursor-pointer transition-[color,translate] duration-150 ease-out motion-safe:active:translate-x-px ${
                                     isOpen ? "text-accent" : "text-ink-soft hover:text-accent-2"
                                   }`}
                                 >

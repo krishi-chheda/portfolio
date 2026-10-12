@@ -5,7 +5,7 @@ import gsap from "gsap";
 import Link from "next/link";
 import { currentProcesses, impactLog } from "@/lib/data";
 import { useBooted } from "@/components/boot/BootWrapper";
-import { DUR, EASE, MOTION_OK, RISE } from "@/lib/motion";
+import { DUR, EASE, MOTION_OK, RISE, scrambleText } from "@/lib/motion";
 
 const CONTACT_EMAIL = "krishichheda10@gmail.com";
 
@@ -37,7 +37,22 @@ export default function Hero() {
           .from('[data-hero="body"]', { y: RISE.item, opacity: 0, duration: DUR.standard, stagger: 0.06 }, 0.7)
           .from('[data-hero="tail"]', { clipPath: "inset(0 100% 0 0)", duration: 0.35, ease: "steps(20)" }, 0.9)
           .from('[data-hero="row"]', { y: 8, opacity: 0, duration: DUR.standard, stagger: 0.05 }, 1.0);
+
+        // Name/title lines and impact figures decode from glyphs as they land
+        const restores: (() => void)[] = [];
+        root.querySelectorAll<HTMLElement>('[data-hero="headline"]').forEach((el, i) => {
+          const { tween, restore } = scrambleText(el, 0.7);
+          tl.add(tween, 0.35 + i * 0.1);
+          restores.push(restore);
+        });
+        root.querySelectorAll<HTMLElement>('[data-hero="value"]').forEach((el, i) => {
+          const { tween, restore } = scrambleText(el, 0.5);
+          tl.add(tween, 1.0 + i * 0.05);
+          restores.push(restore);
+        });
+
         if (booted) tl.play();
+        return () => restores.forEach((fn) => fn());
       },
       root
     );
@@ -141,7 +156,7 @@ export default function Hero() {
           <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 border-l border-rule">
             {impactLog.map((m) => (
               <div key={m.label} data-hero="row" className="border-r border-rule px-4 py-2">
-                <div className="text-2xl md:text-3xl font-bold text-accent">{m.value}</div>
+                <div data-hero="value" className="text-2xl md:text-3xl font-bold text-accent">{m.value}</div>
                 <div className="mt-2 text-[11px] leading-relaxed text-ink-faint">
                   {m.label} · <span className="text-ink-soft">{m.source}</span>
                 </div>

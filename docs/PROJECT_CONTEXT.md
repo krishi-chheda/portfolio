@@ -32,7 +32,7 @@ Principle: *featured projects tell the story, everything else supports it.*
 
 ## Stack
 - **Core:** Next.js 16.2.9 (App Router, Turbopack), React 19.2.4, TypeScript 5 strict, Tailwind v4.
-- **Motion and UI:** framer-motion 12, gsap 3.15.0 (core only), lucide-react, clsx + tailwind-merge.
+- **Motion and UI:** gsap 3.15.0 (core only, the only animation library), lucide-react, clsx + tailwind-merge.
 - **Delivery:** deploys on Vercel; git remote `krishi-chheda/portfolio`.
 - **Next.js docs:** per `AGENTS.md`, read `node_modules/next/dist/docs/` before writing Next-specific code.
 
@@ -57,6 +57,7 @@ src/app/layout.tsx          Server. Metadata, OG/Twitter, canonical, JSON-LD Per
 src/app/page.tsx            Server. <BootWrapper> wraps Navbar + Hero + 6 sections + Footer + ChatBubble
 src/app/readme|now/layout.tsx  Server. Per-route metadata + canonical (pages themselves are client)
 src/app/robots.ts, sitemap.ts  sitemap lists /, /readme, /now
+src/app/not-found.tsx       Server wrapper (title) around src/components/NotFoundView.tsx ("command not found" 404, GSAP loaded on demand)
 src/app/api/chat/route.ts   POST. gpt-4o-mini (temp 0.2) if OPENAI_API_KEY, else local answers built from data.ts.
                             Third-person assistant, facts-only prompt, command allow-list, per-IP rate limit 10/min (per instance)
 src/app/api/github/route.ts GET. Repos from data.ts githubUrls + latest commit; Next data cache 15 min; 503/stale on failure
@@ -78,17 +79,28 @@ src/hooks/useTerminalReveal.ts, useGitHubTelemetry.ts, useChat.ts, useReducedMot
 - **Highlighting:** hover, focus, click and the legend only change highlighting (opacity and colour). Verified in the browser: selecting a node moves zero nodes.
 - **Mobile:** below 640px only the highlighted node's neighbours, or just the projects, are labelled. Labels for nodes in the right 40% flip to the node's left side to stay inside the panel.
 
-## Motion system
-- **Constants** (`src/lib/motion.ts`): ease `power3.out`, durations 0.15 / 0.3 / 0.5s, rise 10–16px.
-- **Library split:** GSAP core for choreographed entrances; framer-motion for mount/unmount (AnimatePresence) and Career's scroll-linked reveal.
-- **Boot gating:** `useBooted()` makes entrances wait for the boot screen. The Hero has a post-boot timeline.
-- **Section reveal:** `useTerminalReveal()` types the section command, raises the panel, then cascades `[data-reveal="item"]`.
+## Motion system (GSAP only; framer-motion removed)
+- **Constants** (`src/lib/motion.ts`): ease `power3.out`, durations 0.15 / 0.3 / 0.5s, rise 10–16px. Also `scrambleText(el, duration)`, the terminal decode effect, which returns `{ tween, restore }`. Always call `restore()` on cleanup.
+- **`usePresence(open, MOTION)`** (`src/hooks`) is the GSAP replacement for AnimatePresence: it keeps an element mounted until its exit tween ends. MOTION must be a module-level constant. Used by the boot screen, command palette and chat.
+- **Boot gating:** `useBooted()` makes entrances wait for the boot screen.
+- **Hero:** a post-boot timeline. The prompt types; the name, title and impact figures decode from glyphs while rising; details and impact cells cascade.
+- **`useTerminalReveal()`:** once per section on scroll.
+  - The SectionHeader title decodes (`data-reveal="title"`) and the command types.
+  - The panel rises while a single emerald scan line sweeps it and then removes itself.
+  - `[data-reveal="item"]` children cascade.
+- **Career:** reveal is driven by its own scroll listener.
+- **`Ticker`** (`src/components/ui/Ticker.tsx`, between the Hero and Projects): an infinite marquee of projects, verified metrics and stack, all from data.ts.
+  - It eases to a stop on hover and pauses off-screen.
+  - It's static under reduced motion and `aria-hidden`, since it repeats information found elsewhere.
+- **Navbar scroll-progress line:** a direct readout of scroll position, not a tween.
 - **Accessibility rules:**
   - All GSAP code runs inside `gsap.matchMedia("(prefers-reduced-motion: no-preference)")`.
   - Use opacity, never autoAlpha.
-  - No looping animation except small status dots and the cursor.
+  - The only infinite loop is the ticker.
+- **Bundle:** the root 404 imports GSAP dynamically. A static import there was shipping a second GSAP and Navbar chunk alongside every page. The homepage is ~259 KB gzipped JS, down from 294 KB.
 - **Tailwind v4 gotcha:** `scale-*`/`translate-*` use the separate `scale`/`translate` CSS properties, so write `transition-[...,scale]` or `transition-[...,translate]`, not `transform`.
-- **Browser-pane caveat:** a hidden pane throttles rAF, so animations stall until a frame is forced (e.g. by a screenshot). This is not an app bug.
+- **Browser-pane caveat:** a hidden pane throttles rAF, so animations stall until a frame is forced. Never `await requestAnimationFrame` in pane scripts.
+- **Windows caveat:** `pkill` in Git Bash doesn't stop `next start`. Run servers as tracked background tasks or stop them by PID, or stale servers will serve old builds.
 
 ## Env vars (names only)
 - `OPENAI_API_KEY`: server-only, optional.
@@ -106,7 +118,7 @@ src/hooks/useTerminalReveal.ts, useGitHubTelemetry.ts, useChat.ts, useReducedMot
 
 ## Open items
 - **ASCII portrait:** blocked until there's an authorised source photo.
-- **Bundle size:** the homepage ships ~294 KB gzipped JS. About 156 KB is the React/Next framework; the 83 KB animation chunk carries **both** GSAP and framer-motion. Moving every framer usage to GSAP (or framer to `LazyMotion`) would save roughly 20–35 KB. Not done; needs the owner's call.
+- **Bundle size:** done; framer-motion was removed and the homepage went from 294 KB to 259 KB gzipped JS.
 - **LCP:** content stays at opacity 0 until the boot screen clears (about 2s, by design from the brief), which delays LCP. That's a product trade-off.
 - **Boot:** the `accessGranted` branch is unreachable, so the 2s safety timeout always ends the boot.
 - **`/now`:** still says "Last updated: June 2026"; its personal content (hobbies, reading) is unverified.

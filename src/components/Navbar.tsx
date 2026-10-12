@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import CommandPalette from "@/components/ui/CommandPalette";
 
@@ -22,6 +22,7 @@ export default function Navbar() {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [active, setActive] = useState("");
   const [clock, setClock] = useState("");
+  const progressRef = useRef<HTMLDivElement>(null);
 
   // Ctrl/Cmd+K toggles the command palette
   useEffect(() => {
@@ -43,6 +44,29 @@ export default function Navbar() {
     return () => clearInterval(id);
   }, []);
 
+  // Scroll-progress line: a direct readout of position (no tween), throttled to one update per frame
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const el = progressRef.current;
+      if (!el) return;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      el.style.transform = `scaleX(${max > 0 ? Math.min(1, window.scrollY / max) : 0})`;
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
   // Track which section is in the middle of the viewport
   useEffect(() => {
     const sections = NAV_LINKS.map((l) => document.getElementById(l.id)).filter((el): el is HTMLElement => el !== null);
@@ -60,6 +84,12 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-bg/85 backdrop-blur-md border-b border-rule">
+      <div
+        ref={progressRef}
+        aria-hidden="true"
+        className="absolute -bottom-px left-0 right-0 h-px origin-left bg-accent shadow-[0_0_8px_var(--color-accent)]"
+        style={{ transform: "scaleX(0)" }}
+      />
       <div className="mx-auto max-w-6xl px-6 h-12 flex items-center justify-between gap-4 text-[11px]">
         {/* Left: identity + current path */}
         <div className="flex items-center gap-4 min-w-0">

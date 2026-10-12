@@ -1,10 +1,19 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { DUR, EASE, MOTION_OK } from "@/lib/motion";
 import { Search, Terminal, ArrowRight, X } from "lucide-react";
+import { usePresence } from "@/hooks/usePresence";
+
+// Enter ~0.2s decelerating, exit ~0.12s accelerating (curves come from usePresence).
+const OVERLAY_MOTION = { from: { opacity: 0 }, enterDuration: 0.2, exitDuration: 0.12 } as const;
+const PANEL_MOTION = {
+  from: { scale: 0.97, y: -8 },
+  exit: { scale: 0.98, y: -4 },
+  enterDuration: 0.2,
+  exitDuration: 0.12,
+} as const;
 
 interface CommandItem {
   id: string;
@@ -22,7 +31,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   const [search, setSearch] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { mounted: overlayMounted, ref: overlayRef } = usePresence<HTMLDivElement>(isOpen, OVERLAY_MOTION);
+  // The panel only mounts with the overlay, so its own `mounted` flag is unused; its ref doubles as the click-outside container.
+  const { ref: containerRef } = usePresence<HTMLDivElement>(isOpen, PANEL_MOTION);
   const listRef = useRef<HTMLDivElement>(null);
 
   const commands: CommandItem[] = [
@@ -184,7 +195,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, containerRef]);
 
   // Micro-cascade of the command list on open (~25ms apart, capped well under 500ms in total).
   useLayoutEffect(() => {
@@ -211,13 +222,10 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   const kbd = "inline-block border border-rule px-1.5 py-px text-[11px] leading-none text-ink-soft";
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.12, ease: [0.3, 0, 1, 1] } }}
-          transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+    <>
+      {overlayMounted && (
+        <div
+          ref={overlayRef}
           className="fixed inset-0 z-[100] flex items-start justify-center pt-24 px-4 font-mono bg-bg/80 backdrop-blur-sm"
         >
           {/* Background Decorative Status */}
@@ -225,10 +233,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             [system] interactive command mode active
           </div>
 
-          <motion.div
-            initial={{ scale: 0.97, y: -8 }}
-            animate={{ scale: 1, y: 0, transition: { duration: 0.2, ease: [0.2, 0, 0, 1] } }}
-            exit={{ scale: 0.98, y: -4, transition: { duration: 0.12, ease: [0.3, 0, 1, 1] } }}
+          <div
             ref={containerRef}
             role="dialog"
             aria-modal="true"
@@ -306,9 +311,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
               </span>
               <span className="uppercase tracking-[0.18em]">tty_commands</span>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

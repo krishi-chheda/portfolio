@@ -9,6 +9,7 @@ import SystemMap from "@/components/sections/SystemMap";
 import Contact from "@/components/sections/Contact";
 import Footer from "@/components/Footer";
 import ChatBubble from "@/components/ask-krishi/ChatBubble";
+import Ticker from "@/components/ui/Ticker";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
       <Navbar />
       <main className="flex-1 w-full">
         <Hero />
+        <Ticker />
         <Projects />
         <Experience />
         <Leadership />

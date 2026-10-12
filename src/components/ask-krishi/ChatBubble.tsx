@@ -1,18 +1,28 @@
 "use client";
 
-import { useState, useEffect, useRef, type ReactNode } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import gsap from "gsap";
 import { Bot, X, Send, Terminal as TermIcon } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
 import { executeNavigationCommand } from "@/lib/navigation";
 import Button from "@/components/ui/Button";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { DUR, RISE } from "@/lib/motion";
+import { usePresence } from "@/hooks/usePresence";
+import { DUR, EASE, MOTION_OK, RISE } from "@/lib/motion";
 
-// Framer equivalents of the shared GSAP curve: decelerate in, accelerate out (exits shorter than entrances).
-const EASE_OUT = [0.2, 0, 0, 1] as const;
-const EASE_IN = [0.3, 0, 1, 1] as const;
-const EXIT = { duration: 0.12, ease: EASE_IN };
+const LAUNCHER_MOTION = { from: { scale: 0.8, opacity: 0 }, enterDuration: 0.2 } as const;
+const PANEL_MOTION = {
+  from: { opacity: 0, y: RISE.panel, scale: 0.98 },
+  exit: { opacity: 0, y: RISE.item, scale: 0.98 },
+} as const;
+
+// Rise + fade an element into place (skipped under reduced motion); returns the cleanup.
+function rise(el: Element) {
+  const mm = gsap.matchMedia();
+  mm.add(MOTION_OK, () => {
+    gsap.from(el, { opacity: 0, y: RISE.item, duration: DUR.standard, ease: EASE, clearProps: "opacity,transform" });
+  });
+  return () => mm.revert();
+}
 
 // http(s) URLs (trailing punctuation excluded) and email addresses.
 const LINK_RE = /https?:\/\/[^\s<>"]*[^\s<>".,;:!?)]|[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
@@ -48,8 +58,23 @@ export default function ChatBubble() {
     "Hi, I'm the KRISHI.OS assistant. Ask about Krishi's projects, his Master of AI at Monash, his leadership roles, or how to reach him."
   );
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const reduceMotion = useReducedMotion();
-  const enter = { duration: DUR.standard, ease: EASE_OUT };
+  const logRef = useRef<HTMLDivElement>(null);
+  const loaderRef = useRef<HTMLDivElement>(null);
+  const prevCount = useRef(messages.length);
+  const { mounted: launcherMounted, ref: launcherRef } = usePresence<HTMLButtonElement>(!isOpen, LAUNCHER_MOTION);
+  const { mounted: panelMounted, ref: panelRef } = usePresence<HTMLDivElement>(isOpen, PANEL_MOTION);
+
+  // Animate only the newest message when one is added; existing messages never re-animate.
+  useLayoutEffect(() => {
+    const grew = messages.length > prevCount.current;
+    prevCount.current = messages.length;
+    const el = logRef.current?.children[messages.length - 1];
+    if (grew && el) return rise(el);
+  }, [messages.length]);
+
+  useLayoutEffect(() => {
+    if (loading && loaderRef.current) return rise(loaderRef.current);
+  }, [loading]);
 
   useEffect(() => {
     // Listen to custom event to open the chat window from external CTAs (e.g. Hero section)
@@ -80,28 +105,21 @@ export default function ChatBubble() {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end font-mono">
       {/* Floating Circle Button */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            initial={reduceMotion ? false : { scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1, transition: { duration: 0.2, ease: EASE_OUT } }}
-            exit={{ scale: 0.8, opacity: 0, transition: EXIT }}
+      {launcherMounted && (
+          <button
+            ref={launcherRef}
             onClick={() => setIsOpen(true)}
             className="w-14 h-14 rounded-full bg-accent text-bg flex items-center justify-center hover:bg-accent-2 transition-colors duration-150 group cursor-pointer focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-accent"
             aria-label="Ask Krishi AI"
           >
             <Bot className="w-6 h-6 group-hover:rotate-6 transition-transform" />
-          </motion.button>
-        )}
-      </AnimatePresence>
+          </button>
+      )}
 
       {/* Expanded Terminal Chat Window */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: RISE.panel, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1, transition: enter }}
-            exit={{ opacity: 0, y: RISE.item, scale: 0.98, transition: EXIT }}
+      {panelMounted && (
+          <div
+            ref={panelRef}
             style={{ transformOrigin: "bottom right" }}
             className="w-[90vw] sm:w-[380px] h-[500px] overflow-hidden bg-bg border border-rule flex flex-col mb-2"
           >
@@ -124,15 +142,12 @@ export default function ChatBubble() {
             </div>
 
             {/* Message Area */}
-            <div role="log" aria-live="polite" aria-label="Ask Krishi conversation" className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
+            <div ref={logRef} role="log" aria-live="polite" aria-label="Ask Krishi conversation" className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
               {messages.map((msg, index) => {
                 const isUser = msg.role === "user";
                 return (
-                  <motion.div
+                  <div
                     key={index}
-                    initial={reduceMotion ? false : { opacity: 0, y: RISE.item }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={enter}
                     className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                   >
                     <div
@@ -160,15 +175,13 @@ export default function ChatBubble() {
                         </div>
                       )}
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
 
               {loading && (
-                <motion.div
-                  initial={reduceMotion ? false : { opacity: 0, y: RISE.item }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={enter}
+                <div
+                  ref={loaderRef}
                   className="flex justify-start"
                 >
                   <div className="border-l-2 border-accent px-3 py-2.5 max-w-[85%]">
@@ -179,7 +192,7 @@ export default function ChatBubble() {
                       <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" style={{ animationDelay: "300ms" }} />
                     </span>
                   </div>
-                </motion.div>
+                </div>
               )}
               <div ref={chatEndRef} />
             </div>
@@ -232,9 +245,8 @@ export default function ChatBubble() {
                 <Send className="w-3.5 h-3.5" />
               </Button>
             </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+      )}
     </div>
   );
 }

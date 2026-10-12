@@ -52,7 +52,7 @@
     - React 19
     - TypeScript
     - Tailwind CSS v4
-    - GSAP 3 (entrance choreography) + Framer Motion 12 (mount/unmount)
+    - GSAP 3 (all motion: entrances, presence, decode text, ticker)
 
 ## LOCAL DEVELOPMENT
     npm install

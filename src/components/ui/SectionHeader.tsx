@@ -12,7 +12,7 @@ export default function SectionHeader({ num, title, command, meta }: SectionHead
       <h2 className="flex items-baseline gap-3 font-normal text-ink-faint">
         <span className="text-accent">§ {num}</span>
         <span>
-          <span className="text-ink">{title}</span>
+          <span data-reveal="title" className="text-ink">{title}</span>
           <span className="mx-2">·</span>
           <span data-reveal="command" className="normal-case tracking-normal text-ink-soft">{command}</span>
         </span>

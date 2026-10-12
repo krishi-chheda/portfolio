@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react";
+import gsap from "gsap";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Github } from "@/components/ui/Icons";
 import SectionHeader from "@/components/ui/SectionHeader";
@@ -10,6 +10,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useGitHubTelemetry } from "@/hooks/useGitHubTelemetry";
 import { formatUtc, repoKey } from "@/lib/github";
 import { useTerminalReveal } from "@/hooks/useTerminalReveal";
+import { EASE, MOTION_OK } from "@/lib/motion";
 
 type Tab = "details" | "architecture" | "notes";
 
@@ -64,6 +65,35 @@ export default function Projects() {
   const repo = activeProject.githubUrl ? telemetry?.repos[repoKey(activeProject.githubUrl)] : undefined;
   const activeFile = TABS.find((t) => t.id === activeTab)!.file;
   const isActive = activeProject.overview.status.toLowerCase().includes("active");
+  const contentKey = `${activeProject.id}-${activeTab}`;
+  const contentRef = useRef<HTMLDivElement>(null);
+  const decisionsRef = useRef<HTMLDivElement>(null);
+
+  // New file/project content rises in (0.2s, decelerate); skipped under reduced motion
+  useLayoutEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const mm = gsap.matchMedia();
+    mm.add(MOTION_OK, () => {
+      gsap.fromTo(el, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.2, ease: EASE, clearProps: "opacity,transform" });
+    });
+    return () => mm.revert();
+  }, [contentKey]);
+
+  // Decisions accordion: height 0 <-> auto. Re-runs when the architecture tab (re)mounts the panel.
+  useLayoutEffect(() => {
+    const el = decisionsRef.current;
+    if (!el) return;
+    const tween = gsap.to(el, {
+      height: decisionsOpen ? "auto" : 0,
+      opacity: decisionsOpen ? 1 : 0,
+      duration: prefersReducedMotion ? 0 : 0.2,
+      ease: decisionsOpen ? EASE : "power2.in",
+    });
+    return () => {
+      tween.kill();
+    };
+  }, [decisionsOpen, contentKey, prefersReducedMotion]);
 
   return (
     <section ref={sectionRef} id="projects" className="py-24 border-t border-rule">
@@ -158,13 +188,9 @@ export default function Projects() {
               </div>
 
               {/* Editor Code Sheet Body */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`${activeProject.id}-${activeTab}`}
-                  // Enter decelerates (0.2s), exit accelerates (0.1s); reduced motion keeps only the fade.
-                  initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 6 }}
-                  animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.2, 0, 0, 1] } }}
-                  exit={{ opacity: 0, y: prefersReducedMotion ? 0 : -4, transition: { duration: 0.1, ease: [0.3, 0, 1, 1] } }}
+              <div
+                  key={contentKey}
+                  ref={contentRef}
                   className="flex-1 flex flex-col gap-6 text-left min-w-0"
                 >
                   {/* File title heading */}
@@ -301,13 +327,11 @@ export default function Projects() {
                             <span>[Engineering Decisions & Trade-offs]</span>
                             {decisionsOpen ? <ChevronDown size={12} className="shrink-0" /> : <ChevronRight size={12} className="shrink-0" />}
                           </button>
-                          <AnimatePresence initial={false}>
-                            {decisionsOpen && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
+                          {/* Always mounted so GSAP can animate height; inert keeps the collapsed content out of focus and the a11y tree */}
+                              <div
+                                ref={decisionsRef}
+                                inert={!decisionsOpen}
+                                style={{ height: 0, opacity: 0 }}
                                 className="overflow-hidden"
                               >
                                 <div className="border-t border-rule p-3 space-y-4">
@@ -324,9 +348,7 @@ export default function Projects() {
                                     </ul>
                                   </div>
                                 </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
+                              </div>
                         </div>
                       </>
                     )}
@@ -387,8 +409,7 @@ export default function Projects() {
                       </a>
                     )}
                   </div>
-                </motion.div>
-              </AnimatePresence>
+                </div>
             </div>
           </div>
         </div>

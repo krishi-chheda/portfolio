@@ -2,7 +2,7 @@
 
 import { motion as motionFramer } from "framer-motion";
 import Link from "next/link";
-import { Bot, Sparkles, Terminal, Search, TerminalSquare } from "lucide-react";
+import { Bot, Sparkles, Terminal, TerminalSquare } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { currentProcesses } from "@/lib/data";
 
@@ -46,7 +46,7 @@ export default function Hero() {
                 <span>krishi@stack: ~</span>
               </div>
 
-              <div className="text-[9px] font-mono text-slate-600 tracking-wider">
+              <div className="text-[10px] font-mono text-slate-600 tracking-wider">
                 ssh: port-22 // system_root
               </div>
             </div>
@@ -103,23 +103,6 @@ export default function Hero() {
                     <Bot className="w-4 h-4" />
                     <span>./ask-krishi</span>
                   </Button>
-                  
-                  <Button
-                    onClick={() => {
-                      const event = new KeyboardEvent("keydown", {
-                        key: "k",
-                        ctrlKey: true,
-                        bubbles: true
-                      });
-                      window.dispatchEvent(event);
-                    }}
-                    variant="outline"
-                    size="md"
-                    className="flex items-center justify-center space-x-2 cursor-pointer border-slate-800 text-slate-400"
-                  >
-                    <Search className="w-3.5 h-3.5" />
-                    <span>Command Palette [Ctrl+K]</span>
-                  </Button>
                 </div>
 
                 {/* Subtle easter-egg CLI clue */}
@@ -156,7 +139,7 @@ export default function Hero() {
                 <TerminalSquare className="w-3 h-3 text-[#10b981]" />
                 ps_aux_grep_krishi
               </span>
-              <span className="text-[9px] text-[#10b981] animate-pulse">MONITORING</span>
+              <span className="text-[10px] text-[#10b981] animate-pulse">MONITORING</span>
             </div>
 
             {/* Terminal Body */}
@@ -172,19 +155,19 @@ export default function Hero() {
               {/* Metrics Ribbon (htop/glances inspired) */}
               <div className="grid grid-cols-2 gap-2 bg-slate-950/40 p-2.5 rounded border border-slate-900/60 text-[10px] font-mono">
                 <div>
-                  <span className="text-slate-500 block text-[8px] font-bold uppercase">PROCESSES RUNNING:</span>
+                  <span className="text-slate-500 block text-[10px] font-bold uppercase">PROCESSES RUNNING:</span>
                   <span className="text-emerald-450 font-bold">{currentProcesses.running.length}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[8px] font-bold uppercase">LEARNING THREADS:</span>
+                  <span className="text-slate-500 block text-[10px] font-bold uppercase">LEARNING THREADS:</span>
                   <span className="text-cyan-400 font-bold">{currentProcesses.learning.length}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[8px] font-bold uppercase">LEADERSHIP TASKS:</span>
+                  <span className="text-slate-500 block text-[10px] font-bold uppercase">LEADERSHIP TASKS:</span>
                   <span className="text-purple-400 font-bold">1</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[8px] font-bold uppercase">SYSTEM UPTIME:</span>
+                  <span className="text-slate-500 block text-[10px] font-bold uppercase">SYSTEM UPTIME:</span>
                   <span className="text-white font-semibold">{currentProcesses.uptime}</span>
                 </div>
               </div>
@@ -196,10 +179,10 @@ export default function Hero() {
                 <div className="space-y-4">
                   {/* Active Processes */}
                   <div className="space-y-1.5">
-                    <span className="text-slate-500 block uppercase font-bold text-[8.5px] tracking-wider select-none">
+                    <span className="text-slate-500 block uppercase font-bold text-[10px] tracking-wider select-none">
                       {"// ACTIVE PROCESSES"}
                     </span>
-                    <div className="space-y-1">
+                    <div className="space-y-1 pr-16 sm:pr-0">
                       {currentProcesses.running.map((proc) => (
                         <div key={proc.name} className="relative group/item">
                           <div className="flex items-center justify-between py-1 px-1.5 rounded hover:bg-slate-900/40 border border-transparent hover:border-slate-900 transition-all cursor-default">
@@ -214,7 +197,7 @@ export default function Hero() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="text-slate-500 hover:text-cyan-400 transition-colors text-[9px] font-bold border border-slate-900 hover:border-cyan-900 bg-slate-950 px-1 py-0.5 rounded select-none shrink-0 ml-1.5"
+                                className="text-slate-500 hover:text-cyan-400 transition-colors text-[10px] font-bold border border-slate-900 hover:border-cyan-900 bg-slate-950 px-1 py-0.5 rounded select-none shrink-0 ml-1.5"
                               >
                                 [repo]
                               </a>
@@ -227,7 +210,7 @@ export default function Hero() {
 
                   {/* Learning Threads */}
                   <div className="space-y-1.5">
-                    <span className="text-slate-500 block uppercase font-bold text-[8.5px] tracking-wider select-none">
+                    <span className="text-slate-500 block uppercase font-bold text-[10px] tracking-wider select-none">
                       {"// LEARNING THREADS"}
                     </span>
                     <div className="space-y-1">
@@ -243,7 +226,7 @@ export default function Hero() {
 
                   {/* Leadership Process */}
                   <div className="space-y-1.5">
-                    <span className="text-slate-500 block uppercase font-bold text-[8.5px] tracking-wider select-none">
+                    <span className="text-slate-500 block uppercase font-bold text-[10px] tracking-wider select-none">
                       {"// LEADERSHIP PROCESS"}
                     </span>
                     <div className="border border-slate-900 bg-slate-950/20 p-2 rounded space-y-1 select-text">
@@ -252,7 +235,7 @@ export default function Hero() {
                         <span className="text-purple-400 font-bold text-[10px] shrink-0">[RUNNING]</span>
                         <span className="text-white font-medium text-[10.5px]">{currentProcesses.leadership.role}</span>
                       </div>
-                      <div className="pl-3.5 text-[9.5px] text-slate-500 font-medium">
+                      <div className="pl-3.5 text-[10px] text-slate-500 font-medium">
                         {currentProcesses.leadership.org}
                       </div>
                     </div>
@@ -264,7 +247,7 @@ export default function Hero() {
                 <div className="space-y-4">
                   {/* Target Roles */}
                   <div className="space-y-1.5">
-                    <span className="text-slate-500 block uppercase font-bold text-[8.5px] tracking-wider select-none">
+                    <span className="text-slate-500 block uppercase font-bold text-[10px] tracking-wider select-none">
                       {"// TARGET ROLES"}
                     </span>
                     <div className="space-y-1">
@@ -280,22 +263,22 @@ export default function Hero() {
 
                   {/* System Status */}
                   <div className="space-y-1.5">
-                    <span className="text-slate-500 block uppercase font-bold text-[8.5px] tracking-wider">
+                    <span className="text-slate-500 block uppercase font-bold text-[10px] tracking-wider">
                       {"// SYSTEM STATUS"}
                     </span>
                     <div className="border border-slate-900 bg-slate-950/25 p-2.5 rounded-lg space-y-2 select-text">
-                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-900/50 text-[#10b981] font-bold text-[9.5px] tracking-wider uppercase animate-pulse">
+                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-900/50 text-[#10b981] font-bold text-[10px] tracking-wider uppercase animate-pulse">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
                         ● AVAILABLE FOR OPPORTUNITIES
                       </div>
                       
                       <div className="space-y-1.5 text-[10.5px]">
                         <div>
-                          <span className="text-slate-500 block uppercase text-[8px] font-bold select-none">Graduation:</span>
+                          <span className="text-slate-500 block uppercase text-[10px] font-bold select-none">Graduation:</span>
                           <span className="text-white font-semibold">{currentProcesses.graduation}</span>
                         </div>
                         <div>
-                          <span className="text-slate-500 block uppercase text-[8px] font-bold select-none">Location:</span>
+                          <span className="text-slate-500 block uppercase text-[10px] font-bold select-none">Location:</span>
                           <span className="text-white font-semibold">{currentProcesses.location}</span>
                         </div>
                       </div>

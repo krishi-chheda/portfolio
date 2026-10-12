@@ -80,7 +80,8 @@ export default function ChatBubble() {
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-slate-500 hover:text-white transition-colors cursor-pointer"
+                className="text-slate-500 hover:text-white transition-colors cursor-pointer p-2 -m-2"
+                aria-label="Close chat"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -102,7 +103,7 @@ export default function ChatBubble() {
                           : "bg-slate-900/60 border border-slate-800/60 text-slate-300"
                       }`}
                     >
-                      <span className="block text-[9px] text-slate-500 uppercase tracking-widest mb-1 select-none">
+                      <span className="block text-[10px] text-slate-500 uppercase tracking-widest mb-1 select-none">
                         {isUser ? "USER >" : "AGENT >"}
                       </span>
                       <p className="whitespace-pre-line">{msg.content}</p>
@@ -129,7 +130,7 @@ export default function ChatBubble() {
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-slate-900/60 border border-slate-800/60 rounded-lg px-3 py-2.5 max-w-[85%]">
-                    <span className="block text-[9px] text-slate-500 uppercase mb-1">AGENT &gt;</span>
+                    <span className="block text-[10px] text-slate-500 uppercase mb-1">AGENT &gt;</span>
                     <span className="flex gap-1 items-center py-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: "0ms" }} />
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -144,7 +145,7 @@ export default function ChatBubble() {
             {/* Quick Questions tags */}
             {messages.length === 1 && (
               <div className="px-4 py-2 border-t border-slate-900 bg-slate-950/40 space-y-1.5">
-                <span className="text-[9px] text-slate-600 uppercase tracking-wide">QUICK INQUIRY:</span>
+                <span className="text-[10px] text-slate-600 uppercase tracking-wide">QUICK INQUIRY:</span>
                 <div className="flex flex-wrap gap-1.5">
                   {quickQuestions.map((q) => (
                     <Button

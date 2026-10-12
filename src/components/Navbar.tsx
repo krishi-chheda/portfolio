@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Terminal, Shield, ArrowUpRight, Cpu, Search } from "lucide-react";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import CommandPalette from "@/components/ui/CommandPalette";
 
 export default function Navbar() {
@@ -13,6 +14,7 @@ export default function Navbar() {
   const [activeHash, setActiveHash] = useState("");
   const [blink, setBlink] = useState(true);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   // Track CMD+K or CTRL+K
   useEffect(() => {
@@ -28,11 +30,12 @@ export default function Navbar() {
 
   // Track cursor blink
   useEffect(() => {
+    if (prefersReducedMotion) return;
     const interval = setInterval(() => {
       setBlink((prev) => !prev);
     }, 500);
     return () => clearInterval(interval);
-  }, []);
+  }, [prefersReducedMotion]);
 
   // Sync scroll hash anchor
   useEffect(() => {
@@ -72,7 +75,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-1.5 bg-slate-950/60 border border-slate-900 rounded px-2.5 py-0.5 font-mono text-[9px] text-slate-500">
+          <div className="hidden md:flex items-center space-x-1.5 bg-slate-950/60 border border-slate-900 rounded px-2.5 py-0.5 font-mono text-[10px] text-slate-500">
             <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
             <span className="uppercase text-slate-400">SYS: ONLINE</span>
             <span className="text-slate-700">|</span>
@@ -183,7 +186,7 @@ export default function Navbar() {
               </div>
 
               {/* Console diagnostic footer */}
-              <div className="pt-4 border-t border-slate-900/50 flex items-center justify-between text-[9px] text-slate-600">
+              <div className="pt-4 border-t border-slate-900/50 flex items-center justify-between text-[10px] text-slate-600">
                 <div className="flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
                   <span>SECURE_SHELL: ACTIVE</span>

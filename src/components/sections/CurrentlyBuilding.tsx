@@ -180,7 +180,7 @@ export default function CurrentlyBuilding() {
               <span className="w-2 h-2 rounded-full bg-green-500/40 border border-green-500/20" />
             </div>
             <span>build_pipeline // currently_building</span>
-            <div className="flex items-center space-x-1.5 bg-slate-900 px-2 py-0.5 rounded text-[9px] border border-slate-800">
+            <div className="flex items-center space-x-1.5 bg-slate-900 px-2 py-0.5 rounded text-[10px] border border-slate-800">
               <Hammer size={10} className="text-cyan-400" />
               <span>pipeline_active</span>
             </div>
@@ -209,7 +209,7 @@ export default function CurrentlyBuilding() {
                             {proj.name}
                           </h3>
                         </div>
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-emerald-950/40 border border-emerald-900/50 text-[#10b981] font-mono text-[9px] font-bold uppercase tracking-wider select-none animate-pulse">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-emerald-950/40 border border-emerald-900/50 text-[#10b981] font-mono text-[10px] font-bold uppercase tracking-wider select-none animate-pulse">
                           <span className="w-1 h-1 rounded-full bg-[#10b981]" />
                           {proj.developmentStatus}
                         </span>
@@ -217,7 +217,7 @@ export default function CurrentlyBuilding() {
 
                       {/* Current Focus */}
                       <div className="space-y-1">
-                        <span className="text-[9.5px] text-slate-500 block uppercase font-bold tracking-wider select-none">
+                        <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider select-none">
                           [Current Focus]
                         </span>
                         <p className="text-xs text-slate-200 font-sans select-text">
@@ -227,7 +227,7 @@ export default function CurrentlyBuilding() {
 
                       {/* Active Work Tasks */}
                       <div className="space-y-1.5">
-                        <span className="text-[9.5px] text-slate-500 block uppercase font-bold tracking-wider select-none">
+                        <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider select-none">
                           [Active Tasks]
                         </span>
                         <ul className="space-y-1.5 text-xs text-slate-400 font-sans">
@@ -242,7 +242,7 @@ export default function CurrentlyBuilding() {
 
                       {/* Roadmap Milestones */}
                       <div className="space-y-1.5">
-                        <span className="text-[9.5px] text-slate-500 block uppercase font-bold tracking-wider select-none">
+                        <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider select-none">
                           [Future Roadmap]
                         </span>
                         <ul className="space-y-1.5 text-xs text-slate-400 font-sans">
@@ -259,7 +259,7 @@ export default function CurrentlyBuilding() {
                       {proj.name === "Accessible Vision" && gitStats?.AccessVision && (
                         <div className="mt-4 pt-3 border-t border-slate-900/60 flex flex-col space-y-1 text-[10px]">
                           <div className="flex items-center space-x-1.5 truncate">
-                            <span className="text-slate-500 block uppercase font-bold text-[8.5px] select-none">
+                            <span className="text-slate-500 block uppercase font-bold text-[10px] select-none">
                               [Latest Commit]:
                             </span>
                             <span className="text-amber-500 font-mono font-bold shrink-0">
@@ -269,8 +269,8 @@ export default function CurrentlyBuilding() {
                               &quot;{gitStats.AccessVision.latestCommit.message}&quot;
                             </span>
                           </div>
-                          <div className="text-[9px] text-slate-500">
-                            Pushed: {new Date(gitStats.AccessVision.latestCommit.date).toLocaleString()}
+                          <div className="text-[10px] text-slate-500">
+                            Pushed: {new Date(gitStats.AccessVision.latestCommit.date).toLocaleString("en-US", { timeZone: "UTC" })}
                           </div>
                         </div>
                       )}
@@ -300,15 +300,15 @@ export default function CurrentlyBuilding() {
                       <div key={repo.name} className="border border-slate-900 bg-slate-950/60 p-3 rounded hover:border-slate-800 transition-all flex flex-col justify-between space-y-2">
                         <div className="flex items-start justify-between gap-2">
                           <span className="text-slate-100 font-bold truncate" title={repo.name}>{repo.name}</span>
-                          <span className="text-cyan-400 font-semibold px-1 rounded bg-slate-900 border border-slate-850 shrink-0 text-[8.5px]">
+                          <span className="text-cyan-400 font-semibold px-1 rounded bg-slate-900 border border-slate-850 shrink-0 text-[10px]">
                             {repo.language}
                           </span>
                         </div>
-                        <div className="text-slate-400 text-[9.5px] truncate font-mono">
+                        <div className="text-slate-400 text-[10px] truncate font-mono">
                           {repo.latestCommit ? `"${repo.latestCommit.message}"` : 'No recent pushes'}
                         </div>
-                        <div className="flex justify-between items-center text-[8.5px] text-slate-500 pt-1 border-t border-slate-900/60">
-                          <span>Updated: {new Date(repo.updatedAt).toLocaleDateString()}</span>
+                        <div className="flex justify-between items-center text-[10px] text-slate-500 pt-1 border-t border-slate-900/60">
+                          <span>Updated: {new Date(repo.updatedAt).toLocaleDateString("en-US", { timeZone: "UTC" })}</span>
                           <span className="flex items-center gap-1">⭐ {repo.stars}</span>
                         </div>
                       </div>
@@ -322,7 +322,7 @@ export default function CurrentlyBuilding() {
           </div>
 
           {/* Footer bar */}
-          <div className="bg-slate-950/95 px-4 py-2 border-t border-slate-900 flex justify-between items-center text-[9px] text-slate-650 select-none">
+          <div className="bg-slate-950/95 px-4 py-2 border-t border-slate-900 flex justify-between items-center text-[10px] text-slate-650 select-none">
             <span>Tracking 2 active building modules</span>
             <span>currently-building.md</span>
           </div>

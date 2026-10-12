@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Folder, FileText, GitBranch, FolderOpen, Play, ChevronDown, ChevronRight, FileJson, FileType } from "lucide-react";
 import { Github } from "@/components/ui/Icons";
 import { projectsData } from "@/lib/data";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const STATIC_TELEMETRY_FALLBACK: Record<string, any> = {
   AccessVision: {
@@ -64,6 +65,7 @@ export default function Projects() {
   const [loadingGit, setLoadingGit] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "architecture" | "notes">("details");
   const [decisionsOpen, setDecisionsOpen] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     setDecisionsOpen(false);
@@ -105,11 +107,12 @@ export default function Projects() {
 
   // Cursor blink
   useEffect(() => {
+    if (prefersReducedMotion) return;
     const interval = setInterval(() => {
       setBlink((b) => !b);
     }, 550);
     return () => clearInterval(interval);
-  }, []);
+  }, [prefersReducedMotion]);
 
   const activeProject = projectsData.find((p) => p.id === selectedId) || projectsData[0];
 
@@ -139,7 +142,7 @@ export default function Projects() {
               <span>projects/{activeProject.id}/details.md</span>
             </div>
 
-            <div className="text-[9px] text-slate-650 flex items-center gap-1">
+            <div className="text-[10px] text-slate-650 flex items-center gap-1">
               <GitBranch size={9} />
               <span>main</span>
             </div>
@@ -183,7 +186,7 @@ export default function Projects() {
                           </span>
                           <Folder size={12} className={isSelected ? "text-[#10b981]" : "text-slate-500 group-hover:text-slate-300"} />
                           <span className="truncate">{project.id}/</span>
-                          {isSelected && <span className="text-[9px] text-[#10b981] select-none font-bold animate-pulse">{blink ? "█" : ""}</span>}
+                          {isSelected && <span className="text-[10px] text-[#10b981] select-none font-bold animate-pulse">{blink ? "█" : ""}</span>}
                         </button>
 
                         {/* File items inside selected folder */}
@@ -271,7 +274,7 @@ export default function Projects() {
                   <div className="space-y-6 flex-1 flex flex-col justify-between">
                     {activeTab === "details" && (
                       <div className="bg-slate-900/30 border border-slate-900 p-4 md:p-6 rounded text-slate-300 text-xs leading-relaxed select-text font-sans space-y-4">
-                        <p className="font-mono text-[9px] text-slate-500 uppercase tracking-widest mb-2 select-none">[PROJECT_SPECIFICATION]</p>
+                        <p className="font-mono text-[10px] text-slate-500 uppercase tracking-widest mb-2 select-none">[PROJECT_SPECIFICATION]</p>
                         
                         <div>
                           <h4 className="text-[#10b981] font-mono text-[11px] font-bold tracking-wide uppercase mb-1">Problem:</h4>
@@ -317,7 +320,7 @@ export default function Projects() {
                         {/* Live GitHub Telemetry */}
                         {activeProject.githubUrl && (
                           <div className="mt-4 pt-4 border-t border-slate-900/60 font-mono text-[11px] text-slate-400 space-y-2 select-none">
-                            <div className="text-[9px] text-[#10b981] font-bold uppercase tracking-wider">
+                            <div className="text-[10px] text-[#10b981] font-bold uppercase tracking-wider">
                               [GITHUB_LIVE_TELEMETRY]
                             </div>
                             {loadingGit ? (
@@ -357,13 +360,13 @@ export default function Projects() {
                                             &quot;{stats.latestCommit.message}&quot;
                                           </span>
                                         </div>
-                                        <div className="text-[9px] text-slate-500">
-                                          Date: {new Date(stats.latestCommit.date).toLocaleString()}
+                                        <div className="text-[10px] text-slate-500">
+                                          Date: {new Date(stats.latestCommit.date).toLocaleString("en-US", { timeZone: "UTC" })}
                                         </div>
                                       </div>
                                     )}
                                     {isPrivate && (
-                                      <div className="border-t border-slate-900/60 pt-2 text-[9.5px] text-slate-500 italic">
+                                      <div className="border-t border-slate-900/60 pt-2 text-[10px] text-slate-500 italic">
                                         Telemetry loaded via local workspace builds. Working tree clean.
                                       </div>
                                     )}
@@ -380,7 +383,7 @@ export default function Projects() {
 
                     {activeTab === "architecture" && (
                       <div className="bg-slate-900/30 border border-slate-900 p-4 md:p-6 rounded text-slate-300 text-xs leading-relaxed select-text font-mono space-y-4">
-                        <p className="font-mono text-[9px] text-slate-500 uppercase tracking-widest mb-2 select-none">{`{ "architecture_schema": "v1.0" }`}</p>
+                        <p className="font-mono text-[10px] text-slate-500 uppercase tracking-widest mb-2 select-none">{`{ "architecture_schema": "v1.0" }`}</p>
                         
                         <div>
                           <span className="text-[#10b981] font-bold text-[11.5px] uppercase tracking-wide font-mono">[Chosen Architecture]</span>
@@ -441,7 +444,7 @@ export default function Projects() {
 
                     {activeTab === "notes" && (
                       <div className="bg-slate-900/30 border border-slate-900 p-4 md:p-6 rounded text-slate-300 text-xs leading-relaxed select-text font-sans space-y-4">
-                        <p className="font-mono text-[9px] text-slate-500 uppercase tracking-widest mb-2 select-none">// engineering_reflection_log</p>
+                        <p className="font-mono text-[10px] text-slate-500 uppercase tracking-widest mb-2 select-none">// engineering_reflection_log</p>
                         
                         <div>
                           <h4 className="text-[#10b981] font-mono text-[11px] font-bold tracking-wide uppercase mb-1">1. Why It Was Built</h4>

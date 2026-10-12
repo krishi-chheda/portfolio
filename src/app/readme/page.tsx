@@ -7,14 +7,20 @@ import { ArrowLeft, Terminal, Shield, Cpu, ExternalLink, Activity } from "lucide
 import GridBackground from "@/components/ui/GridBackground";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export default function ReadmePage() {
   const [typedCommand, setTypedCommand] = useState("");
   const [showCursor, setShowCursor] = useState(true);
   const targetCommand = "cat README.md";
+  const prefersReducedMotion = useReducedMotion();
 
   // Typewriter effect for the command prompt
   useEffect(() => {
+    if (prefersReducedMotion) {
+      setTypedCommand(targetCommand);
+      return;
+    }
     let index = 0;
     const interval = setInterval(() => {
       if (index < targetCommand.length) {
@@ -26,15 +32,16 @@ export default function ReadmePage() {
     }, 100);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [prefersReducedMotion]);
 
   // Blinking cursor
   useEffect(() => {
+    if (prefersReducedMotion) return;
     const cursorInterval = setInterval(() => {
       setShowCursor((prev) => !prev);
     }, 500);
     return () => clearInterval(cursorInterval);
-  }, []);
+  }, [prefersReducedMotion]);
 
   const navGuide = [
     {
@@ -110,7 +117,7 @@ export default function ReadmePage() {
                 <Terminal size={10} className="text-slate-650" />
                 <span>man_reader tty0 // /usr/man/readme.md</span>
               </div>
-              <div className="flex items-center space-x-1.5 text-[9px] text-slate-500">
+              <div className="flex items-center space-x-1.5 text-[10px] text-slate-500">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
                 <span>SYS_ONLINE</span>
               </div>

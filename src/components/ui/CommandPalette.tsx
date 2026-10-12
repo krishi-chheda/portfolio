@@ -226,7 +226,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
               <span className="text-[10px] text-slate-650 px-2 py-0.5 rounded border border-slate-900 bg-slate-950 mr-2 select-none">
                 ESC
               </span>
-              <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors cursor-pointer">
+              <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors cursor-pointer p-2 -m-2" aria-label="Close command palette">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -271,7 +271,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             </div>
 
             {/* Footer Status Bar */}
-            <div className="bg-slate-950/95 px-4 py-2 border-t border-slate-900 flex justify-between items-center text-[9px] text-slate-600 select-none">
+            <div className="bg-slate-950/95 px-4 py-2 border-t border-slate-900 flex justify-between items-center text-[10px] text-slate-600 select-none">
               <span>Use ↑↓ to navigate, Enter to run</span>
               <span>tty_commands</span>
             </div>

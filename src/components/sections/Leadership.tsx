@@ -57,7 +57,7 @@ export default function Leadership() {
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-bold text-purple-400 uppercase tracking-widest px-2 py-0.5 rounded bg-purple-950/30 border border-purple-900/40">
+                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest px-2 py-0.5 rounded bg-purple-950/30 border border-purple-900/40">
                       [DIRECTORSHIP]
                     </span>
                     <span className="text-[10px] text-slate-500">2024 - PRESENT</span>
@@ -104,7 +104,7 @@ export default function Leadership() {
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-bold text-teal-400 uppercase tracking-widest px-2 py-0.5 rounded bg-teal-950/30 border border-teal-900/40">
+                    <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest px-2 py-0.5 rounded bg-teal-950/30 border border-teal-900/40">
                       [COMMUNITY_LEAD]
                     </span>
                     <span className="text-[10px] text-slate-500">2025 - PRESENT</span>

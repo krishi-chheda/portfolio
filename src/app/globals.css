@@ -116,6 +116,18 @@ body.command-palette-open footer {
   color: #ffffff;
 }
 
+/* Respect OS-level reduced-motion preference for CSS keyframe utilities
+   (animate-pulse/spin/bounce/blink). Framer Motion animations are handled
+   separately via the useReducedMotion hook where they exist. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse,
+  .animate-spin,
+  .animate-bounce,
+  .animate-blink {
+    animation: none !important;
+  }
+}
+
 
 
 

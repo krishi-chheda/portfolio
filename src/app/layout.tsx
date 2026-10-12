@@ -73,7 +73,7 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${spaceGrotesk.variable} ${geistMono.variable} h-full antialiased scroll-smooth`}
     >
-      <body className="min-h-full bg-[#080c14] text-slate-100 flex flex-col font-sans select-none overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+      <body className="min-h-full bg-[#080c14] text-slate-100 flex flex-col font-sans overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
         {children}
         <script
           type="application/ld+json"

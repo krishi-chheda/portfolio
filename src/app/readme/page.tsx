@@ -2,37 +2,25 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowLeft, Terminal, Shield, Cpu, ExternalLink, Activity } from "lucide-react";
+import { ArrowLeft, Terminal, ExternalLink } from "lucide-react";
 import GridBackground from "@/components/ui/GridBackground";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export default function ReadmePage() {
-  const [typedCommand, setTypedCommand] = useState("");
+  const [typedLength, setTypedLength] = useState(0);
   const [showCursor, setShowCursor] = useState(true);
   const targetCommand = "cat README.md";
   const prefersReducedMotion = useReducedMotion();
+  const typedCommand = prefersReducedMotion ? targetCommand : targetCommand.slice(0, typedLength);
 
   // Typewriter effect for the command prompt
   useEffect(() => {
-    if (prefersReducedMotion) {
-      setTypedCommand(targetCommand);
-      return;
-    }
-    let index = 0;
-    const interval = setInterval(() => {
-      if (index < targetCommand.length) {
-        setTypedCommand((prev) => prev + targetCommand.charAt(index));
-        index++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [prefersReducedMotion]);
+    if (prefersReducedMotion || typedLength >= targetCommand.length) return;
+    const timerId = setTimeout(() => setTypedLength((n) => n + 1), 100);
+    return () => clearTimeout(timerId);
+  }, [prefersReducedMotion, typedLength]);
 
   // Blinking cursor
   useEffect(() => {
@@ -446,7 +434,7 @@ export default function ReadmePage() {
                   Every feature on this site exists because I enjoy building systems that people can interact with—not just look at.
                 </p>
                 <p className="text-[#10b981] font-bold tracking-widest pt-2">
-                  // SEE YOU IN THE TERMINAL.
+                  {"// SEE YOU IN THE TERMINAL."}
                 </p>
               </div>
 

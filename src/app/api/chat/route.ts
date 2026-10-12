@@ -14,6 +14,8 @@ const COMMAND_KEYWORDS: [command: string, keywords: string[]][] = [
   ["ssh recruiter@krishi.os", ["contact", "email", "reach", "connect", "interview", "linkedin"]],
 ];
 
+const MAX_MESSAGE_LENGTH = 500;
+
 function matchCommand(text: string): string {
   const match = COMMAND_KEYWORDS.find(([, keywords]) => keywords.some((k) => text.includes(k)));
   return match?.[0] ?? "";
@@ -21,9 +23,16 @@ function matchCommand(text: string): string {
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
+    const body = await req.json().catch(() => null);
+    const message = typeof body?.message === "string" ? body.message.trim() : "";
     if (!message) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
+    }
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json(
+        { error: `Message must be ${MAX_MESSAGE_LENGTH} characters or fewer` },
+        { status: 400 }
+      );
     }
 
     const query = message.toLowerCase();
@@ -66,8 +75,11 @@ If asked about things not in the facts, politely state you don't have that detai
             temperature: 0.7,
           }),
         });
+        if (!response.ok) {
+          throw new Error(`OpenAI returned status ${response.status}`);
+        }
         const data = await response.json();
-        reply = data.choices[0].message.content;
+        reply = data.choices?.[0]?.message?.content ?? "";
       } catch (err) {
         console.error("OpenAI request failed, falling back to local engine:", err);
       }
@@ -125,7 +137,6 @@ What would you like to ask next?
 - "Is the platform optimized for responsive mobile layout?"`;
       } 
       else if (query.includes("traffic") || query.includes("light") || query.includes("rl") || query.includes("sumo") || query.includes("congestion")) {
-        const proj = aiKnowledgeBase.projects.find((p) => p.id === "traffic-ai");
         reply = `I developed Traffic AI to optimize traffic congestion at intersections. It uses live computer vision processing on video streams to track lane queue density and adapt signal timings dynamically.
 
 Key details:
@@ -139,7 +150,6 @@ What would you like to ask next?
 - "Can I view the computer vision pipeline code?"`;
       } 
       else if (query.includes("accessible") || query.includes("vision") || query.includes("assistive") || query.includes("guidance") || query.includes("visually")) {
-        const proj = aiKnowledgeBase.projects.find((p) => p.id === "accessible-vision");
         reply = `I developed AccessVision (Accessible Vision) to assist visually impaired individuals in navigating environments safely. It maps environmental paths and detects hazards in real-time, providing immediate spoken audio feedback.
 
 Key details:

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Terminal, Shield, ArrowUpRight, Cpu, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import CommandPalette from "@/components/ui/CommandPalette";

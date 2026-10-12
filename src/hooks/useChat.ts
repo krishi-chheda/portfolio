@@ -28,17 +28,19 @@ export function useChat(initialMessage: string) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text }),
       });
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: data.reply || "Sorry, I lost the connection. Let's try again!",
-          suggestedCommand: data.suggestedCommand,
+          content: response.ok
+            ? data.reply || "Sorry, I lost the connection. Let's try again!"
+            : `Request failed: ${data.error || `status ${response.status}`}. Please try again.`,
+          suggestedCommand: response.ok ? data.suggestedCommand : undefined,
         },
       ]);
-    } catch (err) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Folder, FileText, GitBranch, FolderOpen, Play, ChevronDown, ChevronRight, FileJson, FileType } from "lucide-react";
 import { Github } from "@/components/ui/Icons";
@@ -62,18 +62,19 @@ export default function Projects() {
   const [selectedId, setSelectedId] = useState("accessible-vision");
   const [blink, setBlink] = useState(true);
   const [gitStats, setGitStats] = useState<any>(STATIC_TELEMETRY_FALLBACK);
-  const [loadingGit, setLoadingGit] = useState(false);
+  const [loadingGit, setLoadingGit] = useState(true);
   const [activeTab, setActiveTab] = useState<"details" | "architecture" | "notes">("details");
   const [decisionsOpen, setDecisionsOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
-  useEffect(() => {
+  // Switching project always reopens it on the details tab with decisions collapsed
+  const selectProject = useCallback((id: string) => {
+    setSelectedId(id);
     setDecisionsOpen(false);
     setActiveTab("details");
-  }, [selectedId]);
+  }, []);
 
   useEffect(() => {
-    setLoadingGit(true);
     fetch("/api/github")
       .then((res) => res.json())
       .then((data) => {
@@ -95,15 +96,15 @@ export default function Projects() {
 
   // Command Palette event listener
   useEffect(() => {
-    const handleSelectProject = (e: any) => {
-      const projId = e.detail?.id;
+    const handleSelectProject = (e: Event) => {
+      const projId = (e as CustomEvent<{ id?: string }>).detail?.id;
       if (projId && projectsData.some((p) => p.id === projId)) {
-        setSelectedId(projId);
+        selectProject(projId);
       }
     };
     window.addEventListener("select-project", handleSelectProject);
     return () => window.removeEventListener("select-project", handleSelectProject);
-  }, []);
+  }, [selectProject]);
 
   // Cursor blink
   useEffect(() => {
@@ -174,7 +175,7 @@ export default function Projects() {
                       <div key={project.id} className="space-y-1">
                         {/* Directory line item */}
                         <button
-                          onClick={() => setSelectedId(project.id)}
+                          onClick={() => selectProject(project.id)}
                           className={`flex items-center space-x-2 py-1 px-1.5 rounded transition-all w-full text-left cursor-pointer group ${
                             isSelected 
                               ? "bg-slate-900 text-[#10b981] font-bold" 
@@ -444,7 +445,7 @@ export default function Projects() {
 
                     {activeTab === "notes" && (
                       <div className="bg-slate-900/30 border border-slate-900 p-4 md:p-6 rounded text-slate-300 text-xs leading-relaxed select-text font-sans space-y-4">
-                        <p className="font-mono text-[10px] text-slate-500 uppercase tracking-widest mb-2 select-none">// engineering_reflection_log</p>
+                        <p className="font-mono text-[10px] text-slate-500 uppercase tracking-widest mb-2 select-none">{"// engineering_reflection_log"}</p>
                         
                         <div>
                           <h4 className="text-[#10b981] font-mono text-[11px] font-bold tracking-wide uppercase mb-1">1. Why It Was Built</h4>

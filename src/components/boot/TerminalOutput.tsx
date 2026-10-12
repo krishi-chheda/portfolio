@@ -19,8 +19,10 @@ export default function TerminalOutput({
 }: TerminalOutputProps) {
   const [bootTime, setBootTime] = useState("");
 
+  // Client-only timestamp: set after mount so server and client markup match during hydration
   useEffect(() => {
     const now = new Date();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setBootTime(now.toISOString().replace("T", " ").substring(0, 19));
   }, []);
 

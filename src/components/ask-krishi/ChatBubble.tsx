@@ -174,6 +174,8 @@ export default function ChatBubble() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                maxLength={500}
+                aria-label="Ask Krishi a question"
                 placeholder="Ask about studies, skills, projects..."
                 className="flex-1 bg-slate-900/60 border border-slate-800 rounded px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/10"
                 disabled={loading}

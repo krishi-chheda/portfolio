@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Hammer, ArrowRight, PlayCircle, GitCommit } from "lucide-react";
+import { Hammer, GitCommit } from "lucide-react";
 
 interface ActiveBuild {
   name: string;
@@ -144,10 +144,9 @@ const STATIC_TELEMETRY_FALLBACK: Record<string, any> = {
 
 export default function CurrentlyBuilding() {
   const [gitStats, setGitStats] = useState<any>(STATIC_TELEMETRY_FALLBACK);
-  const [loadingGit, setLoadingGit] = useState(false);
+  const [loadingGit, setLoadingGit] = useState(true);
 
   useEffect(() => {
-    setLoadingGit(true);
     fetch("/api/github")
       .then((res) => res.json())
       .then((data) => {

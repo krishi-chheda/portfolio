@@ -28,7 +28,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       name: "README.md",
       description: "cat README.md // Open KRISHI.OS operating manual & onboarding guide (alias: man krishi)",
       action: () => {
-        window.location.href = "/readme";
+        window.location.assign("/readme");
       }
     },
     {
@@ -116,18 +116,16 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
     cmd.description.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Lock body scroll and apply layout classes when open
+  // Lock body scroll while open; return focus to whatever opened the palette on close
   useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add("command-palette-open");
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.classList.remove("command-palette-open");
-      document.body.style.overflow = "";
-    }
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    document.body.classList.add("command-palette-open");
+    document.body.style.overflow = "hidden";
     return () => {
       document.body.classList.remove("command-palette-open");
       document.body.style.overflow = "";
+      previouslyFocused?.focus({ preventScroll: true });
     };
   }, [isOpen]);
 
@@ -149,6 +147,10 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       if (e.key === "Escape") {
         e.preventDefault();
         onClose();
+      } else if (e.key === "Tab") {
+        // Keep focus inside the dialog; the list is driven by arrow keys from the input
+        e.preventDefault();
+        inputRef.current?.focus();
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
         setActiveIndex((prev) => (prev + 1) % Math.max(1, filteredCommands.length));
@@ -207,6 +209,9 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             exit={{ scale: 0.97, y: -8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             ref={containerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command palette"
             className="w-full max-w-xl bg-slate-950/90 border border-cyan-500/20 rounded-lg shadow-[0_0_30px_rgba(6,182,212,0.15)] overflow-hidden"
           >
             {/* Input Bar */}
@@ -215,6 +220,11 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
               <input
                 ref={inputRef}
                 type="text"
+                role="combobox"
+                aria-label="Search commands"
+                aria-expanded="true"
+                aria-controls="command-palette-list"
+                aria-activedescendant={filteredCommands[activeIndex] ? `cmd-${filteredCommands[activeIndex].id}` : undefined}
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -232,13 +242,17 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             </div>
 
             {/* List */}
-            <div className="max-h-[300px] overflow-y-auto p-2 bg-slate-950/20">
+            <div id="command-palette-list" role="listbox" className="max-h-[300px] overflow-y-auto p-2 bg-slate-950/20">
               {filteredCommands.length > 0 ? (
                 filteredCommands.map((cmd, idx) => {
                   const isActive = idx === activeIndex;
                   return (
                     <button
                       key={cmd.id}
+                      id={`cmd-${cmd.id}`}
+                      role="option"
+                      aria-selected={isActive}
+                      tabIndex={-1}
                       onClick={() => {
                         cmd.action();
                         onClose();

@@ -1,32 +1,23 @@
 import { useState, useEffect } from "react";
 
 export function useTypingEffect(text: string, speed = 30, onComplete?: () => void) {
-  const [displayText, setDisplayText] = useState("");
+  const [typed, setTyped] = useState({ text, count: 0 });
+
+  // Restart from zero whenever the target text changes (reset during render, not in an effect)
+  if (typed.text !== text) {
+    setTyped({ text, count: 0 });
+  }
+  const count = typed.text === text ? typed.count : 0;
 
   useEffect(() => {
-    if (!text) {
-      setDisplayText("");
+    if (!text) return;
+    if (count >= text.length) {
+      onComplete?.();
       return;
     }
-
-    setDisplayText("");
-    let index = 0;
-    let timerId: NodeJS.Timeout;
-
-    const type = () => {
-      if (index <= text.length) {
-        setDisplayText(text.slice(0, index));
-        index++;
-        timerId = setTimeout(type, speed);
-      } else {
-        if (onComplete) onComplete();
-      }
-    };
-
-    type();
-
+    const timerId = setTimeout(() => setTyped((s) => ({ ...s, count: s.count + 1 })), speed);
     return () => clearTimeout(timerId);
-  }, [text, speed, onComplete]);
+  }, [text, count, speed, onComplete]);
 
-  return displayText;
+  return text.slice(0, count);
 }

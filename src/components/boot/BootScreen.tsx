@@ -52,7 +52,11 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.2 }}
-            className="fixed inset-0 z-50 bg-[#000000] flex items-center justify-center font-mono"
+            onClick={() => {
+              setMounted(false);
+              onComplete();
+            }}
+            className="fixed inset-0 z-50 bg-[#000000] flex items-center justify-center font-mono cursor-pointer"
           >
             <div className="text-center text-slate-400 text-xs animate-pulse">
               LOADING SYSTEM PROFILE...

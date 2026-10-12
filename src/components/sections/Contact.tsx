@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Send, CheckCircle2, MessageSquare } from "lucide-react";
-import { Github, Linkedin } from "@/components/ui/Icons";
-import Card from "../ui/Card";
+import { Mail, Send, CheckCircle2 } from "lucide-react";
+import { Linkedin } from "@/components/ui/Icons";
 import Button from "@/components/ui/Button";
+
+const CONTACT_EMAIL = "krishichheda10@gmail.com";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -13,19 +14,19 @@ export default function Contact() {
     email: "",
     message: "",
   });
-  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "opened">("idle");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // No backend: hand the message to the visitor's own mail client.
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
 
-    setStatus("sending");
-
-    // Simulate sending progress
-    setTimeout(() => {
-      setStatus("success");
-      setFormData({ name: "", email: "", message: "" });
-    }, 1500);
+    const subject = `Portfolio enquiry from ${formData.name}`;
+    const body = `${formData.message}\n\n— ${formData.name} (${formData.email})`;
+    window.location.assign(
+      `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    );
+    setStatus("opened");
   };
 
   return (
@@ -82,11 +83,11 @@ export default function Contact() {
 
               <div className="space-y-2 font-mono text-[11px] text-slate-400">
                 <a
-                  href="mailto:krishichheda10@gmail.com"
+                  href={`mailto:${CONTACT_EMAIL}`}
                   className="flex items-center gap-3 p-3 rounded border border-slate-900 bg-slate-950/40 hover:border-cyan-500/30 hover:text-cyan-400 transition-colors"
                 >
                   <Mail className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>krishichheda10@gmail.com</span>
+                  <span>{CONTACT_EMAIL}</span>
                 </a>
                 <a
                   href="https://linkedin.com/in/krishi-chheda"
@@ -120,7 +121,6 @@ export default function Contact() {
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full bg-slate-950/60 border border-slate-900 rounded-md px-3 py-2 text-xs text-white placeholder-slate-700 focus:outline-none focus:border-[#10b981]/50 focus:ring-0 transition-colors"
                       placeholder="e.g. John Doe"
-                      disabled={status === "sending" || status === "success"}
                     />
                   </div>
 
@@ -137,7 +137,6 @@ export default function Contact() {
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full bg-slate-950/60 border border-slate-900 rounded-md px-3 py-2 text-xs text-white placeholder-slate-700 focus:outline-none focus:border-[#10b981]/50 focus:ring-0 transition-colors"
                       placeholder="e.g. john@example.com"
-                      disabled={status === "sending" || status === "success"}
                     />
                   </div>
 
@@ -154,7 +153,6 @@ export default function Contact() {
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       className="w-full bg-slate-950/60 border border-slate-900 rounded-md px-3 py-2 text-xs text-white placeholder-slate-700 focus:outline-none focus:border-[#10b981]/50 focus:ring-0 transition-colors resize-none"
                       placeholder="e.g. Hey Krishi, I saw your project ClinicalBrief and..."
-                      disabled={status === "sending" || status === "success"}
                     />
                   </div>
 
@@ -163,7 +161,6 @@ export default function Contact() {
                 {/* Submit button */}
                 <Button
                   type="submit"
-                  disabled={status === "sending" || status === "success"}
                   variant="terminal"
                   size="lg"
                   className="w-full flex items-center justify-center space-x-2 border border-slate-900 hover:border-[#10b981]/30 cursor-pointer"
@@ -181,32 +178,25 @@ export default function Contact() {
                         <span>./transmit_transmission</span>
                       </motion.span>
                     )}
-                    {status === "sending" && (
+                    {status === "opened" && (
                       <motion.span
-                        key="sending"
-                        className="flex items-center gap-1.5 text-xs"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <span className="w-3 h-3 rounded-full border border-cyan-400 border-t-transparent animate-spin" />
-                        <span>transmitting packets...</span>
-                      </motion.span>
-                    )}
-                    {status === "success" && (
-                      <motion.span
-                        key="success"
+                        key="opened"
                         className="flex items-center gap-1.5 text-xs text-emerald-450"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>packet transmission successful!</span>
+                        <span>draft opened in your mail client</span>
                       </motion.span>
                     )}
                   </AnimatePresence>
                 </Button>
+                <p aria-live="polite" className="text-[11px] text-slate-500 font-sans">
+                  {status === "opened"
+                    ? `Press send in your mail app to deliver it. Nothing opened? Email ${CONTACT_EMAIL} directly.`
+                    : "Opens a pre-filled draft in your own mail client."}
+                </p>
               </form>
             </div>
           </div>

@@ -80,7 +80,7 @@ export default function RootLayout({
                 "https://github.com/krishi-chheda",
                 "https://linkedin.com/in/krishi-chheda"
               ],
-              "alumniOf": {
+              "affiliation": {
                 "@type": "EducationalOrganization",
                 "name": "Monash University",
                 "location": {

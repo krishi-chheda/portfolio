@@ -90,8 +90,8 @@ export default function Hero() {
 
         {/* Display headline */}
         <h1 className="mt-10 font-bold uppercase leading-[0.95] tracking-tight text-[clamp(2rem,8.5vw,7rem)]">
-          <span data-hero="headline" className="block text-ink">Krishi Chheda.</span>
-          <span data-hero="headline" className="block text-accent">AI Engineer &amp;</span>
+          <span data-hero="headline" className="block text-ink">Krishi Chheda.</span>{" "}
+          <span data-hero="headline" className="block text-accent">AI Engineer &amp;</span>{" "}
           <span data-hero="headline" className="block text-accent">Product Builder</span>
         </h1>
 

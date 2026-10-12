@@ -234,7 +234,7 @@ export default function SystemMap() {
               tabIndex={0}
               role="group"
               aria-label="System map. Drag or use the arrow keys to rotate; Tab to move between nodes; Escape clears the selection."
-              className="relative touch-none select-none cursor-grab active:cursor-grabbing outline-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-accent focus-visible:-outline-offset-1"
+              className="relative overflow-hidden touch-none select-none cursor-grab active:cursor-grabbing outline-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-accent focus-visible:-outline-offset-1"
               style={{ aspectRatio: `${W} / ${H}` }}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
@@ -334,7 +334,13 @@ export default function SystemMap() {
                     <span
                       key={n.id}
                       className="absolute"
-                      style={{ left: `${(p.x / W) * 100}%`, top: `${(p.y / H) * 100}%`, transform: "translate(10px, -50%)", opacity: round(0.45 + 0.55 * p.depth) }}
+                      style={{
+                        left: `${(p.x / W) * 100}%`,
+                        top: `${(p.y / H) * 100}%`,
+                        // Labels for nodes in the right part of the graph sit to the node's left so they stay inside the panel
+                        transform: p.x > W * 0.6 ? "translate(calc(-100% - 10px), -50%)" : "translate(10px, -50%)",
+                        opacity: round(0.45 + 0.55 * p.depth),
+                      }}
                     >
                       <span
                         data-sm="label"

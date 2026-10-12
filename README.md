@@ -52,7 +52,18 @@
     - React 19
     - TypeScript
     - Tailwind CSS v4
-    - Framer Motion 12
+    - GSAP 3 (entrance choreography) + Framer Motion 12 (mount/unmount)
+
+## LOCAL DEVELOPMENT
+    npm install
+    npm run dev           # http://localhost:3000
+    npm run lint
+    npm run build
+    npm run check:chat    # Ask Krishi routing checks (needs the dev server running)
+
+    Optional server-only env vars (.env.local):
+    - OPENAI_API_KEY   enables the gpt-4o-mini assistant (otherwise local answers from site data)
+    - GITHUB_TOKEN     raises the GitHub API rate limit for the telemetry panels
 
 ## CURRENT STATUS
     - STATUS: ONLINE

@@ -5,10 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Send, CheckCircle2 } from "lucide-react";
 import { Linkedin } from "@/components/ui/Icons";
 import Button from "@/components/ui/Button";
+import { useTerminalReveal } from "@/hooks/useTerminalReveal";
 
 const CONTACT_EMAIL = "krishichheda10@gmail.com";
 
 export default function Contact() {
+  const sectionRef = useTerminalReveal<HTMLElement>();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,17 +32,17 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="py-24 relative overflow-hidden border-t border-slate-900/60">
+    <section ref={sectionRef} id="contact" className="py-24 relative overflow-hidden border-t border-slate-900/60">
       <div className="max-w-4xl mx-auto px-6">
 
         {/* Section Header CLI Prompt */}
         <div className="font-mono text-xs md:text-sm text-slate-500 mb-8 flex items-center space-x-2 select-none justify-center">
           <span className="text-[#10b981]">krishi@stack:~$</span>
-          <span className="text-slate-100">ssh guest@krishi</span>
+          <span data-reveal="command" className="text-slate-100">ssh guest@krishi</span>
         </div>
 
         {/* OS Terminal Shell Window */}
-        <div className="w-full border border-slate-900 bg-slate-950/20 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl flex flex-col font-mono terminal-highlight">
+        <div className="w-full border border-slate-900 bg-slate-950/20 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl flex flex-col font-mono terminal-highlight" data-reveal="panel">
 
           {/* Title Bar */}
           <div className="bg-slate-950/80 px-4 py-2.5 border-b border-slate-900 flex justify-between items-center select-none text-[10px] text-slate-500">

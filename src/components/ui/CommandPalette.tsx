@@ -199,15 +199,14 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
           className="fixed inset-0 z-[100] flex items-start justify-center pt-24 px-4 font-mono"
         >
           {/* Background Decorative Status */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none select-none font-mono text-[10px] text-cyan-500/20 uppercase tracking-[0.25em] animate-pulse">
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none select-none font-mono text-[10px] text-cyan-500/20 uppercase tracking-[0.25em]">
             [system] interactive command mode active
           </div>
 
           <motion.div
             initial={{ scale: 0.97, y: -8 }}
-            animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.97, y: -8 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            animate={{ scale: 1, y: 0, transition: { duration: 0.2, ease: [0.2, 0, 0, 1] } }}
+            exit={{ scale: 0.98, y: -4, transition: { duration: 0.12, ease: [0.3, 0, 1, 1] } }}
             ref={containerRef}
             role="dialog"
             aria-modal="true"

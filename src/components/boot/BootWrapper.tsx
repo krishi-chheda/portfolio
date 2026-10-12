@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, ReactNode, createContext, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BootScreen from "./BootScreen";
+
+// Lets entrance animations wait until the boot screen has cleared, instead of playing hidden behind it.
+// Defaults to true so pages without a boot screen (/readme, /now) never wait.
+const BootContext = createContext(true);
+export const useBooted = () => useContext(BootContext);
 
 interface BootWrapperProps {
   children: ReactNode;
@@ -27,29 +32,23 @@ export default function BootWrapper({ children }: BootWrapperProps) {
   }, [hasBooted]);
 
   return (
-    <>
+    <BootContext.Provider value={hasBooted}>
       <AnimatePresence mode="wait">
         {!hasBooted && (
           <BootScreen key="boot" onComplete={() => setHasBooted(true)} />
         )}
       </AnimatePresence>
 
-      {/* Main content wrapper is always rendered in the HTML layout for SSR SEO indexing, 
-          and transitions smoothly into view once the boot simulation is completed. */}
-      <div 
-        className={`flex flex-col min-h-screen transition-all duration-1000 ${
-          hasBooted ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+      {/* Main content is always rendered for SSR/SEO and fades in once the boot sequence completes.
+          Opacity only (no transform) so the fixed navbar is never inside a transformed ancestor. */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: hasBooted ? 1 : 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className={`flex flex-col min-h-screen ${hasBooted ? "" : "pointer-events-none"}`}
       >
-        <motion.div
-          animate={hasBooted ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}
-          initial={{ opacity: 0, scale: 0.98 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col flex-1"
-        >
-          {children}
-        </motion.div>
-      </div>
-    </>
+        {children}
+      </motion.div>
+    </BootContext.Provider>
   );
 }

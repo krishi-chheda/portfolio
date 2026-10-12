@@ -1,307 +1,155 @@
 "use client";
 
-import { motion as motionFramer } from "framer-motion";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
+import gsap from "gsap";
 import Link from "next/link";
-import { Bot, Sparkles, Terminal, TerminalSquare } from "lucide-react";
-import Button from "@/components/ui/Button";
-import { currentProcesses } from "@/lib/data";
+import { currentProcesses, impactLog } from "@/lib/data";
+import { useBooted } from "@/components/boot/BootWrapper";
+import { DUR, EASE, MOTION_OK, RISE } from "@/lib/motion";
+
+const CONTACT_EMAIL = "krishichheda10@gmail.com";
+
+const PILLS = [
+  { label: "projects", href: "/#projects" },
+  { label: "career", href: "/#career" },
+  { label: "system-map", href: "/#system-map" },
+  { label: "readme", href: "/readme" },
+  { label: "contact", href: "/#contact" },
+];
 
 export default function Hero() {
-  const triggerChat = () => {
-    // Dispatch custom event to open global AI chatbot bubble
-    window.dispatchEvent(new CustomEvent("open-ai-chat"));
-  };
+  const rootRef = useRef<HTMLElement>(null);
+  const booted = useBooted();
+
+  // Post-boot entrance: prompt types, name and title rise, details and impact cells cascade.
+  // Start states are applied immediately (hidden behind the boot screen); playback waits for boot to finish.
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const mm = gsap.matchMedia();
+    mm.add(
+      MOTION_OK,
+      () => {
+        const tl = gsap.timeline({ paused: true, defaults: { ease: EASE } });
+        tl.from('[data-hero="whoami"]', { clipPath: "inset(0 100% 0 0)", duration: 0.35, ease: "steps(15)" })
+          .from('[data-hero="meta"]', { opacity: 0, duration: DUR.standard }, 0.25)
+          .from('[data-hero="headline"]', { y: 18, opacity: 0, duration: DUR.slow, stagger: 0.1 }, 0.35)
+          .from('[data-hero="body"]', { y: RISE.item, opacity: 0, duration: DUR.standard, stagger: 0.06 }, 0.7)
+          .from('[data-hero="tail"]', { clipPath: "inset(0 100% 0 0)", duration: 0.35, ease: "steps(20)" }, 0.9)
+          .from('[data-hero="row"]', { y: 8, opacity: 0, duration: DUR.standard, stagger: 0.05 }, 1.0);
+        if (booted) tl.play();
+      },
+      root
+    );
+    return () => mm.revert();
+  }, [booted]);
+
+  const openChat = () => window.dispatchEvent(new CustomEvent("open-ai-chat"));
+
+  const details: { key: string; value: ReactNode }[] = [
+    {
+      key: "status",
+      value: (
+        <span>
+          <span className="text-accent">●</span> {currentProcesses.availability.toLowerCase()}
+        </span>
+      ),
+    },
+    { key: "focus", value: currentProcesses.targetRoles.join(" · ").toLowerCase() },
+    { key: "study", value: `master of ai · monash university · graduating ${currentProcesses.graduation.toLowerCase()}` },
+    { key: "based", value: currentProcesses.location.toLowerCase() },
+    {
+      key: "email",
+      value: (
+        <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:text-accent-2 transition-colors duration-150">
+          {CONTACT_EMAIL}
+        </a>
+      ),
+    },
+    {
+      key: "ask",
+      value: (
+        <button type="button" onClick={openChat} className="text-accent hover:text-accent-2 transition-colors duration-150 cursor-pointer">
+          chat with the KRISHI.OS assistant →
+        </button>
+      ),
+    },
+  ];
 
   return (
-    <section className="relative min-h-[95vh] flex items-center justify-center pt-28 pb-16 overflow-hidden bg-[#080c14]">
-      {/* Background terminal matrix glow */}
-      <div className="absolute inset-0 grid-bg pointer-events-none select-none opacity-[0.12]" />
-      <div 
-        className="absolute inset-0 pointer-events-none select-none z-10"
-        style={{
-          background: "radial-gradient(circle at 50% 40%, rgba(16, 185, 129, 0.015) 0%, rgba(8, 12, 20, 0) 70%)"
-        }}
-      />
+    <section ref={rootRef} id="hero" className="relative pt-32 pb-20 md:pt-40">
+      <div className="mx-auto max-w-6xl px-6">
+        {/* Prompt */}
+        <div className="text-xs md:text-sm">
+          <span className="text-accent">krishi@stack:~$</span>{" "}
+          <span data-hero="whoami" className="text-ink">./whoami --long</span>
+        </div>
+        <div data-hero="meta" className="mt-4 text-[11px] md:text-xs text-ink-faint">
+          # profile · applied ai · computer vision · healthcare ai · full-stack product
+        </div>
 
-      <div className="max-w-6xl w-full mx-auto px-6 relative z-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          
-          {/* Left Column: Whoami Identity Terminal */}
-          <motionFramer.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="lg:col-span-7 border border-slate-900 bg-slate-950/30 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl flex flex-col"
+        {/* Display headline */}
+        <h1 className="mt-10 font-bold uppercase leading-[0.95] tracking-tight text-[clamp(2rem,8.5vw,7rem)]">
+          <span data-hero="headline" className="block text-ink">Krishi Chheda.</span>
+          <span data-hero="headline" className="block text-accent">AI Engineer &amp;</span>
+          <span data-hero="headline" className="block text-accent">Product Builder</span>
+        </h1>
+
+        {/* Intro */}
+        <p data-hero="body" className="mt-10 max-w-2xl text-sm md:text-[15px] leading-relaxed text-ink-soft">
+          I build <span className="text-accent">applied AI systems</span> and the products around them: grounded computer
+          vision for accessibility, <span className="text-accent">human-reviewed clinical AI</span>, and edge vision for
+          traffic. Currently studying a Master of Artificial Intelligence at Monash University.
+        </p>
+
+        {/* key: value details */}
+        <dl data-hero="body" className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2 text-xs max-w-4xl">
+          {details.map((d) => (
+            <div key={d.key} className="flex gap-4 min-w-0">
+              <dt className="w-14 shrink-0 text-ink-faint">{d.key}</dt>
+              <dd className="text-ink-soft min-w-0 break-words">{d.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {/* Pills */}
+        <div data-hero="body" className="mt-8 flex flex-wrap gap-2 text-xs">
+          <button
+            type="button"
+            onClick={openChat}
+            className="rounded-full border border-accent px-4 py-1.5 text-accent hover:bg-accent hover:text-bg transition-colors duration-150 cursor-pointer"
           >
-            {/* OS Window Header Bar */}
-            <div className="bg-slate-950/90 px-4 py-3 border-b border-slate-900 flex justify-between items-center select-none font-mono">
-              <div className="flex items-center space-x-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500/40 border border-red-500/20" />
-                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/40 border border-yellow-500/20" />
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500/40 border border-green-500/20" />
-              </div>
-              
-              <div className="flex items-center space-x-2 text-[10px] text-slate-500">
-                <Terminal size={10} className="text-[#10b981]" />
-                <span>krishi@stack: ~</span>
-              </div>
+            ./ask-krishi
+          </button>
+          {PILLS.map((p) => (
+            <Link
+              key={p.label}
+              href={p.href}
+              className="rounded-full border border-rule px-4 py-1.5 text-ink-soft hover:border-ink-soft hover:text-ink transition-colors duration-150"
+            >
+              {p.label}
+            </Link>
+          ))}
+        </div>
 
-              <div className="text-[10px] font-mono text-slate-600 tracking-wider">
-                ssh: port-22 // system_root
-              </div>
-            </div>
-
-            {/* OS Window Shell Body */}
-            <div className="p-6 md:p-8 font-mono text-left space-y-6 flex-1 flex flex-col justify-between">
-              
-              {/* Command Prompts */}
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2 text-xs md:text-sm">
-                  <span className="text-[#10b981] font-bold">krishi@stack:~$</span>
-                  <span className="text-slate-100 font-semibold select-all">./whoami --long</span>
-                </div>
-                
-                <div className="text-[11px] text-emerald-500/60 pl-2 border-l border-emerald-500/30 py-0.5 flex items-center gap-1.5">
-                  <Sparkles size={10} className="animate-pulse" />
-                  <span>loading env · melbourne · ai · engineering</span>
+        {/* Impact log */}
+        <div className="mt-20 border-t border-rule pt-6">
+          <div className="text-xs md:text-sm">
+            <span className="text-accent">krishi@stack:~$</span>{" "}
+            <span data-hero="tail" className="text-ink">tail -f impact.log</span>
+          </div>
+          <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 border-l border-rule">
+            {impactLog.map((m) => (
+              <div key={m.label} data-hero="row" className="border-r border-rule px-4 py-2">
+                <div className="text-2xl md:text-3xl font-bold text-accent">{m.value}</div>
+                <div className="mt-2 text-[11px] leading-relaxed text-ink-faint">
+                  {m.label} · <span className="text-ink-soft">{m.source}</span>
                 </div>
               </div>
-
-              {/* Main Headline Identity */}
-              <div className="border-l-2 border-emerald-500/60 pl-4 md:pl-6 my-2 space-y-1">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-extrabold uppercase tracking-tight text-white leading-[1.05] select-text">
-                  KRISHI
-                  <br />
-                  <span className="text-slate-500">CHHEDA.</span>
-                </h1>
-                
-                <h2 className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 text-xl md:text-3xl font-bold tracking-wide mt-1">
-                  AI ENGINEER &
-                  <br />
-                  PRODUCT BUILDER
-                </h2>
-              </div>
-
-              {/* Supporting Description text */}
-              <p className="text-slate-300 font-sans text-xs md:text-sm leading-relaxed max-w-2xl font-normal select-text">
-                Currently pursuing a <span className="text-[#10b981] font-semibold">Master of Artificial Intelligence at Monash University</span>.
-                <br /><br />
-                Builder of <span className="text-emerald-400 font-semibold">AccessVision</span>, <span className="text-cyan-400 font-semibold">ClinicalBrief</span>, <span className="text-slate-200 font-semibold">StudentHub</span>, and <span className="text-amber-400 font-semibold">Traffic AI</span>.
-                <br /><br />
-                Open to opportunities in <span className="text-cyan-400 font-semibold">AI Engineering</span>, <span className="text-cyan-400 font-semibold">Machine Learning</span>, <span className="text-cyan-400 font-semibold">Software Engineering</span>, and <span className="text-cyan-400 font-semibold">Technology Consulting</span>.
-              </p>
-
-              {/* Action inputs (CTA row) */}
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <Button
-                    onClick={triggerChat}
-                    variant="primary"
-                    size="md"
-                    className="flex items-center justify-center space-x-2 font-bold cursor-pointer"
-                  >
-                    <Bot className="w-4 h-4" />
-                    <span>./ask-krishi</span>
-                  </Button>
-                </div>
-
-                {/* Subtle easter-egg CLI clue */}
-                <div className="text-[10px] text-slate-500 font-mono flex flex-wrap items-center gap-1 select-none pt-1">
-                  <span>Tip: Try executing</span>
-                  <Link
-                    href="/readme"
-                    className="text-cyan-500 hover:text-cyan-400 transition-colors font-bold underline decoration-dotted"
-                  >
-                    cat README.md
-                  </Link>
-                  <span>or</span>
-                  <span className="text-slate-400 font-bold">man krishi</span>
-                  <span>in the command palette.</span>
-                </div>
-              </div>
-            </div>
-          </motionFramer.div>
-          {/* Right Column: ps aux | grep krishi terminal widget */}
-          <motionFramer.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
-            className="lg:col-span-5 border border-slate-900 bg-slate-950/20 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl flex flex-col font-mono"
-          >
-            {/* Header bar */}
-            <div className="bg-slate-950/90 px-4 py-3 border-b border-slate-900 flex justify-between items-center select-none">
-              <div className="flex items-center space-x-1.5">
-                <span className="w-2 h-2 bg-slate-800 rounded-full" />
-                <span className="w-2 h-2 bg-slate-800 rounded-full" />
-                <span className="w-2 h-2 bg-slate-800 rounded-full" />
-              </div>
-              <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                <TerminalSquare className="w-3 h-3 text-[#10b981]" />
-                ps_aux_grep_krishi
-              </span>
-              <span className="text-[10px] text-[#10b981] animate-pulse">MONITORING</span>
-            </div>
-
-            {/* Terminal Body */}
-            <div className="p-5 flex-1 flex flex-col justify-start text-xs space-y-4">
-              {/* CLI Command Prompt */}
-              <div className="space-y-1">
-                <div className="flex items-center space-x-2 text-slate-500">
-                  <span className="text-emerald-500 font-bold">krishi@stack:~$</span>
-                  <span className="text-slate-100 select-all font-semibold">ps aux | grep krishi</span>
-                </div>
-              </div>
-
-              {/* Metrics Ribbon (htop/glances inspired) */}
-              <div className="grid grid-cols-2 gap-2 bg-slate-950/40 p-2.5 rounded border border-slate-900/60 text-[10px] font-mono">
-                <div>
-                  <span className="text-slate-500 block text-[10px] font-bold uppercase">PROCESSES RUNNING:</span>
-                  <span className="text-emerald-450 font-bold">{currentProcesses.running.length}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[10px] font-bold uppercase">LEARNING THREADS:</span>
-                  <span className="text-cyan-400 font-bold">{currentProcesses.learning.length}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[10px] font-bold uppercase">LEADERSHIP TASKS:</span>
-                  <span className="text-purple-400 font-bold">1</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[10px] font-bold uppercase">SYSTEM UPTIME:</span>
-                  <span className="text-white font-semibold">{currentProcesses.uptime}</span>
-                </div>
-              </div>
-
-              {/* Grid content split */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
-                
-                {/* Left Side: Active, Learning, Leadership */}
-                <div className="space-y-4">
-                  {/* Active Processes */}
-                  <div className="space-y-1.5">
-                    <span className="text-slate-500 block uppercase font-bold text-[10px] tracking-wider select-none">
-                      {"// ACTIVE PROCESSES"}
-                    </span>
-                    <div className="space-y-1 pr-16 sm:pr-0">
-                      {currentProcesses.running.map((proc) => (
-                        <div key={proc.name} className="relative group/item">
-                          <div className="flex items-center justify-between py-1 px-1.5 rounded hover:bg-slate-900/40 border border-transparent hover:border-slate-900 transition-all cursor-default">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                              <span className="text-emerald-400 font-bold text-[10px] shrink-0">[RUNNING]</span>
-                              <span className="text-slate-200 font-medium text-[10.5px] truncate">{proc.name}</span>
-                            </div>
-                            {proc.githubUrl && (
-                              <a
-                                href={proc.githubUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                className="text-slate-500 hover:text-cyan-400 transition-colors text-[10px] font-bold border border-slate-900 hover:border-cyan-900 bg-slate-950 px-1 py-0.5 rounded select-none shrink-0 ml-1.5"
-                              >
-                                [repo]
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Learning Threads */}
-                  <div className="space-y-1.5">
-                    <span className="text-slate-500 block uppercase font-bold text-[10px] tracking-wider select-none">
-                      {"// LEARNING THREADS"}
-                    </span>
-                    <div className="space-y-1">
-                      {currentProcesses.learning.map((skill) => (
-                        <div key={skill} className="flex items-center gap-1.5 py-0.5 px-1.5 select-text">
-                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0" />
-                          <span className="text-cyan-400 font-bold text-[10px] shrink-0">[ACTIVE]</span>
-                          <span className="text-slate-300 text-[10.5px]">{skill}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Leadership Process */}
-                  <div className="space-y-1.5">
-                    <span className="text-slate-500 block uppercase font-bold text-[10px] tracking-wider select-none">
-                      {"// LEADERSHIP PROCESS"}
-                    </span>
-                    <div className="border border-slate-900 bg-slate-950/20 p-2 rounded space-y-1 select-text">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse shrink-0" />
-                        <span className="text-purple-400 font-bold text-[10px] shrink-0">[RUNNING]</span>
-                        <span className="text-white font-medium text-[10.5px]">{currentProcesses.leadership.role}</span>
-                      </div>
-                      <div className="pl-3.5 text-[10px] text-slate-500 font-medium">
-                        {currentProcesses.leadership.org}
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Right Side: Target Roles, System Status */}
-                <div className="space-y-4">
-                  {/* Target Roles */}
-                  <div className="space-y-1.5">
-                    <span className="text-slate-500 block uppercase font-bold text-[10px] tracking-wider select-none">
-                      {"// TARGET ROLES"}
-                    </span>
-                    <div className="space-y-1">
-                      {currentProcesses.targetRoles.map((role) => (
-                        <div key={role} className="flex items-center gap-1.5 py-0.5 px-1.5 select-text">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                          <span className="text-amber-500 font-bold text-[10px] shrink-0">[QUEUE]</span>
-                          <span className="text-slate-300 text-[10.5px]">{role}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* System Status */}
-                  <div className="space-y-1.5">
-                    <span className="text-slate-500 block uppercase font-bold text-[10px] tracking-wider">
-                      {"// SYSTEM STATUS"}
-                    </span>
-                    <div className="border border-slate-900 bg-slate-950/25 p-2.5 rounded-lg space-y-2 select-text">
-                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-900/50 text-[#10b981] font-bold text-[10px] tracking-wider uppercase animate-pulse">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
-                        ● AVAILABLE FOR OPPORTUNITIES
-                      </div>
-                      
-                      <div className="space-y-1.5 text-[10.5px]">
-                        <div>
-                          <span className="text-slate-500 block uppercase text-[10px] font-bold select-none">Graduation:</span>
-                          <span className="text-white font-semibold">{currentProcesses.graduation}</span>
-                        </div>
-                        <div>
-                          <span className="text-slate-500 block uppercase text-[10px] font-bold select-none">Location:</span>
-                          <span className="text-white font-semibold">{currentProcesses.location}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
-              </div>
-
-              {/* Shell output trailing decoration */}
-              <div className="text-[10px] text-slate-650 border-t border-slate-900/50 pt-2 mt-auto select-none flex justify-between">
-                <span>[info] Active processes rendered.</span>
-                <span>tty1</span>
-              </div>
-            </div>
-          </motionFramer.div>
-
+            ))}
+          </div>
         </div>
       </div>
-
-      {/* Aesthetic bottom shadow fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#080c14] to-transparent pointer-events-none" />
     </section>
   );
 }

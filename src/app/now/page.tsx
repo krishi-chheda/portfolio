@@ -28,7 +28,7 @@ export default function NowPage() {
           {/* Page Title */}
           <div className="space-y-4 mb-12">
             <div className="inline-flex items-center space-x-2 bg-slate-900/60 border border-slate-800/80 px-3 py-1 rounded-full text-[10px] font-mono text-slate-400">
-              <Clock className="w-3 h-3 text-cyan-400 animate-pulse" />
+              <Clock className="w-3 h-3 text-cyan-400" />
               <span>LAST UPDATED: JUNE 2026</span>
             </div>
             <h1 className="text-4xl font-heading font-extrabold text-white">

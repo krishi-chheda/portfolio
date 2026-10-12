@@ -6,63 +6,15 @@ import { Folder, FileText, GitBranch, FolderOpen, Play, ChevronDown, ChevronRigh
 import { Github } from "@/components/ui/Icons";
 import { projectsData } from "@/lib/data";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-
-const STATIC_TELEMETRY_FALLBACK: Record<string, any> = {
-  AccessVision: {
-    name: "AccessVision",
-    stars: 2,
-    forks: 0,
-    language: "Python",
-    updatedAt: "2026-06-25T14:22:18Z",
-    latestCommit: {
-      hash: "e2c38f9",
-      message: "refactor: optimize YOLOv8 model quantization and frame payload size",
-      date: "2026-06-25T14:22:18Z"
-    }
-  },
-  ClinicalBrief: {
-    name: "ClinicalBrief",
-    stars: 0,
-    forks: 0,
-    language: "TypeScript",
-    updatedAt: "2026-06-26T09:12:45Z",
-    latestCommit: {
-      hash: "8c7f21a",
-      message: "feat: add Whisper audio stream buffers and speaker overlap checks",
-      date: "2026-06-26T09:12:45Z"
-    }
-  },
-  "student-hub": {
-    name: "student-hub",
-    stars: 1,
-    forks: 0,
-    language: "TypeScript",
-    updatedAt: "2026-06-24T18:45:00Z",
-    latestCommit: {
-      hash: "d8f3b2e",
-      message: "docs: update API documentation and clean public transit routing maps",
-      date: "2026-06-24T18:45:00Z"
-    }
-  },
-  "ai-traffic-system": {
-    name: "ai-traffic-system",
-    stars: 0,
-    forks: 0,
-    language: "Python",
-    updatedAt: "2026-06-27T10:30:12Z",
-    latestCommit: {
-      hash: "4a2b8c9",
-      message: "refactor: optimize YOLO weights for Jetson Nano deployment edge pipeline",
-      date: "2026-06-27T10:30:12Z"
-    }
-  }
-};
+import { useGitHubTelemetry } from "@/hooks/useGitHubTelemetry";
+import { formatUtc, repoKey } from "@/lib/github";
+import { useTerminalReveal } from "@/hooks/useTerminalReveal";
 
 export default function Projects() {
+  const sectionRef = useTerminalReveal<HTMLElement>();
   const [selectedId, setSelectedId] = useState("accessible-vision");
   const [blink, setBlink] = useState(true);
-  const [gitStats, setGitStats] = useState<any>(STATIC_TELEMETRY_FALLBACK);
-  const [loadingGit, setLoadingGit] = useState(true);
+  const { data: telemetry, loading: loadingGit } = useGitHubTelemetry();
   const [activeTab, setActiveTab] = useState<"details" | "architecture" | "notes">("details");
   const [decisionsOpen, setDecisionsOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -74,25 +26,6 @@ export default function Projects() {
     setActiveTab("details");
   }, []);
 
-  useEffect(() => {
-    fetch("/api/github")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.repos) {
-          setGitStats(data.repos);
-        }
-      })
-      .catch((err) => console.error("Failed to load GitHub stats:", err))
-      .finally(() => setLoadingGit(false));
-  }, []);
-
-  const getRepoKey = (id: string) => {
-    if (id === "accessible-vision") return "AccessVision";
-    if (id === "clinicalbrief") return "ClinicalBrief";
-    if (id === "studenthub") return "student-hub";
-    if (id === "traffic-ai") return "ai-traffic-system";
-    return id;
-  };
 
   // Command Palette event listener
   useEffect(() => {
@@ -116,19 +49,20 @@ export default function Projects() {
   }, [prefersReducedMotion]);
 
   const activeProject = projectsData.find((p) => p.id === selectedId) || projectsData[0];
+  const repo = activeProject.githubUrl ? telemetry?.repos[repoKey(activeProject.githubUrl)] : undefined;
 
   return (
-    <section id="projects" className="py-24 relative overflow-hidden border-t border-slate-900/60">
+    <section ref={sectionRef} id="projects" className="py-24 relative overflow-hidden border-t border-slate-900/60">
       <div className="max-w-6xl mx-auto px-6">
         
         {/* Section Header CLI Prompt */}
         <div className="font-mono text-xs md:text-sm text-slate-500 mb-8 flex items-center space-x-2 select-none">
           <span className="text-[#10b981]">krishi@stack:~$</span>
-          <span className="text-slate-100">ls -la projects/</span>
+          <span data-reveal="command" className="text-slate-100">ls -la projects/</span>
         </div>
 
         {/* Integrated IDE / Explorer Panel */}
-        <div className="w-full border border-slate-900 bg-slate-950/20 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl flex flex-col font-mono terminal-highlight">
+        <div className="w-full border border-slate-900 bg-slate-950/20 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl flex flex-col font-mono terminal-highlight" data-reveal="panel">
           
           {/* Editor Header Bar */}
           <div className="bg-slate-950/90 px-4 py-2.5 border-b border-slate-900 flex justify-between items-center select-none text-[10px] text-slate-500">
@@ -187,7 +121,7 @@ export default function Projects() {
                           </span>
                           <Folder size={12} className={isSelected ? "text-[#10b981]" : "text-slate-500 group-hover:text-slate-300"} />
                           <span className="truncate">{project.id}/</span>
-                          {isSelected && <span className="text-[10px] text-[#10b981] select-none font-bold animate-pulse">{blink ? "█" : ""}</span>}
+                          {isSelected && <span className="text-[10px] text-[#10b981] select-none font-bold">{blink ? "█" : ""}</span>}
                         </button>
 
                         {/* File items inside selected folder */}
@@ -254,16 +188,15 @@ export default function Projects() {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={`${activeProject.id}-${activeTab}`}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.15 }}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.2, 0, 0, 1] } }}
+                  exit={{ opacity: 0, y: -4, transition: { duration: 0.1, ease: [0.3, 0, 1, 1] } }}
                   className="space-y-6 text-left flex-1 flex flex-col justify-between"
                 >
                   {/* File title heading print */}
                   <div className="space-y-1">
                     <span className="text-[10px] text-[#10b981] font-bold tracking-widest uppercase flex items-center gap-1.5 select-none">
-                      <span className="w-1.5 h-1.5 bg-[#10b981] rounded-full animate-ping" />
+                      <span className="w-1.5 h-1.5 bg-[#10b981] rounded-full" />
                       cat projects/{activeProject.id}/{activeTab === "details" ? "details.md" : activeTab === "architecture" ? "architecture.json" : "engineering_notes.txt"}
                     </span>
                     <h3 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase select-text">
@@ -318,64 +251,48 @@ export default function Projects() {
                           </span>
                         </div>
 
-                        {/* Live GitHub Telemetry */}
-                        {activeProject.githubUrl && (
+                        {/* GitHub telemetry: real data only; renders nothing when unavailable */}
+                        {activeProject.githubUrl && (loadingGit || repo) && (
                           <div className="mt-4 pt-4 border-t border-slate-900/60 font-mono text-[11px] text-slate-400 space-y-2 select-none">
-                            <div className="text-[10px] text-[#10b981] font-bold uppercase tracking-wider">
-                              [GITHUB_LIVE_TELEMETRY]
+                            <div className="flex flex-wrap items-center justify-between gap-2 text-[10px]">
+                              <span className="text-[#10b981] font-bold uppercase tracking-wider">[GITHUB]</span>
+                              {telemetry && (
+                                <span className="text-slate-500">
+                                  {telemetry.stale ? "cached snapshot from " : "as of "}
+                                  {formatUtc(telemetry.fetchedAt)}
+                                </span>
+                              )}
                             </div>
                             {loadingGit ? (
-                              <div className="flex items-center space-x-2 animate-pulse text-slate-500">
-                                <span className="w-1.5 h-1.5 bg-[#10b981] rounded-full" />
-                                <span>Syncing telemetry packets...</span>
-                              </div>
-                            ) : gitStats && gitStats[getRepoKey(activeProject.id)] ? (
-                              (() => {
-                                const stats = gitStats[getRepoKey(activeProject.id)];
-                                const isPrivate = activeProject.id === "clinicalbrief" || activeProject.id === "traffic-ai";
-                                return (
-                                  <div className="bg-slate-950/40 border border-slate-900/80 p-3 rounded space-y-2 select-text">
-                                    <div className="flex flex-wrap items-center justify-between gap-3 text-[10px]">
-                                      <div>
-                                        <span className="text-slate-500">Stars:</span> <span className="text-white font-bold">{stats.stars}</span>
-                                      </div>
-                                      <div>
-                                        <span className="text-slate-500">Forks:</span> <span className="text-white font-bold">{stats.forks}</span>
-                                      </div>
-                                      <div>
-                                        <span className="text-slate-500">Language:</span> <span className="text-cyan-400 font-bold">{stats.language}</span>
-                                      </div>
-                                      <div>
-                                        <span className="text-slate-500">Status:</span>{" "}
-                                        <span className={isPrivate ? "text-amber-500 font-bold" : "text-emerald-500 font-bold"}>
-                                          {isPrivate ? "PRIVATE/LOCAL" : "PUBLIC/SYNCED"}
-                                        </span>
-                                      </div>
+                              <div className="text-slate-500 text-[10px]">Fetching repository data…</div>
+                            ) : repo && (
+                              <div className="bg-slate-950/40 border border-slate-900/80 p-3 rounded space-y-2 select-text text-[10px]">
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                                  {repo.language && (
+                                    <span><span className="text-slate-500">Language:</span> <span className="text-cyan-400 font-bold">{repo.language}</span></span>
+                                  )}
+                                  <span><span className="text-slate-500">Last push:</span> <span className="text-slate-200">{formatUtc(repo.pushedAt)}</span></span>
+                                </div>
+                                {repo.latestCommit && (
+                                  <div className="border-t border-slate-900/60 pt-2 space-y-1">
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                      <span className="text-[#10b981] font-bold shrink-0">latest_commit:</span>
+                                      <a
+                                        href={repo.latestCommit.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-amber-500 font-semibold shrink-0 hover:text-amber-400 underline decoration-dotted"
+                                      >
+                                        {repo.latestCommit.sha}
+                                      </a>
+                                      <span className="text-slate-300 truncate" title={repo.latestCommit.message}>
+                                        &quot;{repo.latestCommit.message}&quot;
+                                      </span>
                                     </div>
-                                    {!isPrivate && stats.latestCommit && (
-                                      <div className="border-t border-slate-900/60 pt-2 flex flex-col space-y-1 text-[10px]">
-                                        <div className="flex items-center space-x-1.5 truncate">
-                                          <span className="text-[#10b981] font-bold shrink-0">latest_commit:</span>
-                                          <span className="text-amber-500 font-semibold font-mono shrink-0">[{stats.latestCommit.hash}]</span>
-                                          <span className="text-slate-300 truncate font-mono" title={stats.latestCommit.message}>
-                                            &quot;{stats.latestCommit.message}&quot;
-                                          </span>
-                                        </div>
-                                        <div className="text-[10px] text-slate-500">
-                                          Date: {new Date(stats.latestCommit.date).toLocaleString("en-US", { timeZone: "UTC" })}
-                                        </div>
-                                      </div>
-                                    )}
-                                    {isPrivate && (
-                                      <div className="border-t border-slate-900/60 pt-2 text-[10px] text-slate-500 italic">
-                                        Telemetry loaded via local workspace builds. Working tree clean.
-                                      </div>
-                                    )}
+                                    <div className="text-slate-500">{formatUtc(repo.latestCommit.date)}</div>
                                   </div>
-                                );
-                              })()
-                            ) : (
-                              <div className="text-slate-500 italic text-[10px]">Telemetry stream offline.</div>
+                                )}
+                              </div>
                             )}
                           </div>
                         )}

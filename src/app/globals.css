@@ -1,77 +1,71 @@
 @import "tailwindcss";
 
+/* KRISHI.OS palette: cool near-black, soft ink, one emerald accent. All text tokens pass WCAG AA on every bg. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  
-  --color-bg-dark: #080c14;
-  --color-bg-card: #0d1321;
-  --color-border-subtle: #1e293b;
-  --color-cyber-cyan: #06b6d4;
-  --color-emerald-mint: #10b981;
-  
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --color-bg: #0a0c0b;
+  --color-bg-2: #101312;
+  --color-bg-3: #161a18;
+  --color-ink: #e4e8e3;
+  --color-ink-soft: #a1aaa3;
+  --color-ink-faint: #7c8780;
+  --color-rule: #222826;
+  --color-accent: #34d399;
+  --color-accent-2: #a7f3d0;
+  --color-gold: #d9b45a;
+
+  --font-sans: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-heading: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 :root {
-  --background: #080c14;
-  --foreground: #f8fafc;
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
 }
 
-/* Custom Scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #080c14;
+  background: var(--color-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 9999px;
+  background: var(--color-rule);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #06b6d4;
+  background: var(--color-accent);
 }
 
-/* Grid overlay background */
-.grid-bg {
-  background-size: 50px 50px;
-  background-image: 
-    linear-gradient(to right, rgba(30, 41, 59, 0.15) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(30, 41, 59, 0.15) 1px, transparent 1px);
+/* Fixed page frame: hairline border with accent corner ticks */
+.page-frame {
+  position: fixed;
+  inset: 10px;
+  z-index: 40;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--color-rule) 70%, transparent);
+  --tick: 18px;
+  background:
+    linear-gradient(var(--color-accent), var(--color-accent)) top left / var(--tick) 1px no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) top left / 1px var(--tick) no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) top right / var(--tick) 1px no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) top right / 1px var(--tick) no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) bottom left / var(--tick) 1px no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) bottom left / 1px var(--tick) no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) bottom right / var(--tick) 1px no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) bottom right / 1px var(--tick) no-repeat;
 }
-
-/* Glowing text effects */
-.glow-cyan {
-  text-shadow: 0 0 10px rgba(6, 182, 212, 0.25);
-}
-
-.glow-emerald {
-  text-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
-}
-
-/* Glassmorphism blur utility */
-.glass-panel {
-  background: rgba(13, 19, 33, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.glass-panel-cyan {
-  background: rgba(13, 19, 33, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(6, 182, 212, 0.15);
+@media (max-width: 640px) {
+  .page-frame {
+    inset: 4px;
+    --tick: 12px;
+  }
 }
 
 @keyframes terminal-blink {
@@ -94,25 +88,18 @@ body.command-palette-open footer {
   transform: scale(0.985);
 }
 
-/* Terminal section highlighting styles */
+/* Section highlight when jumped to from Ask Krishi / commands */
 .terminal-highlight {
-  transition: border-color 0.4s ease, box-shadow 0.4s ease, background-color 0.4s ease;
+  transition: border-color 0.4s ease, background-color 0.4s ease;
 }
 
 .terminal-highlight-active {
-  border-color: rgba(6, 182, 212, 0.5) !important;
-  box-shadow: 0 0 35px rgba(6, 182, 212, 0.25) !important;
-  background-color: rgba(6, 182, 212, 0.04) !important;
+  border-color: var(--color-accent) !important;
+  background-color: color-mix(in srgb, var(--color-accent) 4%, transparent) !important;
 }
 
-/* Custom text-selection highlights matching terminal branding */
 ::selection {
-  background: rgba(34, 211, 238, 0.30);
-  color: #ffffff;
-}
-
-::-moz-selection {
-  background: rgba(34, 211, 238, 0.30);
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
   color: #ffffff;
 }
 
@@ -127,8 +114,3 @@ body.command-palette-open footer {
     animation: none !important;
   }
 }
-
-
-
-
-

@@ -98,19 +98,6 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
             }}
           />
 
-          {/* CRT Screen Flicker overlay */}
-          <motion.div
-            animate={{
-              opacity: [0.99, 1.0, 0.98, 1.0, 0.99, 1.0],
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 0.15,
-              ease: "linear",
-            }}
-            className="absolute inset-0 pointer-events-none select-none z-10 bg-emerald-500/[0.003]"
-          />
-
           {/* Subtle Vignette shadow overlay */}
           <div
             className="absolute inset-0 pointer-events-none select-none z-10"

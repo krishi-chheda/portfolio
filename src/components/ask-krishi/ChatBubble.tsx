@@ -1,17 +1,44 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, X, Send, Terminal as TermIcon } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
 import { executeNavigationCommand } from "@/lib/navigation";
 import Button from "@/components/ui/Button";
 
+// http(s) URLs (trailing punctuation excluded) and email addresses.
+const LINK_RE = /https?:\/\/[^\s<>"]*[^\s<>".,;:!?)]|[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
+
+// Renders URLs and emails in chat text as links; everything else stays plain text.
+function linkify(text: string): ReactNode[] {
+  const parts: ReactNode[] = [];
+  let last = 0;
+  for (const m of text.matchAll(LINK_RE)) {
+    const isUrl = m[0].startsWith("http");
+    parts.push(
+      text.slice(last, m.index),
+      <a
+        key={m.index}
+        href={isUrl ? m[0] : `mailto:${m[0]}`}
+        target={isUrl ? "_blank" : undefined}
+        rel="noopener noreferrer"
+        className="text-cyan-400 underline decoration-dotted underline-offset-2 hover:text-cyan-300 break-all"
+      >
+        {m[0]}
+      </a>
+    );
+    last = m.index + m[0].length;
+  }
+  parts.push(text.slice(last));
+  return parts;
+}
+
 export default function ChatBubble() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const { messages, loading, sendMessage } = useChat(
-    "Hi, I'm Krishi's AI Assistant. Ask me about his Monash University Master's studies, MDAS leadership, or builds like ClinicalBrief and StudentHub."
+    "Hi, I'm the KRISHI.OS assistant. Ask about Krishi's projects, his Master of AI at Monash, his leadership roles, or how to reach him."
   );
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +64,7 @@ export default function ChatBubble() {
 
   const quickQuestions = [
     "Tell me about ClinicalBrief",
-    "Is Krishi open to jobs?",
+    "Is Krishi open to opportunities?",
     "What is his role at MDAS?",
   ];
 
@@ -88,7 +115,7 @@ export default function ChatBubble() {
             </div>
 
             {/* Message Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs bg-slate-950/20">
+            <div role="log" aria-live="polite" aria-label="Ask Krishi conversation" className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs bg-slate-950/20">
               {messages.map((msg, index) => {
                 const isUser = msg.role === "user";
                 return (
@@ -106,7 +133,7 @@ export default function ChatBubble() {
                       <span className="block text-[10px] text-slate-500 uppercase tracking-widest mb-1 select-none">
                         {isUser ? "USER >" : "AGENT >"}
                       </span>
-                      <p className="whitespace-pre-line">{msg.content}</p>
+                      <p className="whitespace-pre-line">{linkify(msg.content)}</p>
 
                       {!isUser && msg.suggestedCommand && (
                         <div className="mt-3 pt-2 border-t border-slate-800/60 font-mono text-[10px]">

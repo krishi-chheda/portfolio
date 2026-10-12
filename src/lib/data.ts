@@ -90,6 +90,20 @@ export const currentProcesses: CurrentProcess = {
   uptime: "Building Since 2024"
 };
 
+export interface ImpactMetric {
+  value: string;
+  label: string;
+  source: string;
+}
+
+// Every figure here is traceable: AccessVision README benchmark table, ClinicalBrief README, owner-confirmed Traffic AI result.
+export const impactLog: ImpactMetric[] = [
+  { value: "73%", label: "grounded-query p95 latency cut under 50-user load", source: "AccessVision" },
+  { value: "11.2%→100%", label: "request success rate under concurrent load", source: "AccessVision" },
+  { value: "~42%", label: "reduction in waiting time with density-based signals", source: "Traffic AI" },
+  { value: "35,103", label: "synthetic clinical notes searchable with access scoping", source: "ClinicalBrief" },
+];
+
 export const projectsData: Project[] = [
   {
     id: "accessible-vision",
@@ -336,10 +350,10 @@ export const experienceData: Experience[] = [
   {
     id: "mdas-vp",
     year: "2026",
-    role: "Vice President (previously Media & Marketing Director, Jan–May 2026; Media & Marketing Officer, Oct 2025–Jan 2026)",
+    role: "Vice President since July 2026 (previously Media & Marketing Director, Jan–May 2026, and Media & Marketing Officer, Oct 2025–Jan 2026)",
     organization: "Monash Data & AI Society (MDAS)",
     location: "Melbourne, VIC, Australia",
-    period: "Oct 2025 - Present (Vice President since Jul 2026)",
+    period: "Oct 2025 - Present",
     description: [
       "Directed media branding and digital campaign strategies for the largest data student society at Monash.",
       "Grew workshop reach to 300+ students across 5+ events by designing and executing targeted promotions and cross-team outreach campaigns.",

@@ -1,194 +1,80 @@
 import { NextResponse } from "next/server";
+import { additionalProjectsData, projectsData } from "@/lib/data";
+import { GITHUB_USER, repoKey, type CommitTelemetry, type RepoTelemetry, type TelemetryResponse } from "@/lib/github";
 
-// Simple in-memory cache to prevent rate-limiting (TTL: 5 minutes)
-let cache: any = null;
-let cacheTime = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+// GitHub responses are cached in the Next data cache. Worst case per window: 1 list + 1 commit call per
+// tracked repo (~10), well under the 60 req/h unauthenticated limit. GITHUB_TOKEN (optional, server-only) raises it.
+const REVALIDATE_SECONDS = 900;
 
-// Curated list of repositories to retrieve stats for
-const TARGET_REPOS = [
-  "AccessVision",
-  "student-hub",
-  "AuraLens-AI",
-  "f1-telemetry-ai-dashboard",
-  "F1-telemetry-analyzer",
-  "fastapi_backend",
-  "video-splitter",
-  "portfolio"
-];
+const TRACKED = [...projectsData, ...additionalProjectsData].flatMap((p) => (p.githubUrl ? [repoKey(p.githubUrl)] : []));
+
+// Last successful snapshot in this server instance, served (marked stale) if GitHub fails.
+let lastGood: TelemetryResponse | null = null;
+
+interface GhRepo {
+  name: string;
+  html_url: string;
+  language: string | null;
+  pushed_at: string;
+}
+
+interface GhCommit {
+  sha: string;
+  html_url: string;
+  commit: { message: string; committer: { date: string } | null };
+}
+
+function gh(path: string) {
+  const headers: Record<string, string> = {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "krishi-portfolio",
+  };
+  if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  return fetch(`https://api.github.com${path}`, { headers, next: { revalidate: REVALIDATE_SECONDS } });
+}
+
+// Missing, empty (409) or rate-limited repos yield null: the UI omits the commit rather than inventing one.
+async function latestCommit(repo: string): Promise<CommitTelemetry | null> {
+  try {
+    const res = await gh(`/repos/${GITHUB_USER}/${repo}/commits?per_page=1`);
+    if (!res.ok) return null;
+    const [c] = (await res.json()) as GhCommit[];
+    if (!c?.commit.committer?.date) return null;
+    return {
+      sha: c.sha.slice(0, 7),
+      message: c.commit.message.split("\n")[0],
+      date: c.commit.committer.date,
+      url: c.html_url,
+    };
+  } catch {
+    return null;
+  }
+}
 
 export async function GET() {
-  const now = Date.now();
-
-  // Return cached data if still valid
-  if (cache && now - cacheTime < CACHE_DURATION) {
-    return NextResponse.json(cache, {
-      headers: {
-        "X-Cache": "HIT",
-        "Access-Control-Allow-Origin": "*"
-      }
-    });
-  }
-
   try {
-    const headers = {
-      "User-Agent": "krishi-portfolio-agent",
-      Accept: "application/vnd.github.v3+json"
-    };
+    const res = await gh(`/users/${GITHUB_USER}/repos?per_page=100`);
+    if (!res.ok) throw new Error(`GitHub repos list returned ${res.status}`);
+    const list = (await res.json()) as GhRepo[];
+    const byKey = new Map(list.map((r) => [r.name.toLowerCase(), r]));
 
-    // 1. Fetch all user repositories
-    const reposRes = await fetch("https://api.github.com/users/krishi-chheda/repos?per_page=100", {
-      headers,
-      next: { revalidate: 300 } // Next.js fetch cache fallback
-    });
-
-    if (!reposRes.ok) {
-      throw new Error(`GitHub API returned status ${reposRes.status} for repos list`);
-    }
-
-    const reposData = await reposRes.json();
-    if (!Array.isArray(reposData)) {
-      throw new Error("Invalid response format from GitHub repos API");
-    }
-
-    // 2. Fetch public events to extract recent commits
-    let eventsData: any[] = [];
-    try {
-      const eventsRes = await fetch("https://api.github.com/users/krishi-chheda/events/public", {
-        headers,
-        next: { revalidate: 300 }
-      });
-      if (eventsRes.ok) {
-        eventsData = await eventsRes.json();
-      }
-    } catch (e) {
-      console.error("Failed to fetch GitHub public events feed:", e);
-    }
-
-    // Process repositories details
-    const repoStats: Record<string, any> = {};
-
-    // Initialize all target repos with default/fallback values
-    TARGET_REPOS.forEach((repo) => {
-      repoStats[repo] = {
-        name: repo,
-        stars: 0,
-        forks: 0,
-        updatedAt: new Date().toISOString(),
-        language: "Python",
-        latestCommit: {
-          hash: "main",
-          message: "Updated repository details",
-          date: new Date().toISOString()
-        }
-      };
-    });
-
-    // Populate from repos data
-    reposData.forEach((repo: any) => {
-      const matchedName = TARGET_REPOS.find(
-        (target) => target.toLowerCase() === repo.name.toLowerCase()
-      );
-
-      if (matchedName) {
-        repoStats[matchedName] = {
-          name: repo.name,
-          stars: repo.stargazers_count,
-          forks: repo.forks_count,
-          updatedAt: repo.updated_at,
-          language: repo.language || "Python",
-          latestCommit: {
-            hash: "main",
-            message: "Updated repository details",
-            date: repo.updated_at
-          }
-        };
-      }
-    });
-
-    // Extract latest commit info from the events feed for target repos
-    if (Array.isArray(eventsData)) {
-      eventsData.forEach((event: any) => {
-        if (event.type === "PushEvent" && event.payload?.commits?.length > 0) {
-          const repoNameOnly = event.repo.name.split("/")[1];
-          const matchedName = TARGET_REPOS.find(
-            (target) => target.toLowerCase() === repoNameOnly.toLowerCase()
-          );
-
-          if (matchedName) {
-            const commit = event.payload.commits[0]; // Most recent commit in the push
-            const commitHash = commit.sha ? commit.sha.substring(0, 7) : "main";
-            // Check if we already found a more recent commit in the events list
-            const currentCommitDate = new Date(repoStats[matchedName].latestCommit.date);
-            const eventDate = new Date(event.created_at);
-
-            if (eventDate > currentCommitDate || repoStats[matchedName].latestCommit.hash === "main") {
-              repoStats[matchedName].latestCommit = {
-                hash: commitHash,
-                message: commit.message || "Updated code files",
-                date: event.created_at
-              };
-            }
-          }
-        }
-      });
-    }
-
-    // Set cache
-    cache = {
-      lastUpdated: now,
-      repos: repoStats
-    };
-    cacheTime = now;
-
-    return NextResponse.json(cache, {
-      headers: {
-        "X-Cache": "MISS",
-        "Access-Control-Allow-Origin": "*"
-      }
-    });
-  } catch (error: any) {
-    console.error("GitHub API routing error:", error);
-
-    // If API fails, return current cache if exists, otherwise a safe fallback
-    if (cache) {
-      return NextResponse.json(cache, {
-        headers: {
-          "X-Cache": "FALLBACK",
-          "Access-Control-Allow-Origin": "*"
-        }
-      });
-    }
-
-    // Safe bootstrap fallback so site does not crash
-    const nowIso = new Date().toISOString();
-    const fallbackStats: Record<string, any> = {};
-    TARGET_REPOS.forEach((repo) => {
-      fallbackStats[repo] = {
-        name: repo,
-        stars: 0,
-        forks: 0,
-        updatedAt: nowIso,
-        language: repo === "student-hub" || repo === "f1-telemetry-ai-dashboard" || repo === "portfolio" ? "TypeScript" : "Python",
-        latestCommit: {
-          hash: "main",
-          message: "Commit updates fetched dynamically",
-          date: nowIso
-        }
-      };
-    });
-
-    return NextResponse.json(
-      {
-        lastUpdated: now,
-        repos: fallbackStats,
-        error: error.message || "Fallback active"
-      },
-      {
-        headers: {
-          "Access-Control-Allow-Origin": "*"
-        }
-      }
+    const entries = await Promise.all(
+      TRACKED.map(async (key): Promise<[string, RepoTelemetry] | null> => {
+        const r = byKey.get(key);
+        if (!r) return null; // private or deleted: omit, never invent
+        return [key, { name: r.name, url: r.html_url, language: r.language, pushedAt: r.pushed_at, latestCommit: await latestCommit(r.name) }];
+      })
     );
+
+    lastGood = {
+      fetchedAt: new Date(res.headers.get("date") ?? Date.now()).toISOString(),
+      stale: false,
+      repos: Object.fromEntries(entries.filter((e) => e !== null)),
+    };
+    return NextResponse.json(lastGood);
+  } catch (err) {
+    console.error("GitHub telemetry unavailable:", err);
+    if (lastGood) return NextResponse.json({ ...lastGood, stale: true });
+    return NextResponse.json({ error: "GitHub data unavailable" }, { status: 503 });
   }
 }

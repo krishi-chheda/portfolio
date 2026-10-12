@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Hammer, GitCommit } from "lucide-react";
+import { useTerminalReveal } from "@/hooks/useTerminalReveal";
+import { useGitHubTelemetry } from "@/hooks/useGitHubTelemetry";
+import { projectsData } from "@/lib/data";
+import { formatUtc, repoKey } from "@/lib/github";
 
 interface ActiveBuild {
   name: string;
@@ -37,133 +39,25 @@ const activeBuilds: ActiveBuild[] = [
   }
 ];
 
-const STATIC_TELEMETRY_FALLBACK: Record<string, any> = {
-  AccessVision: {
-    name: "AccessVision",
-    stars: 2,
-    forks: 0,
-    language: "Python",
-    updatedAt: "2026-06-25T14:22:18Z",
-    latestCommit: {
-      hash: "e2c38f9",
-      message: "refactor: optimize YOLOv8 model quantization and frame payload size",
-      date: "2026-06-25T14:22:18Z"
-    }
-  },
-  ClinicalBrief: {
-    name: "ClinicalBrief",
-    stars: 0,
-    forks: 0,
-    language: "TypeScript",
-    updatedAt: "2026-06-26T09:12:45Z",
-    latestCommit: {
-      hash: "8c7f21a",
-      message: "feat: add Whisper audio stream buffers and speaker overlap checks",
-      date: "2026-06-26T09:12:45Z"
-    }
-  },
-  "student-hub": {
-    name: "student-hub",
-    stars: 1,
-    forks: 0,
-    language: "TypeScript",
-    updatedAt: "2026-06-24T18:45:00Z",
-    latestCommit: {
-      hash: "d8f3b2e",
-      message: "docs: update API documentation and clean public transit routing maps",
-      date: "2026-06-24T18:45:00Z"
-    }
-  },
-  "ai-traffic-system": {
-    name: "ai-traffic-system",
-    stars: 0,
-    forks: 0,
-    language: "Python",
-    updatedAt: "2026-06-27T10:30:12Z",
-    latestCommit: {
-      hash: "4a2b8c9",
-      message: "refactor: optimize YOLO weights for Jetson Nano deployment edge pipeline",
-      date: "2026-06-27T10:30:12Z"
-    }
-  },
-  "AuraLens-AI": {
-    name: "AuraLens-AI",
-    stars: 1,
-    forks: 0,
-    language: "Python",
-    updatedAt: "2026-06-23T11:20:00Z",
-    latestCommit: {
-      hash: "f4a8b2c",
-      message: "feat: integrate ChromaDB with local CLIP vector search embedding index",
-      date: "2026-06-23T11:20:00Z"
-    }
-  },
-  "f1-telemetry-ai-dashboard": {
-    name: "f1-telemetry-ai-dashboard",
-    stars: 1,
-    forks: 0,
-    language: "TypeScript",
-    updatedAt: "2026-06-22T16:45:10Z",
-    latestCommit: {
-      hash: "b7c2d9e",
-      message: "feat: render throttle and brake inputs directly onto 2D track sectors",
-      date: "2026-06-22T16:45:10Z"
-    }
-  },
-  fastapi_backend: {
-    name: "fastapi_backend",
-    stars: 0,
-    forks: 0,
-    language: "Python",
-    updatedAt: "2026-06-20T10:05:00Z",
-    latestCommit: {
-      hash: "a3d8e2f",
-      message: "feat: implement photoplethysmography extraction and Scikit-learn regressors",
-      date: "2026-06-20T10:05:00Z"
-    }
-  },
-  "video-splitter": {
-    name: "video-splitter",
-    stars: 0,
-    forks: 0,
-    language: "Python",
-    updatedAt: "2026-06-18T09:12:00Z",
-    latestCommit: {
-      hash: "c5e9f1a",
-      message: "docs: add installation guides for Streamlit and local FFmpeg binary",
-      date: "2026-06-18T09:12:00Z"
-    }
-  }
-};
-
 export default function CurrentlyBuilding() {
-  const [gitStats, setGitStats] = useState<any>(STATIC_TELEMETRY_FALLBACK);
-  const [loadingGit, setLoadingGit] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/github")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.repos) {
-          setGitStats(data.repos);
-        }
-      })
-      .catch((err) => console.error("Failed to load GitHub stats:", err))
-      .finally(() => setLoadingGit(false));
-  }, []);
+  const sectionRef = useTerminalReveal<HTMLElement>();
+  const { data: telemetry, loading: loadingGit } = useGitHubTelemetry();
+  const recentRepos = telemetry
+    ? Object.values(telemetry.repos).sort((a, b) => b.pushedAt.localeCompare(a.pushedAt)).slice(0, 6)
+    : [];
 
   return (
-    <section id="currently-building" className="py-24 relative overflow-hidden border-t border-slate-900/60">
+    <section ref={sectionRef} id="currently-building" className="py-24 relative overflow-hidden border-t border-slate-900/60">
       <div className="max-w-5xl mx-auto px-6">
         
         {/* Section Header CLI Prompt */}
         <div className="font-mono text-xs md:text-sm text-slate-500 mb-8 flex items-center space-x-2 select-none">
           <span className="text-[#10b981]">krishi@stack:~$</span>
-          <span className="text-slate-100">./currently-building --status</span>
+          <span data-reveal="command" className="text-slate-100">./currently-building --status</span>
         </div>
 
         {/* Workstation Console Widget */}
-        <div className="w-full border border-slate-900 bg-slate-950/20 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl flex flex-col font-mono terminal-highlight">
+        <div className="w-full border border-slate-900 bg-slate-950/20 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl flex flex-col font-mono terminal-highlight" data-reveal="panel">
           
           {/* Header */}
           <div className="bg-slate-950/80 px-4 py-2.5 border-b border-slate-900 flex justify-between items-center select-none text-[10px] text-slate-500">
@@ -183,15 +77,11 @@ export default function CurrentlyBuilding() {
           <div className="p-6 md:p-8 space-y-8 select-text">
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-              {activeBuilds.map((proj, idx) => {
+              {activeBuilds.map((proj) => {
+                const githubUrl = projectsData.find((p) => p.title === proj.name)?.githubUrl;
+                const commit = githubUrl ? telemetry?.repos[repoKey(githubUrl)]?.latestCommit : null;
                 return (
-                  <motion.div
-                    key={proj.name}
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: idx * 0.1 }}
-                    className="border border-slate-900 bg-slate-950/40 p-6 rounded-lg flex flex-col justify-between space-y-6"
+                  <div key={proj.name} data-reveal="item" className="border border-slate-900 bg-slate-950/40 p-6 rounded-lg flex flex-col justify-between space-y-6"
                   >
                     {/* Project Identification */}
                     <div className="space-y-4">
@@ -202,7 +92,7 @@ export default function CurrentlyBuilding() {
                             {proj.name}
                           </h3>
                         </div>
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-emerald-950/40 border border-emerald-900/50 text-[#10b981] font-mono text-[10px] font-bold uppercase tracking-wider select-none animate-pulse">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-emerald-950/40 border border-emerald-900/50 text-[#10b981] font-mono text-[10px] font-bold uppercase tracking-wider select-none">
                           <span className="w-1 h-1 rounded-full bg-[#10b981]" />
                           {proj.developmentStatus}
                         </span>
@@ -250,69 +140,76 @@ export default function CurrentlyBuilding() {
                         </ul>
                       </div>
 
-                      {/* Live Commit Telemetry for flagship builds */}
-                      {proj.name === "AccessVision" && gitStats?.AccessVision && (
+                      {/* Latest commit from GitHub, when available */}
+                      {commit && (
                         <div className="mt-4 pt-3 border-t border-slate-900/60 flex flex-col space-y-1 text-[10px]">
-                          <div className="flex items-center space-x-1.5 truncate">
-                            <span className="text-slate-500 block uppercase font-bold text-[10px] select-none">
-                              [Latest Commit]:
-                            </span>
-                            <span className="text-amber-500 font-mono font-bold shrink-0">
-                              [{gitStats.AccessVision.latestCommit.hash}]
-                            </span>
-                            <span className="text-slate-300 truncate">
-                              &quot;{gitStats.AccessVision.latestCommit.message}&quot;
-                            </span>
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="text-slate-500 uppercase font-bold select-none shrink-0">[Latest Commit]:</span>
+                            <a href={commit.url} target="_blank" rel="noopener noreferrer" className="text-amber-500 font-mono font-bold shrink-0 hover:text-amber-400 underline decoration-dotted">
+                              {commit.sha}
+                            </a>
+                            <span className="text-slate-300 truncate" title={commit.message}>&quot;{commit.message}&quot;</span>
                           </div>
-                          <div className="text-[10px] text-slate-500">
-                            Pushed: {new Date(gitStats.AccessVision.latestCommit.date).toLocaleString("en-US", { timeZone: "UTC" })}
-                          </div>
+                          <div className="text-slate-500">{formatUtc(commit.date)}</div>
                         </div>
                       )}
                     </div>
 
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
 
-            {/* Live GitHub Repository Activity Stream */}
-            <div className="border-t border-slate-900 pt-6">
-              <h4 className="text-[#10b981] font-mono text-xs font-bold uppercase tracking-wider mb-4 flex items-center gap-2 select-none">
-                <GitCommit size={14} className="text-[#10b981] animate-pulse" />
-                <span>Live GitHub Repository Activity Stream</span>
-              </h4>
+            {/* Recent GitHub activity for portfolio repos only; hidden entirely if GitHub is unavailable */}
+            {(loadingGit || recentRepos.length > 0) && (
+              <div className="border-t border-slate-900 pt-6">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                  <h4 className="text-[#10b981] font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 select-none">
+                    <GitCommit size={14} className="text-[#10b981]" />
+                    <span>Recent GitHub Activity</span>
+                  </h4>
+                  {telemetry && (
+                    <span className="text-[10px] text-slate-500 font-mono">
+                      {telemetry.stale ? "cached snapshot from " : "as of "}
+                      {formatUtc(telemetry.fetchedAt)}
+                    </span>
+                  )}
+                </div>
 
-              {loadingGit ? (
-                <div className="text-xs text-slate-500 animate-pulse">Syncing telemetry data...</div>
-              ) : gitStats ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-[10px]">
-                  {Object.values(gitStats)
-                    .filter((repo: any) => repo.name !== "portfolio" && repo.name !== "ClinicalBrief" && repo.name !== "ai-traffic-system")
-                    .sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-                    .slice(0, 6)
-                    .map((repo: any) => (
-                      <div key={repo.name} className="border border-slate-900 bg-slate-950/60 p-3 rounded hover:border-slate-800 transition-all flex flex-col justify-between space-y-2">
+                {loadingGit ? (
+                  <div className="text-xs text-slate-500">Fetching repository data…</div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-[10px]">
+                    {recentRepos.map((repo) => (
+                      <a
+                        key={repo.name}
+                        href={repo.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="border border-slate-900 bg-slate-950/60 p-3 rounded hover:border-slate-700 transition-colors duration-150 flex flex-col justify-between space-y-2"
+                      >
                         <div className="flex items-start justify-between gap-2">
                           <span className="text-slate-100 font-bold truncate" title={repo.name}>{repo.name}</span>
-                          <span className="text-cyan-400 font-semibold px-1 rounded bg-slate-900 border border-slate-850 shrink-0 text-[10px]">
-                            {repo.language}
-                          </span>
+                          {repo.language && (
+                            <span className="text-cyan-400 font-semibold px-1 rounded bg-slate-900 border border-slate-800 shrink-0">
+                              {repo.language}
+                            </span>
+                          )}
                         </div>
-                        <div className="text-slate-400 text-[10px] truncate font-mono">
-                          {repo.latestCommit ? `"${repo.latestCommit.message}"` : 'No recent pushes'}
+                        {repo.latestCommit && (
+                          <div className="text-slate-400 truncate font-mono" title={repo.latestCommit.message}>
+                            &quot;{repo.latestCommit.message}&quot;
+                          </div>
+                        )}
+                        <div className="text-slate-500 pt-1 border-t border-slate-900/60">
+                          Last push: {formatUtc(repo.pushedAt)}
                         </div>
-                        <div className="flex justify-between items-center text-[10px] text-slate-500 pt-1 border-t border-slate-900/60">
-                          <span>Updated: {new Date(repo.updatedAt).toLocaleDateString("en-US", { timeZone: "UTC" })}</span>
-                          <span className="flex items-center gap-1">⭐ {repo.stars}</span>
-                        </div>
-                      </div>
+                      </a>
                     ))}
-                </div>
-              ) : (
-                <div className="text-xs text-slate-500 italic">Telemetry stream offline.</div>
-              )}
-            </div>
+                  </div>
+                )}
+              </div>
+            )}
 
           </div>
 

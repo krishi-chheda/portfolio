@@ -13,7 +13,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center font-mono rounded transition-all duration-300 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:pointer-events-none select-none",
+          "inline-flex items-center justify-center font-mono rounded transition-[color,background-color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer disabled:opacity-50 disabled:pointer-events-none select-none",
           // Variant options
           variant === "primary" && "bg-cyan-500 hover:bg-cyan-400 text-black font-semibold shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.45)]",
           variant === "secondary" && "bg-slate-950/40 border border-slate-800 text-slate-300 hover:bg-slate-900/60 hover:border-slate-700",

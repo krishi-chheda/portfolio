@@ -111,6 +111,14 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         window.dispatchEvent(new CustomEvent("open-ai-chat"));
       }
     },
+    {
+      id: "krishi-world",
+      name: "krishi.world",
+      description: "./enter-world // Explore the portfolio as a pixel-art adventure (work in progress)",
+      action: () => {
+        router.push("/world");
+      }
+    },
     ...[
       { id: "accessible-vision", label: "Inspect AI Accessibility platform" },
       { id: "clinicalbrief", label: "Inspect Healthcare AI platform" },

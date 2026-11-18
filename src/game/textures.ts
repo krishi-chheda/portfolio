@@ -1,0 +1,497 @@
+import type Phaser from "phaser";
+
+// All KRISHI.WORLD art is original and drawn in code at boot: no sprite files, nothing copyrighted.
+// Style target: GBA-era top-down RPG (dotted grass, bushy 2x2 trees, tiled roofs, dark sprite outlines).
+// Tiles are 16x16. Paths, sand and water are auto-tiled: each has 16 variants, one per combination of
+// which neighbours (N/E/S/W) are the same terrain, so edges and corners blend instead of looking blocky.
+
+export const TILE = 16;
+
+const C = {
+  grass: "#78b85a",
+  grassLight: "#97cd74",
+  grassDark: "#5e9e48",
+  leaf: "#3f8f4a",
+  leafDark: "#2b6b39",
+  leafLight: "#6fbf5c",
+  leafShine: "#a6dc7c",
+  trunk: "#6b4a32",
+  path: "#e0c48c",
+  pathLight: "#ecd6a6",
+  pathRim: "#b99a62",
+  sand: "#f2e2b4",
+  sandDark: "#dcc78f",
+  water: "#62b4dc",
+  waterDark: "#4791c4",
+  waterLight: "#a9def0",
+  foam: "#e4f6fb",
+  roof: "#d9773f",
+  roofDark: "#a8542a",
+  roofDeep: "#7a3a1d",
+  roofLight: "#f0a060",
+  slate: "#5b7fae",
+  slateDark: "#3f5f8a",
+  slateLight: "#86a6cf",
+  wall: "#f5e8c8",
+  wallShade: "#d9c69c",
+  wood: "#9a6a3c",
+  woodDark: "#6e4524",
+  woodLight: "#bf8a52",
+  glass: "#7bc9df",
+  glassLight: "#d4f0f8",
+  gold: "#f5c65b",
+  red: "#e0564a",
+  redDark: "#a83a32",
+  white: "#ffffff",
+  outline: "#1f1d24",
+  skin: "#f2c9a0",
+  skinShade: "#d9a37a",
+  hair: "#3b2a20",
+  hairLight: "#5a4030",
+  hoodie: "#2fae7c",
+  hoodieDark: "#1f7d58",
+  accent: "#34d399",
+  pants: "#2c3a5a",
+  shoe: "#2a2220",
+} as const;
+
+// ---------- pixel buffer ----------
+
+type RGBA = [number, number, number, number];
+const cache = new Map<string, RGBA>();
+function rgba(color: string, alpha = 255): RGBA {
+  const key = color + alpha;
+  let v = cache.get(key);
+  if (!v) {
+    const n = parseInt(color.slice(1), 16);
+    v = [(n >> 16) & 255, (n >> 8) & 255, n & 255, alpha];
+    cache.set(key, v);
+  }
+  return v;
+}
+
+class Pix {
+  readonly data: Uint8ClampedArray<ArrayBuffer>;
+  constructor(readonly w: number, readonly h: number) {
+    this.data = new Uint8ClampedArray(w * h * 4);
+  }
+  set(x: number, y: number, color: string, alpha = 255) {
+    if (x < 0 || y < 0 || x >= this.w || y >= this.h) return;
+    this.data.set(rgba(color, alpha), (Math.floor(y) * this.w + Math.floor(x)) * 4);
+  }
+  alpha(x: number, y: number) {
+    if (x < 0 || y < 0 || x >= this.w || y >= this.h) return 0;
+    return this.data[(y * this.w + x) * 4 + 3];
+  }
+  rect(x: number, y: number, w: number, h: number, color: string, alpha = 255) {
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) this.set(x + i, y + j, color, alpha);
+  }
+  disc(cx: number, cy: number, r: number, color: string) {
+    for (let y = Math.floor(cy - r); y <= cy + r; y++)
+      for (let x = Math.floor(cx - r); x <= cx + r; x++) if ((x - cx) ** 2 + (y - cy) ** 2 <= r * r) this.set(x, y, color);
+  }
+  /** GBA-style 1px dark outline around everything opaque inside the box (transparent pixels next to opaque ones). */
+  outline(x0: number, y0: number, w: number, h: number, color: string = C.outline) {
+    const marks: [number, number][] = [];
+    for (let y = y0; y < y0 + h; y++)
+      for (let x = x0; x < x0 + w; x++) {
+        if (this.alpha(x, y) > 0) continue;
+        const near = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => {
+          const nx = x + dx;
+          const ny = y + dy;
+          return nx >= x0 && ny >= y0 && nx < x0 + w && ny < y0 + h && this.alpha(nx, ny) === 255;
+        });
+        if (near) marks.push([x, y]);
+      }
+    for (const [x, y] of marks) this.set(x, y, color);
+  }
+  toTexture(scene: Phaser.Scene, key: string) {
+    const tex = scene.textures.createCanvas(key, this.w, this.h);
+    if (!tex) throw new Error(`Could not create texture ${key}`);
+    tex.context.putImageData(new ImageData(this.data, this.w, this.h), 0, 0);
+    tex.refresh();
+    return tex;
+  }
+}
+
+// Deterministic hash noise so the art is identical on every load
+function noise(x: number, y: number, seed = 0) {
+  let h = (x * 374761393 + y * 668265263 + seed * 2246822519) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+
+// ---------- terrain tiles ----------
+
+/** Neighbour bits: set when that neighbour is the same terrain. */
+export const N = 1;
+export const E = 2;
+export const S = 4;
+export const W = 8;
+
+// Tile sheet layout
+export const T = {
+  GRASS: 0,
+  GRASS_2: 1,
+  FLOWER: 2,
+  TALL: 3,
+  FENCE: 4,
+  PATH: 8, // + mask (16 variants)
+  SAND: 24, // + mask
+  WATER: 40, // + mask, frame A
+  WATER_B: 56, // + mask, frame B
+} as const;
+const SHEET_TILES = 72;
+
+function grassTile(p: Pix, ox: number, seed: number, dense: boolean) {
+  p.rect(ox, 0, TILE, TILE, C.grass);
+  // The GBA "dotted" grass: a staggered dot grid plus a little noise
+  for (let y = 0; y < TILE; y++)
+    for (let x = 0; x < TILE; x++) {
+      if ((x + (y % 8 < 4 ? 0 : 2)) % 4 === 1 && y % 4 === 1) p.set(ox + x, y, C.grassLight);
+      else if (noise(x, y, seed) < (dense ? 0.06 : 0.025)) p.set(ox + x, y, C.grassDark);
+    }
+}
+
+/**
+ * Edged terrain (path / sand / water): fill inside, `outsideTile` beyond each open side, a wobbly border and
+ * rounded corners where two open sides meet.
+ */
+function edgedTile(
+  p: Pix,
+  ox: number,
+  mask: number,
+  outsideTile: (p: Pix, ox: number) => void,
+  inside: (x: number, y: number) => string,
+  rim: string,
+  seed: number
+) {
+  outsideTile(p, ox);
+  const R = 5;
+  const isInside = (x: number, y: number) => {
+    const depth = (pos: number, side: number) => 2 + (noise(pos, side, seed) < 0.35 ? 1 : 0);
+    const dN = mask & N ? 99 : y;
+    const dS = mask & S ? 99 : 15 - y;
+    const dW = mask & W ? 99 : x;
+    const dE = mask & E ? 99 : 15 - x;
+    if (dN < depth(x, 1) || dS < depth(x, 2) || dW < depth(y, 3) || dE < depth(y, 4)) return false;
+    // Round the corner between two open sides
+    for (const [a, b] of [[dN, dW], [dN, dE], [dS, dW], [dS, dE]])
+      if (a < R && b < R && (R - a) ** 2 + (R - b) ** 2 > (R - 1) ** 2) return false;
+    return true;
+  };
+  for (let y = 0; y < TILE; y++)
+    for (let x = 0; x < TILE; x++) {
+      if (!isInside(x, y)) continue;
+      // Rim where an outside pixel is adjacent. Off-tile pixels on a connected side count as inside, so the
+      // seam between two same-terrain tiles never gets a rim.
+      const edge = !isInside(x + 1, y) || !isInside(x - 1, y) || !isInside(x, y + 1) || !isInside(x, y - 1);
+      p.set(ox + x, y, edge ? rim : inside(x, y));
+    }
+}
+
+const pathInside = (x: number, y: number) => (noise(x, y, 5) < 0.08 ? C.pathRim : noise(x, y, 6) < 0.1 ? C.pathLight : C.path);
+const sandInside = (x: number, y: number) => (noise(x, y, 8) < 0.07 ? C.sandDark : C.sand);
+const sandOutside = (p: Pix, ox: number) => {
+  for (let y = 0; y < TILE; y++) for (let x = 0; x < TILE; x++) p.set(ox + x, y, sandInside(x, y));
+};
+function waterInside(shift: number) {
+  return (x: number, y: number) => {
+    const row = Math.floor(y / 4);
+    const phase = (x + shift + (row % 2) * 4) % 8;
+    if (y % 4 === 1 && phase < 3) return C.waterLight;
+    if (y % 4 === 2 && phase >= 1 && phase < 4) return C.waterDark;
+    return C.water;
+  };
+}
+
+function flowerTile(p: Pix, ox: number) {
+  grassTile(p, ox, 3, false);
+  for (const [cx, cy] of [[4, 4], [11, 10]]) {
+    p.rect(ox + cx - 1, cy - 2, 3, 5, C.red);
+    p.rect(ox + cx - 2, cy - 1, 5, 3, C.red);
+    p.set(ox + cx - 1, cy - 1, C.white);
+    p.set(ox + cx, cy, C.gold);
+    p.set(ox + cx + 1, cy + 1, C.redDark);
+    p.set(ox + cx, cy + 3, C.leafDark);
+  }
+}
+
+function tallTile(p: Pix, ox: number) {
+  grassTile(p, ox, 9, false);
+  // Leafy shrub clumps (walkable decoration)
+  for (const [cx, cy] of [[4, 5], [11, 5], [7, 11], [13, 12], [2, 12]]) {
+    p.disc(ox + cx, cy, 2.6, C.leaf);
+    p.set(ox + cx - 1, cy - 1, C.leafLight);
+    p.set(ox + cx, cy - 2, C.leafShine);
+    p.set(ox + cx + 1, cy + 2, C.leafDark);
+    p.set(ox + cx + 2, cy + 1, C.leafDark);
+  }
+}
+
+function fenceTile(p: Pix, ox: number) {
+  grassTile(p, ox, 13, false);
+  p.rect(ox, 6, TILE, 2, C.woodLight);
+  p.rect(ox, 8, TILE, 1, C.woodDark);
+  p.rect(ox, 11, TILE, 2, C.woodLight);
+  p.rect(ox, 13, TILE, 1, C.woodDark);
+  for (const x of [2, 12]) {
+    p.rect(ox + x, 3, 3, 12, C.wood);
+    p.rect(ox + x, 3, 1, 12, C.woodLight);
+    p.rect(ox + x + 2, 3, 1, 12, C.woodDark);
+  }
+}
+
+function drawTerrainSheet(p: Pix) {
+  grassTile(p, T.GRASS * TILE, 1, false);
+  grassTile(p, T.GRASS_2 * TILE, 2, true);
+  flowerTile(p, T.FLOWER * TILE);
+  tallTile(p, T.TALL * TILE);
+  fenceTile(p, T.FENCE * TILE);
+  const grassOutside = (q: Pix, ox: number) => grassTile(q, ox, 1, false);
+  for (let m = 0; m < 16; m++) {
+    edgedTile(p, (T.PATH + m) * TILE, m, grassOutside, pathInside, C.pathRim, 21);
+    edgedTile(p, (T.SAND + m) * TILE, m, grassOutside, sandInside, C.sandDark, 23);
+    edgedTile(p, (T.WATER + m) * TILE, m, sandOutside, waterInside(0), C.foam, 25);
+    edgedTile(p, (T.WATER_B + m) * TILE, m, sandOutside, waterInside(4), C.foam, 25);
+  }
+}
+
+// ---------- objects (multi-tile, drawn as sprites with outlines) ----------
+
+export interface ObjectArt {
+  w: number; // footprint in tiles
+  h: number;
+  door?: [number, number][]; // door tiles, relative to the footprint
+}
+
+export const OBJECTS = {
+  tree: { w: 2, h: 2 },
+  house: { w: 5, h: 4, door: [[2, 3]] },
+  university: { w: 8, h: 5, door: [[3, 4], [4, 4]] },
+  sign: { w: 1, h: 1 },
+  mailbox: { w: 1, h: 1 },
+} satisfies Record<string, ObjectArt>;
+export type ObjectKind = keyof typeof OBJECTS;
+
+function drawTree(p: Pix) {
+  // Ground shadow
+  for (let x = 4; x < 28; x++) for (let y = 27; y < 31; y++) if (((x - 16) / 12) ** 2 + ((y - 29) / 2.2) ** 2 <= 1) p.set(x, y, C.leafDark, 110);
+  p.rect(13, 22, 6, 7, C.trunk);
+  p.rect(13, 22, 2, 7, C.woodLight);
+  // Canopy: overlapping leaf clusters, drawn top to bottom so lower ones overlap (the scalloped GBA look)
+  const clusters = [[16, 6], [10, 9], [22, 9], [6, 14], [16, 13], [26, 14], [10, 19], [22, 19], [16, 20]];
+  for (const [cx, cy] of clusters) {
+    p.disc(cx, cy, 6, C.leafDark);
+    p.disc(cx - 0.5, cy - 0.5, 5, C.leaf);
+    p.disc(cx - 1.5, cy - 1.5, 3, C.leafLight);
+    p.set(cx - 2, cy - 3, C.leafShine);
+    p.set(cx - 3, cy - 2, C.leafShine);
+  }
+  p.outline(0, 0, 32, 32);
+}
+
+function drawHouse(p: Pix) {
+  const W_ = 80;
+  // Roof (rows 2..39): shingles in offset rows, a ridge, and a raised upper tier
+  for (let y = 3; y < 40; y++)
+    for (let x = 1; x < W_ - 1; x++) {
+      const row = Math.floor((y - 3) / 6);
+      const shingle = (x + (row % 2) * 4) % 8 === 0;
+      p.set(x, y, (y - 3) % 6 === 5 ? C.roofDark : shingle ? C.roofDark : C.roof);
+    }
+  p.rect(1, 3, W_ - 2, 2, C.roofDeep);
+  p.rect(1, 5, W_ - 2, 1, C.roofLight);
+  // Upper tier
+  for (let y = 8; y < 22; y++) for (let x = 14; x < 66; x++) p.set(x, y, (y - 8) % 5 === 4 || (x + Math.floor((y - 8) / 5) * 3) % 7 === 0 ? C.roofDark : C.roof);
+  p.rect(14, 8, 52, 1, C.roofLight);
+  p.rect(14, 22, 52, 2, C.roofDeep);
+  // Eave shadow
+  p.rect(1, 38, W_ - 2, 2, C.roofDeep);
+  // Walls (rows 40..63)
+  p.rect(2, 40, W_ - 4, 23, C.wall);
+  p.rect(2, 40, W_ - 4, 2, C.wallShade);
+  p.rect(2, 61, W_ - 4, 2, C.wallShade);
+  for (const x of [2, W_ - 6]) {
+    p.rect(x, 40, 4, 23, C.wood);
+    p.rect(x, 40, 1, 23, C.woodLight);
+  }
+  // Windows
+  for (const x of [10, 56]) {
+    p.rect(x, 45, 14, 10, C.woodDark);
+    p.rect(x + 1, 46, 12, 8, C.glass);
+    p.rect(x + 2, 47, 4, 2, C.glassLight);
+    p.rect(x + 6, 46, 1, 8, C.woodDark);
+  }
+  // Door (tile column 2)
+  p.rect(33, 44, 14, 19, C.woodDark);
+  p.rect(34, 45, 12, 18, C.wood);
+  p.rect(35, 46, 4, 7, C.woodLight);
+  p.rect(41, 46, 4, 7, C.woodLight);
+  p.set(43, 55, C.gold);
+  p.outline(0, 0, W_, 64);
+}
+
+function drawUniversity(p: Pix) {
+  const W_ = 128;
+  // Slate roof
+  for (let y = 3; y < 42; y++)
+    for (let x = 1; x < W_ - 1; x++) {
+      const row = Math.floor((y - 3) / 5);
+      p.set(x, y, (y - 3) % 5 === 4 || (x + (row % 2) * 3) % 6 === 0 ? C.slateDark : C.slate);
+    }
+  p.rect(1, 3, W_ - 2, 2, C.slateDark);
+  p.rect(1, 5, W_ - 2, 1, C.slateLight);
+  // Central gable with an open-book emblem
+  for (let y = 6; y < 30; y++) {
+    const half = Math.floor((y - 6) * 1.1);
+    for (let x = 64 - half; x < 64 + half; x++) p.set(x, y, C.wall);
+    p.set(64 - half - 1, y, C.slateDark);
+    p.set(64 + half, y, C.slateDark);
+  }
+  p.rect(58, 18, 12, 8, C.gold);
+  p.rect(63, 18, 2, 8, C.roofDark);
+  p.rect(59, 19, 3, 1, C.white);
+  p.rect(66, 19, 3, 1, C.white);
+  p.rect(1, 40, W_ - 2, 2, C.slateDark);
+  // Stone facade with columns
+  p.rect(2, 42, W_ - 4, 37, C.wall);
+  for (let x = 6; x < W_ - 6; x += 16) {
+    p.rect(x, 42, 5, 37, C.wallShade);
+    p.rect(x, 42, 1, 37, C.white);
+  }
+  p.rect(2, 42, W_ - 4, 3, C.wallShade);
+  p.rect(2, 76, W_ - 4, 3, C.wallShade);
+  // Windows between the columns, skipping the doorway
+  for (let x = 13; x < W_ - 10; x += 16) {
+    if (x > 44 && x < 80) continue;
+    p.rect(x, 50, 7, 12, C.woodDark);
+    p.rect(x + 1, 51, 5, 10, C.glass);
+    p.rect(x + 1, 51, 2, 3, C.glassLight);
+  }
+  // Double door on tile columns 3-4
+  p.rect(50, 52, 28, 27, C.woodDark);
+  p.rect(52, 54, 11, 25, C.wood);
+  p.rect(65, 54, 11, 25, C.wood);
+  p.rect(53, 55, 4, 9, C.woodLight);
+  p.rect(66, 55, 4, 9, C.woodLight);
+  p.set(61, 66, C.gold);
+  p.set(66, 66, C.gold);
+  p.outline(0, 0, W_, 80);
+}
+
+function drawSign(p: Pix) {
+  p.rect(7, 9, 2, 6, C.woodDark);
+  p.rect(2, 3, 12, 7, C.wood);
+  p.rect(3, 4, 10, 1, C.woodLight);
+  p.rect(4, 6, 8, 1, C.woodDark);
+  p.rect(4, 8, 6, 1, C.woodDark);
+  p.outline(0, 0, 16, 16);
+}
+
+function drawMailbox(p: Pix) {
+  p.rect(7, 9, 2, 6, C.woodDark);
+  p.rect(3, 3, 10, 7, C.red);
+  p.rect(3, 3, 10, 2, C.white);
+  p.rect(4, 6, 8, 1, C.redDark);
+  p.rect(12, 5, 1, 3, C.gold);
+  p.outline(0, 0, 16, 16);
+}
+
+// ---------- player ----------
+
+export type Dir = "down" | "up" | "left" | "right";
+export const DIRS: Dir[] = ["down", "up", "left", "right"];
+export const PLAYER_W = 16;
+export const PLAYER_H = 24;
+
+/** Chibi walker (big head, GBA proportions) in a 16x24 cell. step 0 = standing, 1/2 = alternate feet. */
+function drawPlayer(p: Pix, ox: number, dir: Dir, step: number) {
+  const side = dir === "left" || dir === "right";
+  const flip = (x: number) => (dir === "left" ? ox + 15 - x : ox + x);
+  const s = (x: number, y: number, c: string) => p.set(flip(x), y, c);
+  const r = (x: number, y: number, w: number, h: number, c: string) => {
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) s(x + i, y + j, c);
+  };
+
+  // Legs / shoes
+  const lift = (foot: 1 | 2) => (step === foot ? 1 : 0);
+  if (side) {
+    const stride = step === 0 ? 0 : step === 1 ? 2 : -2;
+    r(6 + stride, 18, 3, 3, C.pants);
+    r(7 - stride, 18, 3, 3, C.pants);
+    r(6 + stride, 21, 3, 1, C.shoe);
+    r(7 - stride, 21, 3, 1, C.shoe);
+  } else {
+    r(5, 18, 3, 3 - lift(1), C.pants);
+    r(9, 18, 3, 3 - lift(2), C.pants);
+    r(5, 21 - lift(1), 3, 1, C.shoe);
+    r(9, 21 - lift(2), 3, 1, C.shoe);
+  }
+  // Hoodie
+  r(4, 12, 9, 6, C.hoodie);
+  r(4, 16, 9, 2, C.hoodieDark);
+  if (!side) {
+    r(8, 13, 1, 4, C.wall); // zip
+    const swing = step === 1 ? 1 : step === 2 ? -1 : 0;
+    r(3, 12 + swing, 1, 4, C.hoodieDark);
+    r(13, 12 - swing, 1, 4, C.hoodieDark);
+    s(3, 16 + swing, C.skin);
+    s(13, 16 - swing, C.skin);
+  } else {
+    const swing = step === 1 ? 1 : step === 2 ? -1 : 0;
+    r(8 + swing, 13, 2, 4, C.hoodieDark);
+    r(8 + swing, 17, 2, 1, C.skin);
+  }
+  // Head (big, GBA chibi)
+  r(3, 3, 11, 9, C.skin);
+  r(3, 10, 11, 2, C.skinShade);
+  // Hair + emerald headband (the KRISHI.OS accent)
+  r(3, 1, 11, 4, C.hair);
+  s(4, 0, C.hair);
+  s(7, 0, C.hair);
+  s(11, 0, C.hair);
+  r(5, 1, 3, 1, C.hairLight);
+  r(3, 4, 11, 1, C.accent);
+  if (dir === "up") {
+    r(3, 5, 11, 6, C.hair);
+    r(5, 6, 2, 2, C.hairLight);
+    s(8, 4, C.hoodieDark); // headband knot
+  } else if (side) {
+    r(3, 5, 4, 4, C.hair); // back of the head
+    r(11, 7, 1, 2, C.outline); // eye
+    s(13, 8, C.skinShade);
+  } else {
+    r(3, 5, 1, 3, C.hair);
+    r(13, 5, 1, 3, C.hair);
+    r(5, 7, 1, 2, C.outline);
+    r(11, 7, 1, 2, C.outline);
+    s(8, 10, C.skinShade);
+  }
+  p.outline(ox, 0, PLAYER_W, PLAYER_H);
+  // Soft ground shadow, added after the outline so it isn't outlined
+  for (let x = 4; x < 13; x++) if (p.alpha(ox + x, 23) === 0) p.set(ox + x, 23, C.outline, 70);
+}
+
+/** Draws every texture once into Phaser's texture manager. */
+export function generateTextures(scene: Phaser.Scene) {
+  if (scene.textures.exists("tiles")) return;
+
+  const sheet = new Pix(TILE * SHEET_TILES, TILE);
+  drawTerrainSheet(sheet);
+  sheet.toTexture(scene, "tiles");
+
+  const objects: Record<ObjectKind, (p: Pix) => void> = { tree: drawTree, house: drawHouse, university: drawUniversity, sign: drawSign, mailbox: drawMailbox };
+  for (const kind of Object.keys(objects) as ObjectKind[]) {
+    const { w, h } = OBJECTS[kind];
+    const p = new Pix(w * TILE, h * TILE);
+    objects[kind](p);
+    p.toTexture(scene, kind);
+  }
+
+  // 4 directions x 3 frames in one row: down0 down1 down2 up0 ... right2
+  const player = new Pix(PLAYER_W * 12, PLAYER_H);
+  DIRS.forEach((dir, d) => [0, 1, 2].forEach((step) => drawPlayer(player, (d * 3 + step) * PLAYER_W, dir, step)));
+  const tex = player.toTexture(scene, "player");
+  for (let i = 0; i < 12; i++) tex.add(i, 0, i * PLAYER_W, 0, PLAYER_W, PLAYER_H);
+}

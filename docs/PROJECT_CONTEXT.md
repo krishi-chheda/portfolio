@@ -147,7 +147,7 @@ An explorable top-down pixel-art world at `/world`, added alongside the portfoli
 - **Owner decisions (2026-11-19):**
   - Project Metropolis has exactly 4 buildings: ClinicalBrief, AccessVision, Traffic AI and KRISHI.OS. StudentHub stays a flagship on the classic site only.
   - Profile links: LinkedIn and email only.
-  - Brief facts confirmed and stored in `data.ts` `ownerProfile` (game only; Ask Krishi doesn't read them):
+  - Brief facts confirmed and stored in `data.ts` `ownerProfile` (the game reads all of it; since 2026-11-19 Ask Krishi reads background, skills and hobbies):
     - Electronics & Telecommunication background
     - skills list
     - hobbies
@@ -231,6 +231,10 @@ An explorable top-down pixel-art world at `/world`, added alongside the portfoli
 - **LCP:** content stays at opacity 0 until the boot screen clears (about 2s, by design from the brief), which delays LCP. That's a product trade-off.
 - **`/now`:** still says "Last updated: June 2026"; its personal content (hobbies, reading) is unverified.
 - **Ask Krishi** is single-turn. The live gpt-4o-mini path is untested locally (no key). Both upstream fetches (OpenAI, GitHub) time out after 10s.
+- **Ask Krishi knows the owner-confirmed profile:**
+  - **LLM path:** facts = `aiKnowledgeBase` + `ownerConfirmed` (background, skills, hobbies).
+  - **Local answers:** the skills intent lists `ownerProfile.skills` plus project tech. The hobbies intent lists `ownerProfile.hobbies` plus the existing interests ("photography" no longer routes to the AuraLens card). The education intent adds the background.
+  - The skills intent sits before "building" because "deep learning" contains "learning".
 - **Ask Krishi fallback routing:** project + topic word (architecture / challenge / trade-offs / why built / what's next) answers from that project's data.ts field; natural shortcuts (copilot, p95, voice, lane, supabase…) pin both; "which project uses X" answers from techStack. Every suggested follow-up must be answerable: `check:chat` walks them all and fails on the generic reply.
 - **Awaiting owner:** consolidating Leadership roles, career commits, README open-source list and palette commands into data.ts (wording differs, so it changes visible copy); dead code (GridBackground.tsx, useTypingEffect.ts, .animate-blink, unused public/*.svg); `apple-design-skill` gitlink without .gitmodules; whether to link /now or drop it.
 - **Unverified personal claims:** "300+ students across 5+ events", "40% digital interaction", "largest data society", the Mysahayak 30%/20% figures, and Sacred Heart's 50+ interactions per shift.
@@ -240,7 +244,7 @@ An explorable top-down pixel-art world at `/world`, added alongside the portfoli
 npx tsc --noEmit     # passes
 npm run lint         # passes (0 problems)
 npm run build        # passes; all pages static except the two API routes
-npm run check:chat   # 26 routing/validation/rate-limit checks + a walk of every suggested follow-up (fallback mode, needs the dev server)
+npm run check:chat   # 36 routing cases + empty-message and rate-limit checks + a walk of every suggested follow-up (fallback mode, needs the dev server)
 npm run dev          # .claude/launch.json "dev" on :3000
 ```
 No automated UI tests. Browser checks are manual via the preview tools.

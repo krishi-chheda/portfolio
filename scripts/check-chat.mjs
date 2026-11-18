@@ -29,7 +29,7 @@ const cases = [
   ["Tell me about MOSAIC", R.lead],
   ["Is Krishi open to opportunities?", R.contact, "AI Engineer"],
   ["Are you open to work?", R.contact],
-  ["What is your tech stack?", R.map, "Technologies"],
+  ["What is your tech stack?", R.map, "Krishi's skills"],
   ["How do I navigate this site?", R.readme],
   ["What did he do at Mysahayak?", R.career],
   ["When does he graduate?", R.career, "July 2027"],
@@ -48,6 +48,12 @@ const cases = [
   ["Why did Krishi build ClinicalBrief?", R.cb, "In Krishi's words:"],
   ["Can I try the live portal?", R.none, "https://mystudenthub.vercel.app"],
   ["How does the copilot stay grounded?", R.cb, "copilot"],
+  ["What are Krishi's hobbies?", R.none, "scuba diving"],
+  ["Does he do yoga?", R.none, "aerial yoga"],
+  ["Does Krishi like photography?", R.none, "photography", "AuraLens AI is one of"],
+  ["Does Krishi know PyTorch?", R.map, "PyTorch"],
+  ["What are his deep learning skills?", R.map, "TensorFlow"],
+  ["What did Krishi study before AI?", R.career, "Electronics and Telecommunication Engineering"],
 ];
 
 let failed = 0;

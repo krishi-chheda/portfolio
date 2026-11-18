@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { additionalProjectsData, aiKnowledgeBase, currentProcesses, experienceData, projectsData, CONTACT_EMAIL } from "@/lib/data";
+import { additionalProjectsData, aiKnowledgeBase, currentProcesses, experienceData, ownerProfile, projectsData, CONTACT_EMAIL } from "@/lib/data";
 
 const MAX_MESSAGE_LENGTH = 500;
 
@@ -227,7 +227,7 @@ ${followUps(projectsData.filter((p) => p.liveUrl).map((p) => TOPIC_QUESTIONS.arc
     reply: () => projectReply("accessible-vision"),
     command: COMMANDS.accessvision,
   },
-  { terms: ["auralens", "photo culling", "photography"], reply: () => supportingReply("auralens-ai") },
+  { terms: ["auralens", "photo culling"], reply: () => supportingReply("auralens-ai") },
   { terms: ["f1", "formula 1", "formula one", "telemetry"], reply: () => supportingReply("f1-telemetry") },
   { terms: ["blood pressure", "fastapi_backend", "ppg"], reply: () => supportingReply("bp-prediction-api") },
   { terms: ["video splitter", "ffmpeg"], reply: () => supportingReply("video-splitter") },
@@ -263,11 +263,24 @@ ${followUps(["What are Krishi's featured projects?", "What is his experience so 
     command: COMMANDS.career,
   },
   {
-    terms: ["monash", "master", "masters", "degree", "university", "uni", "study", "studying", "education", "graduate", "graduation", "graduating"],
-    reply: () => `Krishi is studying a Master of Artificial Intelligence at Monash University in ${currentProcesses.location}, graduating in ${currentProcesses.graduation}.
+    terms: ["monash", "master", "masters", "degree", "university", "uni", "study", "studying", "studied", "education", "graduate", "graduation", "graduating", "electronics", "telecommunication", "telecommunications", "telecom", "bachelor", "bachelors", "undergraduate", "undergrad"],
+    reply: () => `Krishi is studying a Master of Artificial Intelligence at Monash University in ${currentProcesses.location}, graduating in ${currentProcesses.graduation}. His background is in ${ownerProfile.background}.
 
 ${followUps(["What are Krishi's featured projects?", "What is Krishi building now?", "Is Krishi open to opportunities?"])}`,
     command: COMMANDS.career,
+  },
+  {
+    terms: [
+      "skill", "skills", "tech stack", "stack", "technologies", "technology", "languages", "language", "toolkit",
+      "python", "typescript", "javascript", "react", "nextjs", "next.js", "fastapi", "yolo", "opencv", "computer vision",
+      "pytorch", "tensorflow", "sql", "docker", "git", "cloud", "flutter", "llm", "llms", "ai agents", "agents", "deep learning",
+    ],
+    reply: () => `Krishi's skills: ${ownerProfile.skills.join(", ")}.
+
+Across his featured projects he has used: ${allTech.join(", ")}.
+
+${followUps(["Which project uses YOLO?", "What is ClinicalBrief's architecture?", "What is Krishi building now?"])}`,
+    command: COMMANDS.systemMap,
   },
   {
     terms: ["building", "working on", "current projects", "currently", "right now", "latest", "roadmap", "learning"],
@@ -287,15 +300,11 @@ ${projectsData.map((p) => `- ${p.title}: ${p.description}`).join("\n")}
 ${followUps(["Tell me about AccessVision", "Tell me about ClinicalBrief", "Tell me about Traffic AI"])}`,
   },
   {
-    terms: ["skill", "skills", "tech stack", "stack", "technologies", "technology", "languages", "language", "python", "typescript", "javascript", "react", "nextjs", "next.js", "fastapi", "yolo", "opencv", "computer vision"],
-    reply: () => `Technologies Krishi has used across his featured projects: ${allTech.join(", ")}.
-
-${followUps(["Which project uses YOLO?", "What is ClinicalBrief's architecture?", "What is Krishi building now?"])}`,
-    command: COMMANDS.systemMap,
-  },
-  {
-    terms: ["hobby", "hobbies", "interests", "interest", "fitness", "free time", "outside of work"],
-    reply: () => `Outside engineering, Krishi's listed interests are: ${aiKnowledgeBase.aboutMe.interests.join(", ")}.
+    terms: [
+      "hobby", "hobbies", "interests", "interest", "fitness", "free time", "outside of work", "outside tech", "for fun", "weekend", "weekends",
+      "photography", "photos", "yoga", "aerial yoga", "scuba", "scuba diving", "diving", "dive", "swimming", "swim", "travel", "travelling", "traveling", "gym",
+    ],
+    reply: () => `Outside engineering, Krishi's hobbies are ${ownerProfile.hobbies.join(", ").toLowerCase()}. He's also interested in ${aiKnowledgeBase.aboutMe.interests.join(", ")}.
 
 ${followUps(["What are Krishi's featured projects?", "What are his leadership roles?", "How can I contact Krishi?"])}`,
   },
@@ -319,6 +328,12 @@ ${followUps(["Tell me about ClinicalBrief", "Is Krishi open to opportunities?", 
 
 // --- LLM path ---
 
+// Everything the model may state: the portfolio knowledge base plus the owner-confirmed background, skills and hobbies
+const FACTS = {
+  ...aiKnowledgeBase,
+  ownerConfirmed: { background: ownerProfile.background, skills: ownerProfile.skills, hobbies: ownerProfile.hobbies },
+};
+
 const SYSTEM_PROMPT = `You are the assistant on Krishi Chheda's portfolio website, KRISHI.OS. You answer visitors' questions about Krishi in the third person ("Krishi", "he"). You are not Krishi: never speak as him, and never make commitments or arrangements on his behalf.
 
 Rules:
@@ -336,11 +351,11 @@ Rules:
 - "${COMMANDS.leadership}": MDAS, MOSAIC, leadership
 - "${COMMANDS.career}": experience, internships, education, career timeline
 - "${COMMANDS.building}": what Krishi is building now
-- "${COMMANDS.systemMap}": skills, technologies, how the projects and domains connect
+- "${COMMANDS.systemMap}": skills, technologies, how the projects and domains connect (hobbies have no command)
 - "${COMMANDS.contact}": contact details, availability, opportunities
 
 <facts>
-${JSON.stringify(aiKnowledgeBase)}
+${JSON.stringify(FACTS)}
 </facts>`;
 
 async function llmReply(message: string): Promise<string> {

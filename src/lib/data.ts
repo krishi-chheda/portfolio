@@ -450,8 +450,8 @@ export const SYSTEM_VERSION = "v0.1.0";
 export const LINKEDIN_URL = "https://www.linkedin.com/in/krishi-chheda";
 export const GITHUB_URL = "https://github.com/krishi-chheda";
 
-// Confirmed by Krishi on 2026-11-19 for KRISHI.WORLD. Used by the game only; Ask Krishi and the classic
-// portfolio don't read these yet.
+// Confirmed by Krishi on 2026-11-19. Used by KRISHI.WORLD and by Ask Krishi (background, skills and hobbies:
+// LLM facts + local answers); the classic portfolio sections don't show them yet.
 export const ownerProfile = {
   background: "Electronics and Telecommunication Engineering",
   skills: [

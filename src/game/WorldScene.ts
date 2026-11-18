@@ -3,6 +3,9 @@ import { DIRS, OBJECTS, PLAYER_W, T, TILE, generateTextures, type Dir } from "./
 import { buildMap, type MapDef, type Warp } from "./maps/legend";
 import { originValley } from "./maps/originValley";
 import { projectMetropolis } from "./maps/projectMetropolis";
+import { innovationForest } from "./maps/innovationForest";
+import { leadershipFrontier } from "./maps/leadershipFrontier";
+import { adventureCoast } from "./maps/adventureCoast";
 import { ALL_NPCS, ATTRIBUTES, DOOR_TERMINAL, DOOR_TEXT, MAP_CONTENT } from "./content";
 import { emit, on, type Dialogue } from "./bus";
 import { discover, discovered } from "./progress";
@@ -13,10 +16,25 @@ const VIEW_TILES = { w: 18, h: 12 }; // aim to show about this many tiles, at an
 const DELTA: Record<Dir, [number, number]> = { down: [0, 1], up: [0, -1], left: [-1, 0], right: [1, 0] };
 const OPPOSITE: Record<Dir, Dir> = { down: "up", up: "down", left: "right", right: "left" };
 
-const MAPS: Record<string, MapDef> = { origin: originValley, metropolis: projectMetropolis };
+const MAPS: Record<string, MapDef> = {
+  origin: originValley,
+  metropolis: projectMetropolis,
+  forest: innovationForest,
+  frontier: leadershipFrontier,
+  coast: adventureCoast,
+};
 const FADE_MS = 200;
 
-type KeyName = "up" | "down" | "left" | "right" | "w" | "a" | "s" | "d" | "e" | "enter" | "journal" | "profile";
+type KeyName = "up" | "down" | "left" | "right" | "w" | "a" | "s" | "d" | "e" | "enter" | "journal" | "profile" | "map" | "achievements" | "menu";
+
+// Keys that open a React overlay, and the bus event each one sends
+const MENU_KEYS = [
+  ["journal", "open-journal"],
+  ["profile", "open-profile"],
+  ["map", "open-map"],
+  ["achievements", "open-achievements"],
+  ["menu", "open-menu"],
+] as const;
 
 /** What scene.restart() passes between maps. */
 interface Arrival {
@@ -119,11 +137,19 @@ export class WorldScene extends Phaser.Scene {
       enter: "ENTER",
       journal: "I",
       profile: "P",
+      map: "M",
+      achievements: "J",
+      menu: "ESC",
     }) as typeof this.keys;
+    kb.enableGlobalCapture(); // an overlay may have released it before a warp
 
     // React overlays pause and resume the world
     const offs = [
       on("ui-open", () => this.lock()),
+      on("travel", (to) => {
+        const target = MAPS[to];
+        if (target && to !== this.def.id) this.warp({ x: 0, y: 0, to, spawn: target.spawn, facing: "down" });
+      }),
       on("ui-closed", () => {
         this.locked = false;
         kb.resetKeys(); // the key that closed the overlay must not also trigger something here
@@ -137,7 +163,7 @@ export class WorldScene extends Phaser.Scene {
     cam.startFollow(this.player, true);
     if (!this.reduceMotion) cam.fadeIn(FADE_MS);
     this.fitZoom();
-    emit("region", this.def.name);
+    emit("region", { id: this.def.id, name: this.def.name });
     this.scale.on(Phaser.Scale.Events.RESIZE, this.fitZoom, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off(Phaser.Scale.Events.RESIZE, this.fitZoom, this);
@@ -153,15 +179,12 @@ export class WorldScene extends Phaser.Scene {
       this.interactions.get(`${this.tile.x + dx},${this.tile.y + dy}`)?.();
       return;
     }
-    if (JustDown(this.keys.journal)) {
-      this.lock();
-      emit("open-journal");
-      return;
-    }
-    if (JustDown(this.keys.profile)) {
-      this.lock();
-      emit("open-profile");
-      return;
+    for (const [key, event] of MENU_KEYS) {
+      if (JustDown(this.keys[key])) {
+        this.lock();
+        emit(event);
+        return;
+      }
     }
 
     const dir = this.heldDirection();

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ATTRIBUTES, RARITY_COLORS, TERMINALS, type Attribute, type Rarity } from "@/game/content";
+import { ACHIEVEMENTS, ATTRIBUTES, RARITY_COLORS, REGIONS, ROUTES, TERMINALS, type Attribute, type ProgressSnapshot, type Rarity } from "@/game/content";
 import { CONTACT_EMAIL, LINKEDIN_URL, aiKnowledgeBase, currentProcesses, ownerProfile } from "@/lib/data";
 import type { Dialogue } from "@/game/bus";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -459,5 +459,195 @@ export function ProfileCard({ found, onClose }: { found: Set<string>; onClose: (
         </div>
       </div>
     </Window>
+  );
+}
+
+// ---------- pause menu ----------
+
+export type MenuChoice = "journal" | "map" | "achievements" | "profile" | "portfolio";
+const MENU: { id: MenuChoice | "close"; label: string; key: string }[] = [
+  { id: "journal", label: "Journal", key: "I" },
+  { id: "map", label: "World Map", key: "M" },
+  { id: "achievements", label: "Achievements", key: "J" },
+  { id: "profile", label: "Profile", key: "P" },
+  { id: "portfolio", label: "Classic Portfolio", key: "" },
+  { id: "close", label: "Close", key: "Esc" },
+];
+
+/** GBA start menu: a narrow panel docked top-right with a ▶ cursor. Arrows move, Enter picks, Esc closes. */
+export function PauseMenu({ onChoose, onClose }: { onChoose: (c: MenuChoice) => void; onClose: () => void }) {
+  const [index, setIndex] = useState(0);
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  useEffect(() => refs.current[index]?.focus({ preventScroll: true }), [index]);
+  useKeys((e) => {
+    if (e.key === "Escape") onClose();
+    else if (e.key === "ArrowDown" || e.key === "s") setIndex((i) => (i + 1) % MENU.length);
+    else if (e.key === "ArrowUp" || e.key === "w") setIndex((i) => (i - 1 + MENU.length) % MENU.length);
+  });
+  return (
+    <div className="absolute inset-0 bg-black/20" role="dialog" aria-modal="true" aria-label="Menu" onClick={onClose}>
+      <ul
+        onClick={(e) => e.stopPropagation()}
+        className={`${PIXEL} pointer-events-auto absolute top-16 right-4 w-56 border-4 border-[#46382b] bg-[#f5e8c8] py-2 text-lg text-[#2b2420] shadow-[6px_6px_0_#46382b]`}
+      >
+        {MENU.map((item, i) => (
+          <li key={item.id}>
+            <button
+              ref={(el) => {
+                refs.current[i] = el;
+              }}
+              type="button"
+              onMouseEnter={() => setIndex(i)}
+              onClick={() => (item.id === "close" ? onClose() : onChoose(item.id))}
+              className={`flex w-full items-center gap-2 px-3 py-1 text-left outline-none ${i === index ? "bg-[#f5c65b]" : ""}`}
+            >
+              <span aria-hidden="true" className="w-3">
+                {i === index ? "▶" : ""}
+              </span>
+              <span className="flex-1">{item.label}</span>
+              {item.key && <span className="text-sm text-[#6e5643]">{item.key}</span>}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// ---------- world map ----------
+
+/** Islands joined by bridges. Visited regions are named and, unless you're already there, fast-travel targets. */
+export function WorldMap({
+  visited,
+  current,
+  onTravel,
+  onClose,
+}: {
+  visited: string[];
+  current: string;
+  onTravel: (id: string) => void;
+  onClose: () => void;
+}) {
+  useKeys((e) => {
+    if (e.key === "Escape" || e.key === "m" || e.key === "M") onClose();
+  });
+  const at = (id: string) => REGIONS.find((r) => r.id === id);
+  const here = at(current);
+  return (
+    <Window
+      titleId="map-title"
+      title="WORLD MAP"
+      meta={`${visited.length}/${REGIONS.length} REGIONS`}
+      width="max-w-3xl"
+      footerHint="Pick a visited region to fast travel · M or Esc to close"
+      onClose={onClose}
+    >
+      <div className="p-4">
+        <div className="relative aspect-[16/10] w-full overflow-hidden border-4 border-[#46382b] bg-[#4f9fbf] bg-[radial-gradient(#7bc9df_1.5px,transparent_1.5px)] [background-size:14px_14px]">
+          <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            {ROUTES.map(([a, b]) => {
+              const ra = at(a);
+              const rb = at(b);
+              if (!ra || !rb) return null;
+              const known = visited.includes(a) && visited.includes(b);
+              return (
+                <line
+                  key={a + b}
+                  x1={ra.x}
+                  y1={ra.y}
+                  x2={rb.x}
+                  y2={rb.y}
+                  stroke={known ? "#9a6a3c" : "#2f6f8f"}
+                  strokeWidth="6"
+                  strokeDasharray={known ? undefined : "6 6"}
+                  vectorEffect="non-scaling-stroke"
+                />
+              );
+            })}
+          </svg>
+          {REGIONS.map((r) => {
+            const seen = visited.includes(r.id);
+            const isHere = r.id === current;
+            return (
+              <button
+                key={r.id}
+                type="button"
+                disabled={!seen || isHere}
+                onClick={() => onTravel(r.id)}
+                style={{ left: `${r.x}%`, top: `${r.y}%`, background: seen ? r.color : "#9aa7ab" }}
+                className="absolute flex h-[22%] w-[19%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[40%] border-4 border-[#46382b] shadow-[3px_3px_0_#46382b] enabled:cursor-pointer enabled:hover:brightness-110 disabled:cursor-default"
+                aria-label={seen ? `${r.name}${isHere ? ", you are here" : ", fast travel here"}` : "Undiscovered region"}
+              >
+                {isHere && (
+                  <span aria-hidden="true" className="absolute -top-7 text-xl text-[#e0564a] motion-safe:animate-bounce">
+                    ▼
+                  </span>
+                )}
+                <span className={`rounded-sm px-1 text-center text-[11px] leading-tight sm:text-sm ${seen ? "bg-[#f5e8c8]/90 text-[#2b2420]" : "text-[#46382b]"}`}>
+                  {seen ? r.name : "???"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {here && (
+          <p className="mt-3 text-base text-[#6e5643]">
+            You are in {here.name}: {here.blurb.toLowerCase()}.
+          </p>
+        )}
+      </div>
+    </Window>
+  );
+}
+
+// ---------- achievements ----------
+
+function Trophy({ done }: { done: boolean }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 16 16" aria-hidden="true" shapeRendering="crispEdges" className="shrink-0">
+      <path d="M4 2h8v4a4 4 0 0 1-8 0z M7 10h2v2h2v2H5v-2h2z" fill={done ? "#f5c65b" : "#cfc4a8"} stroke="#1f1d24" strokeWidth="1" />
+    </svg>
+  );
+}
+
+export function AchievementList({ progress, onClose }: { progress: ProgressSnapshot; onClose: () => void }) {
+  useKeys((e) => {
+    if (e.key === "Escape" || e.key === "j" || e.key === "J") onClose();
+  });
+  const done = ACHIEVEMENTS.filter((a) => a.done(progress)).length;
+  return (
+    <Window titleId="achievements-title" title="ACHIEVEMENTS" meta={`${done}/${ACHIEVEMENTS.length}`} width="max-w-xl" footerHint="J or Esc to close" onClose={onClose}>
+      <ul className="divide-y-2 divide-[#46382b]/20">
+        {ACHIEVEMENTS.map((a) => {
+          const ok = a.done(progress);
+          return (
+            <li key={a.id} className={`flex items-center gap-3 px-4 py-3 ${ok ? "" : "opacity-60"}`}>
+              <Trophy done={ok} />
+              <div>
+                <p className="text-lg">{a.name}</p>
+                <p className="text-sm text-[#6e5643]">{a.description}</p>
+              </div>
+              {ok && <span className="ml-auto text-sm text-[#285943]">DONE</span>}
+            </li>
+          );
+        })}
+      </ul>
+    </Window>
+  );
+}
+
+/** Small non-blocking banner when an achievement unlocks. */
+export function AchievementToast({ name }: { name: string }) {
+  return (
+    <div
+      role="status"
+      className={`${PIXEL} pointer-events-none absolute top-16 left-1/2 flex -translate-x-1/2 items-center gap-2 border-4 border-[#46382b] bg-[#f5e8c8] px-4 py-2 text-[#2b2420] shadow-[4px_4px_0_#46382b]`}
+    >
+      <Trophy done />
+      <span>
+        <span className="block text-xs uppercase tracking-widest text-[#285943]">Achievement unlocked</span>
+        <span className="text-lg">{name}</span>
+      </span>
+    </div>
   );
 }

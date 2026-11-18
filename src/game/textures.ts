@@ -138,6 +138,7 @@ export const T = {
   TALL: 3,
   FENCE: 4,
   PAVE: 5,
+  DOCK: 6,
   PATH: 8, // + mask (16 variants)
   SAND: 24, // + mask
   WATER: 40, // + mask, frame A
@@ -252,6 +253,17 @@ function paveTile(p: Pix, ox: number) {
     }
 }
 
+function dockTile(p: Pix, ox: number) {
+  p.rect(ox, 0, TILE, TILE, C.waterDark);
+  for (let y = 0; y < TILE; y += 4) {
+    p.rect(ox, y, TILE, 3, C.woodLight);
+    p.rect(ox, y + 3, TILE, 1, C.woodDark);
+    p.set(ox + ((y * 5) % 13) + 1, y + 1, C.wood);
+  }
+  p.rect(ox + 1, 0, 1, TILE, C.woodDark);
+  p.rect(ox + 14, 0, 1, TILE, C.woodDark);
+}
+
 function drawTerrainSheet(p: Pix) {
   grassTile(p, T.GRASS * TILE, 1, false);
   grassTile(p, T.GRASS_2 * TILE, 2, true);
@@ -259,6 +271,7 @@ function drawTerrainSheet(p: Pix) {
   tallTile(p, T.TALL * TILE);
   fenceTile(p, T.FENCE * TILE);
   paveTile(p, T.PAVE * TILE);
+  dockTile(p, T.DOCK * TILE);
   const grassOutside = (q: Pix, ox: number) => grassTile(q, ox, 1, false);
   for (let m = 0; m < 16; m++) {
     edgedTile(p, (T.PATH + m) * TILE, m, grassOutside, pathInside, C.pathRim, 21);
@@ -289,6 +302,16 @@ export const OBJECTS = {
   "bldg-clinicalbrief": { w: 6, h: 5, door: [[2, 4], [3, 4]] },
   "bldg-traffic": { w: 6, h: 5, door: [[2, 4], [3, 4]] },
   "bldg-os": { w: 6, h: 5, door: [[2, 4], [3, 4]] },
+  lab: { w: 6, h: 4, door: [[2, 3], [3, 3]] },
+  computer: { w: 1, h: 1, ph: 2 },
+  arena: { w: 8, h: 5, door: [[3, 4], [4, 4]] },
+  office: { w: 5, h: 5, door: [[2, 4]] },
+  flag: { w: 1, h: 1, ph: 2 },
+  palm: { w: 1, h: 1, ph: 3 },
+  hut: { w: 4, h: 3, door: [[1, 2]] },
+  buoy: { w: 1, h: 1 },
+  tripod: { w: 1, h: 1, ph: 2 },
+  mat: { w: 1, h: 1 },
 } satisfies Record<string, ObjectArt>;
 export type ObjectKind = keyof typeof OBJECTS;
 
@@ -489,6 +512,156 @@ function drawTower(p: Pix, roof: string, roofDark: string, roofLight: string, em
   p.outline(0, 0, W_, 80);
 }
 
+/** Research lab: white walls, teal roof with a satellite dish, wide glass doors. */
+function drawLab(p: Pix) {
+  const W_ = 96;
+  p.rect(1, 6, W_ - 2, 24, "#257566");
+  p.rect(3, 8, W_ - 6, 20, "#3aa38f");
+  for (let x = 6; x < W_ - 6; x += 8) p.rect(x, 12, 4, 12, "#2f8f7d");
+  // dish
+  p.disc(78, 8, 6, "#e8e4da");
+  p.disc(78, 8, 4, "#c9c2b2");
+  p.rect(77, 8, 2, 7, "#9c9486");
+  p.rect(1, 28, W_ - 2, 2, "#257566");
+  p.rect(2, 30, W_ - 4, 33, C.white);
+  for (let x = 8; x < W_ - 10; x += 14) {
+    if (x > 28 && x < 62) continue;
+    p.rect(x, 36, 10, 10, "#2f4a5c");
+    p.rect(x + 1, 37, 8, 8, C.glass);
+    p.rect(x + 1, 37, 3, 3, C.glassLight);
+  }
+  p.rect(30, 34, 36, 4, "#1f1d24");
+  for (let x = 32; x < 64; x += 3) p.set(x, 35, x % 2 ? "#34d399" : "#7bc9df");
+  p.rect(36, 44, 24, 19, "#2f4a5c");
+  p.rect(37, 45, 10, 18, C.glass);
+  p.rect(49, 45, 10, 18, C.glass);
+  p.rect(2, 61, W_ - 4, 2, "#c9c2b2");
+  p.outline(0, 0, W_, 64);
+}
+
+/** A research computer on a desk, screen glowing. */
+function drawComputer(p: Pix) {
+  p.rect(1, 18, 14, 4, C.woodDark);
+  p.rect(2, 22, 2, 9, C.woodDark);
+  p.rect(12, 22, 2, 9, C.woodDark);
+  p.rect(2, 6, 12, 10, "#3a3f4a");
+  p.rect(3, 7, 10, 8, "#0a0c0b");
+  p.rect(4, 8, 5, 1, "#34d399");
+  p.rect(4, 10, 7, 1, "#34d399");
+  p.rect(4, 12, 4, 1, "#7bc9df");
+  p.rect(7, 16, 2, 2, "#3a3f4a");
+  p.outline(0, 0, 16, 32);
+}
+
+/** Event arena: an oval stadium with banners. */
+function drawArena(p: Pix) {
+  const W_ = 128;
+  for (let y = 4; y < 60; y++)
+    for (let x = 2; x < W_ - 2; x++) {
+      const dx = (x - 64) / 62;
+      const dy = (y - 34) / 30;
+      if (dx * dx + dy * dy <= 1) p.set(x, y, dy < -0.2 ? "#d9a23f" : "#e8dcc0");
+    }
+  for (let y = 10; y < 40; y += 5) for (let x = 10; x < W_ - 10; x += 6) if (p.alpha(x, y) && y < 30) p.set(x, y, "#a8742a");
+  // banners
+  for (const [x, c] of [[24, C.red], [44, "#7bc9df"], [84, "#34d399"], [104, C.gold]] as const) {
+    p.rect(x, 18, 2, 22, C.woodDark);
+    p.rect(x + 2, 18, 8, 10, c);
+  }
+  p.rect(2, 60, W_ - 4, 19, "#e8dcc0");
+  p.rect(2, 60, W_ - 4, 2, "#a8742a");
+  for (let x = 8; x < W_ - 8; x += 12) if (x < 44 || x > 80) p.rect(x, 64, 4, 15, "#c9c2b2");
+  p.rect(48, 62, 32, 17, C.woodDark);
+  p.rect(50, 64, 13, 15, C.wood);
+  p.rect(65, 64, 13, 15, C.wood);
+  p.set(61, 72, C.gold);
+  p.set(66, 72, C.gold);
+  p.outline(0, 0, W_, 80);
+}
+
+/** Office tower: stacked glass floors. */
+function drawOffice(p: Pix) {
+  const W_ = 80;
+  p.rect(2, 2, W_ - 4, 77, "#5b6b7e");
+  p.rect(4, 4, W_ - 8, 4, "#86a6cf");
+  for (let y = 12; y < 60; y += 8)
+    for (let x = 6; x < W_ - 8; x += 10) {
+      p.rect(x, y, 8, 6, C.glass);
+      p.rect(x, y, 3, 2, C.glassLight);
+    }
+  p.rect(30, 62, 20, 17, "#2f4a5c");
+  p.rect(32, 64, 16, 15, C.glass);
+  p.rect(39, 64, 2, 15, "#2f4a5c");
+  p.outline(0, 0, W_, 80);
+}
+
+function drawFlag(p: Pix) {
+  p.rect(7, 3, 2, 28, "#3a3f4a");
+  p.rect(9, 4, 6, 6, "#34d399");
+  p.rect(9, 6, 6, 1, C.white);
+  p.rect(5, 29, 6, 2, "#3a3f4a");
+  p.outline(0, 0, 16, 32);
+}
+
+function drawPalm(p: Pix) {
+  // curved trunk
+  for (let y = 14; y < 46; y++) p.rect(7 + Math.round(Math.sin(y / 9) * 2), y, 3, 1, y % 4 === 0 ? C.woodDark : C.wood);
+  // fronds
+  for (const [dx, dy] of [[-7, 2], [7, 2], [-5, -3], [5, -3], [0, -5]]) {
+    for (let i = 0; i < 7; i++) p.rect(8 + Math.round((dx * i) / 6), 14 + Math.round((dy * i) / 6 + (i * i) / 12), 3, 2, i % 2 ? C.leaf : C.leafLight);
+  }
+  p.disc(8, 14, 2.5, C.leafDark);
+  p.set(6, 16, "#8a5a2a");
+  p.set(10, 16, "#8a5a2a");
+  p.outline(0, 0, 16, 48);
+}
+
+/** Dive hut: thatched roof on stilts. */
+function drawHut(p: Pix) {
+  const W_ = 64;
+  for (let y = 2; y < 24; y++) {
+    const half = 8 + y * 1.1;
+    for (let x = Math.floor(32 - half); x < 32 + half; x++) p.set(x, y, (x + y) % 4 === 0 ? "#b38a4a" : "#d9b46a");
+  }
+  p.rect(2, 22, W_ - 4, 2, "#8a6a38");
+  p.rect(6, 24, W_ - 12, 22, C.woodLight);
+  for (let x = 8; x < W_ - 8; x += 6) p.rect(x, 24, 1, 22, C.wood);
+  p.rect(16, 30, 6, 6, "#2f4a5c");
+  p.rect(17, 31, 4, 4, C.glass);
+  p.rect(42, 28, 12, 10, C.white); // dive flag
+  p.rect(42, 32, 12, 2, C.red);
+  p.rect(18, 36, 10, 10, C.woodDark); // door (tile column 1)
+  p.outline(0, 0, W_, 48);
+}
+
+function drawBuoy(p: Pix) {
+  p.disc(8, 9, 5, C.red);
+  p.rect(3, 8, 11, 2, C.white);
+  p.rect(7, 2, 2, 4, "#3a3f4a");
+  p.rect(2, 14, 12, 1, C.foam);
+  p.outline(0, 0, 16, 16);
+}
+
+function drawTripod(p: Pix) {
+  p.rect(4, 6, 9, 6, "#1f1d24");
+  p.rect(5, 7, 4, 4, "#3a3f4a");
+  p.disc(7, 9, 1.5, C.glass);
+  p.rect(10, 5, 2, 1, C.red);
+  for (let i = 0; i < 18; i++) {
+    p.set(8 - Math.floor(i / 4), 12 + i, "#3a3f4a");
+    p.set(8 + Math.floor(i / 4), 12 + i, "#3a3f4a");
+    p.set(8, 12 + i, "#3a3f4a");
+  }
+  p.outline(0, 0, 16, 32);
+}
+
+function drawMat(p: Pix) {
+  p.rect(2, 3, 12, 10, "#b48be8");
+  p.rect(2, 3, 12, 1, "#e2d0fa");
+  p.rect(2, 12, 12, 1, "#7a52b8");
+  p.outline(0, 0, 16, 16);
+}
+
 function drawMailbox(p: Pix) {
   p.rect(7, 9, 2, 6, C.woodDark);
   p.rect(3, 3, 10, 7, C.red);
@@ -617,6 +790,16 @@ export function generateTextures(scene: Phaser.Scene, npcs: { id: string; look: 
     "bldg-clinicalbrief": (q) => drawTower(q, "#3aa38f", "#257566", "#8fdccb", "cross"),
     "bldg-traffic": (q) => drawTower(q, "#d9a23f", "#a8742a", "#f5d27b", "light"),
     "bldg-os": (q) => drawTower(q, "#1c2a24", "#0a0c0b", "#34d399", "prompt"),
+    lab: drawLab,
+    computer: drawComputer,
+    arena: drawArena,
+    office: drawOffice,
+    flag: drawFlag,
+    palm: drawPalm,
+    hut: drawHut,
+    buoy: drawBuoy,
+    tripod: drawTripod,
+    mat: drawMat,
   };
   for (const kind of Object.keys(objects) as ObjectKind[]) {
     const art: ObjectArt = OBJECTS[kind];

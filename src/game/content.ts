@@ -1,4 +1,13 @@
-import { CONTACT_EMAIL, aiKnowledgeBase, currentProcesses, krishiOsProject, ownerProfile, projectsData } from "@/lib/data";
+import {
+  CONTACT_EMAIL,
+  additionalProjectsData,
+  aiKnowledgeBase,
+  currentProcesses,
+  experienceData,
+  krishiOsProject,
+  ownerProfile,
+  projectsData,
+} from "@/lib/data";
 import type { Dir, Look, ObjectKind } from "./textures";
 
 export type Rarity = "Common" | "Rare" | "Epic" | "Legendary";
@@ -280,3 +289,331 @@ export const DOOR_TERMINAL: Partial<Record<ObjectKind, string>> = {
   "bldg-traffic": "traffic-ai",
   "bldg-os": "krishi-os",
 };
+
+// ---------- Innovation Forest: skills ----------
+
+// Groups of the owner-confirmed skills (ownerProfile.skills). Anything not in that list is dropped, so a typo
+// here can't invent a skill.
+const SKILL_GROUPS = [
+  { id: "python-developer", name: "Python Developer", label: "LANGUAGES", skills: ["Python", "SQL", "FastAPI"], rarity: "Common" },
+  { id: "app-builder", name: "App Builder", label: "FRAMEWORKS", skills: ["JavaScript", "TypeScript", "Next.js", "Flutter"], rarity: "Rare" },
+  { id: "deep-learning", name: "Deep Learning Practitioner", label: "AI & ML", skills: ["PyTorch", "TensorFlow", "Deep Learning", "Computer Vision"], rarity: "Epic" },
+  { id: "agent-builder", name: "Agent Builder", label: "LLMs & AGENTS", skills: ["LLMs", "AI Agents"], rarity: "Epic" },
+  { id: "toolsmith", name: "Toolsmith", label: "TOOLS", skills: ["Docker", "Git", "Cloud technologies"], rarity: "Common" },
+] as const;
+
+const confirmedSkills = (skills: readonly string[]) => skills.filter((sk) => ownerProfile.skills.includes(sk));
+const norm = (t: string) => t.toLowerCase().replace(/s$/, "");
+// Projects whose stack mentions one of these skills ("SQL" matches "PostgreSQL (Supabase)", "LLMs" matches "local LLM")
+const projectsUsing = (skills: string[]) =>
+  [...projectsData, krishiOsProject]
+    .filter((pr) => pr.techStack.some((t) => skills.some((sk) => norm(t).includes(norm(sk)))))
+    .map((pr) => pr.title);
+
+function skillAttributes(): Attribute[] {
+  return SKILL_GROUPS.map((g) => {
+    const skills = confirmedSkills(g.skills);
+    return {
+      id: g.id,
+      name: g.name,
+      category: "Skill",
+      description: `Part of Krishi's toolkit: ${skills.join(", ")}.`,
+      skills,
+      projects: projectsUsing(skills),
+      rarity: g.rarity,
+    };
+  });
+}
+
+// ---------- Leadership Frontier: roles (role, organisation, dates and skills only) ----------
+
+function role(id: string) {
+  const e = experienceData.find((x) => x.id === id);
+  if (!e) throw new Error(`KRISHI.WORLD: unknown experience ${id}`);
+  return e;
+}
+
+const ROLE_ATTRIBUTES = [
+  { id: "team-leader", name: "Team Leader", role: "mdas-vp", rarity: "Epic" },
+  { id: "community-builder", name: "Community Builder", role: "mosaic-coordinator", rarity: "Rare" },
+  { id: "professional", name: "Professional", role: "mysahayak-intern", rarity: "Rare" },
+  { id: "helping-hand", name: "Helping Hand", role: "sacredheart-volunteer", rarity: "Common" },
+] as const;
+
+function roleAttributes(): Attribute[] {
+  return ROLE_ATTRIBUTES.map((r) => {
+    const e = role(r.role);
+    return {
+      id: r.id,
+      name: r.name,
+      category: "Experience",
+      description: `${e.organization}: ${e.role} (${e.period}).`,
+      skills: e.skills,
+      projects: [],
+      rarity: r.rarity,
+    };
+  });
+}
+
+// ---------- Adventure Coast: life outside tech (owner-confirmed hobbies) ----------
+
+const hobbies = (...names: string[]) => names.filter((h) => ownerProfile.hobbies.includes(h));
+const auraLens = additionalProjectsData.find((x) => x.id === "auralens-ai");
+
+function hobbyAttributes(): Attribute[] {
+  return [
+    {
+      id: "photographer",
+      name: "Photographer",
+      category: "Hobby",
+      description: auraLens
+        ? `Photography is one of Krishi's hobbies, and he built ${auraLens.title} for it: ${auraLens.description}`
+        : "Photography is one of Krishi's hobbies.",
+      skills: hobbies("Photography"),
+      projects: auraLens ? [auraLens.title] : [],
+      rarity: "Rare",
+    },
+    {
+      id: "ocean-explorer",
+      name: "Ocean Explorer",
+      category: "Hobby",
+      description: `Among Krishi's hobbies: ${hobbies("Scuba diving", "Swimming", "Travel").join(", ").toLowerCase()}.`,
+      skills: hobbies("Scuba diving", "Swimming", "Travel"),
+      projects: [],
+      rarity: "Rare",
+    },
+    {
+      id: "mindful-mover",
+      name: "Mindful Mover",
+      category: "Hobby",
+      description: `Among Krishi's hobbies: ${hobbies("Yoga", "Aerial yoga", "Fitness").join(", ").toLowerCase()}.`,
+      skills: hobbies("Yoga", "Aerial yoga", "Fitness"),
+      projects: [],
+      rarity: "Common",
+    },
+  ];
+}
+
+// ---------- region characters, signs and crystals ----------
+
+const LAB_COAT: Look = { hair: "#9aa0a8", hairLight: "#c8ccd4", top: "#f4f4f4", topDark: "#c8ccd4", trim: "#7bc9df", pants: "#3a3a48", band: null };
+const skillLine = (label: string) => {
+  const g = SKILL_GROUPS.find((x) => x.label === label);
+  return g ? confirmedSkills(g.skills).join(" · ") : "";
+};
+
+export const FOREST: MapContent = {
+  npcs: [
+    {
+      id: "researcher",
+      name: "Researcher",
+      x: 16,
+      y: 11,
+      facing: "down",
+      look: LAB_COAT,
+      pages: [
+        "Welcome to Innovation Forest, where Krishi's skills grow.",
+        `His toolkit: ${ownerProfile.skills.join(", ")}.`,
+        "Five skill crystals are hidden off the trails. Try looking behind the trees!",
+      ],
+    },
+    {
+      id: "intern",
+      name: "Lab Intern",
+      x: 25,
+      y: 14,
+      facing: "up",
+      look: { ...LAB_COAT, hair: "#c06030", hairLight: "#e08850" },
+      pages: ["Each computer by the trail describes part of his stack.", `Lately he's been learning ${currentProcesses.learning.join(", ")}.`],
+    },
+  ],
+  signs: {
+    "21,26": ["INNOVATION FOREST", "Krishi's skills and tools. Five crystals are hidden off the trails."],
+    "8,11": ["LANGUAGES", skillLine("LANGUAGES")],
+    "14,11": ["AI & ML", skillLine("AI & ML")],
+    "24,11": ["FRAMEWORKS", skillLine("FRAMEWORKS")],
+    "32,11": ["LLMs & AGENTS", skillLine("LLMs & AGENTS"), "TOOLS", skillLine("TOOLS")],
+  },
+  crystals: [
+    { attribute: "python-developer", x: 4, y: 19 },
+    { attribute: "app-builder", x: 35, y: 20 },
+    { attribute: "deep-learning", x: 11, y: 25 },
+    { attribute: "agent-builder", x: 28, y: 25 },
+    { attribute: "toolsmith", x: 35, y: 7 },
+  ],
+};
+
+const mdas = role("mdas-vp");
+const mosaic = role("mosaic-coordinator");
+const mysahayak = role("mysahayak-intern");
+const sacredHeart = role("sacredheart-volunteer");
+const listSkills = (skills: string[]) => skills.join(", "); // keep casing: Flutter, API, QA
+
+export const FRONTIER: MapContent = {
+  npcs: [
+    {
+      id: "host",
+      name: "Event Host",
+      x: 19,
+      y: 9,
+      facing: "down",
+      look: { hair: "#2a2a35", hairLight: "#4a4a5a", top: "#d9a23f", topDark: "#a8742a", trim: "#ffffff", pants: "#2c3a5a", band: null },
+      pages: [
+        "Welcome to the Leadership Frontier!",
+        `At ${mdas.organization}, Krishi's role: ${mdas.role}.`,
+        `The work: ${listSkills(mdas.skills)}.`,
+      ],
+    },
+    {
+      id: "coordinator",
+      name: "Coordinator",
+      x: 9,
+      y: 15,
+      facing: "right",
+      look: { hair: "#6e4524", hairLight: "#9a6a3c", top: "#7bc9df", topDark: "#4791c4", trim: "#ffffff", pants: "#46382b", band: "#f5c65b" },
+      pages: [`Krishi is ${mosaic.role} at ${mosaic.organization} (${mosaic.period}).`, `It's all about ${listSkills(mosaic.skills)}.`],
+    },
+    {
+      id: "mentor",
+      name: "Mentor",
+      x: 8,
+      y: 8,
+      facing: "down",
+      look: { hair: "#9aa0a8", hairLight: "#c8ccd4", top: "#3a3f4a", topDark: "#23262e", trim: "#e0564a", pants: "#2c3a5a", band: null },
+      pages: [`${mysahayak.organization}: ${mysahayak.role}, ${mysahayak.period}.`, `There he worked on ${listSkills(mysahayak.skills)}.`],
+    },
+    {
+      id: "volunteer",
+      name: "Volunteer",
+      x: 34,
+      y: 8,
+      facing: "down",
+      look: { hair: "#c9902e", hairLight: "#f5c65b", top: "#e0564a", topDark: "#a83a32", trim: "#ffffff", pants: "#46382b", band: null },
+      pages: [`At ${sacredHeart.organization}, Krishi's role is ${sacredHeart.role} (${sacredHeart.period}).`],
+    },
+  ],
+  signs: { "2,12": ["LEADERSHIP FRONTIER", "Krishi's leadership and work experience."] },
+  crystals: [
+    { attribute: "team-leader", x: 35, y: 19 },
+    { attribute: "community-builder", x: 4, y: 19 },
+    { attribute: "professional", x: 4, y: 9 },
+    { attribute: "helping-hand", x: 35, y: 10 },
+  ],
+};
+
+export const COAST: MapContent = {
+  npcs: [
+    {
+      id: "photographer",
+      name: "Photographer",
+      x: 7,
+      y: 11,
+      facing: "left",
+      look: { hair: "#1f1d24", hairLight: "#3a3a48", top: "#46382b", topDark: "#2b2420", trim: "#f5c65b", pants: "#2c3a5a", band: null },
+      pages: ["Photography is one of Krishi's hobbies.", ...(auraLens ? [`He even built ${auraLens.title}: ${auraLens.description}`] : [])],
+    },
+    {
+      id: "instructor",
+      name: "Yoga Instructor",
+      x: 20,
+      y: 9,
+      facing: "down",
+      look: { hair: "#2a2a35", hairLight: "#4a4a5a", top: "#b48be8", topDark: "#7a52b8", trim: "#ffffff", pants: "#2b2420", band: "#34d399" },
+      pages: ["Welcome to the yoga deck!", `Krishi's hobbies include ${hobbies("Yoga", "Aerial yoga", "Fitness").join(", ").toLowerCase()}.`],
+    },
+    {
+      id: "diver",
+      name: "Diver",
+      x: 35,
+      y: 11,
+      facing: "left",
+      look: { hair: "#c06030", hairLight: "#e08850", top: "#1f1d24", topDark: "#0a0c0b", trim: "#7bc9df", pants: "#1f1d24", band: null },
+      pages: [`${hobbies("Scuba diving", "Swimming").join(" and ")} are among Krishi's hobbies.`, "See that buoy past the island? It marks a dive spot."],
+    },
+    {
+      id: "traveller",
+      name: "Traveller",
+      x: 28,
+      y: 22,
+      facing: "down",
+      look: { hair: "#c9902e", hairLight: "#f5c65b", top: "#e0564a", topDark: "#a83a32", trim: "#f5e8c8", pants: "#6e4524", band: null },
+      pages: ["Travel is on Krishi's list of hobbies too.", "Me? I just like islands."],
+    },
+  ],
+  signs: {
+    "21,6": ["ADVENTURE COAST", "Krishi's life outside tech."],
+    "5,11": ["A camera on a tripod, framed on the sunset."],
+    "19,11": ["A yoga mat, rolled out facing the sea."],
+    "21,11": ["A yoga mat, rolled out facing the sea."],
+    "34,22": ["A dive buoy bobs on the water. The dive spot must be right below!"],
+  },
+  crystals: [
+    { attribute: "photographer", x: 11, y: 21 },
+    { attribute: "ocean-explorer", x: 31, y: 21 },
+    { attribute: "mindful-mover", x: 23, y: 11 },
+  ],
+};
+
+// Appended here (not in the ATTRIBUTES literal) because they read constants declared above
+ATTRIBUTES.push(...skillAttributes(), ...roleAttributes(), ...hobbyAttributes());
+MAP_CONTENT.forest = FOREST;
+MAP_CONTENT.frontier = FRONTIER;
+MAP_CONTENT.coast = COAST;
+ALL_NPCS.push(...FOREST.npcs, ...FRONTIER.npcs, ...COAST.npcs);
+Object.assign(DOOR_TEXT, {
+  lab: ["The lab is mid-experiment. Please don't disturb!"],
+  arena: ["The arena is between events right now."],
+  office: ["You need a visitor badge to go upstairs."],
+  hut: ["The dive shop is closed. Gone diving!"],
+});
+
+// ---------- regions, world map and achievements ----------
+
+export interface Region {
+  id: string;
+  name: string;
+  blurb: string;
+  x: number; // world-map position (percent of the map panel)
+  y: number;
+  color: string;
+}
+
+export const REGIONS: Region[] = [
+  { id: "forest", name: "Innovation Forest", blurb: "Skills and tools", x: 38, y: 22, color: "#285943" },
+  { id: "origin", name: "Origin Valley", blurb: "About and education", x: 38, y: 52, color: "#78b85a" },
+  { id: "metropolis", name: "Project Metropolis", blurb: "Projects", x: 64, y: 52, color: "#9c9486" },
+  { id: "frontier", name: "Leadership Frontier", blurb: "Leadership and experience", x: 88, y: 52, color: "#d9a23f" },
+  { id: "coast", name: "Adventure Coast", blurb: "Life outside tech", x: 38, y: 82, color: "#f2e2b4" },
+];
+
+// Bridges on the world map (matches the warps between maps)
+export const ROUTES: [string, string][] = [
+  ["origin", "forest"],
+  ["origin", "metropolis"],
+  ["metropolis", "frontier"],
+  ["origin", "coast"],
+];
+
+export interface ProgressSnapshot {
+  regions: string[];
+  attributes: string[];
+  terminals: string[];
+}
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  done: (p: ProgressSnapshot) => boolean;
+}
+
+export const ACHIEVEMENTS: Achievement[] = [
+  { id: "first-steps", name: "First Steps", description: "Explore Origin Valley.", done: (p) => p.regions.includes("origin") },
+  { id: "curious-mind", name: "Curious Mind", description: "Discover five attributes.", done: (p) => p.attributes.length >= 5 },
+  { id: "into-the-forest", name: "Into the Forest", description: "Visit Innovation Forest.", done: (p) => p.regions.includes("forest") },
+  { id: "builder", name: "Builder", description: "Read your first project terminal.", done: (p) => p.terminals.length >= 1 },
+  { id: "team-player", name: "Team Player", description: "Visit Leadership Frontier.", done: (p) => p.regions.includes("frontier") },
+  { id: "adventurer", name: "Adventurer", description: "Reach Adventure Coast.", done: (p) => p.regions.includes("coast") },
+  { id: "world-explorer", name: "World Explorer", description: "Visit all five regions.", done: (p) => REGIONS.every((r) => p.regions.includes(r.id)) },
+  { id: "completionist", name: "Completionist", description: "Discover every attribute.", done: (p) => ATTRIBUTES.every((a) => p.attributes.includes(a.id)) },
+];

@@ -2,11 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type Phaser from "phaser";
 import { emit, on, type Dialogue } from "@/game/bus";
-import { discover, discovered } from "@/game/progress";
-import { TERMINALS } from "@/game/content";
-import { DialogueBox, DiscoveryCard, Journal, ProfileCard, ProjectTerminal } from "./Overlays";
+import { record, snapshot } from "@/game/progress";
+import { ACHIEVEMENTS, TERMINALS, type ProgressSnapshot } from "@/game/content";
+import {
+  AchievementList,
+  AchievementToast,
+  DialogueBox,
+  DiscoveryCard,
+  Journal,
+  PauseMenu,
+  ProfileCard,
+  ProjectTerminal,
+  WorldMap,
+  type MenuChoice,
+} from "./Overlays";
 
 type Overlay =
   | { kind: "dialogue"; dialogue: Dialogue }
@@ -14,7 +26,12 @@ type Overlay =
   | { kind: "journal" }
   | { kind: "terminal"; id: string }
   | { kind: "profile" }
+  | { kind: "menu" }
+  | { kind: "map" }
+  | { kind: "achievements" }
   | null;
+
+const EMPTY: ProgressSnapshot = { attributes: [], regions: [], terminals: [] };
 
 const HUD_BOX = "border-2 border-[#46382b] bg-[#f5e8c8] px-3 py-1.5 text-xs text-[#46382b] shadow-[3px_3px_0_#46382b]";
 const HUD_BUTTON = `${HUD_BOX} pointer-events-auto font-bold hover:bg-[#f5c65b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f5c65b]`;
@@ -28,8 +45,36 @@ export default function WorldGame() {
   const hostRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [overlay, setOverlay] = useState<Overlay>(null);
-  const [found, setFound] = useState<Set<string>>(() => new Set());
-  const [region, setRegion] = useState("Origin Valley");
+  const router = useRouter();
+  const [progress, setProgress] = useState<ProgressSnapshot>(EMPTY);
+  const progressRef = useRef<ProgressSnapshot>(EMPTY);
+  const [region, setRegion] = useState({ id: "origin", name: "Origin Valley" });
+  const [toasts, setToasts] = useState<string[]>([]);
+  const found = new Set(progress.attributes);
+
+  // Save one fact (visited region, read terminal, found attribute) and announce any achievement it completes.
+  // Kept in a ref too so bus listeners registered once always see the latest progress.
+  const bump = (field: keyof ProgressSnapshot, id: string) => {
+    const prev = progressRef.current;
+    if (prev[field].includes(id)) return;
+    record(field, id);
+    const next = { ...prev, [field]: [...prev[field], id] };
+    progressRef.current = next;
+    setProgress(next);
+    const unlocked = ACHIEVEMENTS.filter((a) => !a.done(prev) && a.done(next)).map((a) => a.name);
+    if (unlocked.length) setToasts((t) => [...t, ...unlocked]);
+  };
+  const bumpRef = useRef(bump);
+  useEffect(() => {
+    bumpRef.current = bump;
+  });
+
+  // One toast at a time, 3.5s each
+  useEffect(() => {
+    if (!toasts.length) return;
+    const id = setTimeout(() => setToasts((t) => t.slice(1)), 3500);
+    return () => clearTimeout(id);
+  }, [toasts]);
 
   useEffect(() => {
     let game: Phaser.Game | undefined;
@@ -52,18 +97,24 @@ export default function WorldGame() {
 
   // Saved discoveries are read after mount (localStorage is browser-only)
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setFound(new Set(discovered()));
+    progressRef.current = snapshot();
+    setProgress(progressRef.current);
     const offs = [
       on("dialogue", (dialogue) => setOverlay({ kind: "dialogue", dialogue })),
       on("discover", (id) => {
-        setFound((prev) => new Set(prev).add(id)); // also covers a browser that can't save
+        bumpRef.current("attributes", id); // the scene already saved it; this updates the UI and achievements
         setOverlay({ kind: "discover", id });
       }),
       on("open-journal", () => setOverlay({ kind: "journal" })),
       on("open-profile", () => setOverlay({ kind: "profile" })),
       on("terminal", (id) => setOverlay({ kind: "terminal", id })),
-      on("region", setRegion),
+      on("region", (r) => {
+        setRegion(r);
+        bumpRef.current("regions", r.id);
+      }),
+      on("open-map", () => setOverlay({ kind: "map" })),
+      on("open-achievements", () => setOverlay({ kind: "achievements" })),
+      on("open-menu", () => setOverlay({ kind: "menu" })),
     ];
     return () => offs.forEach((off) => off());
   }, []);
@@ -75,17 +126,28 @@ export default function WorldGame() {
 
   // Closing a terminal for the first time awards its attribute (the world stays paused through the card)
   const closeTerminal = (id: string) => {
+    bump("terminals", id);
     const attribute = TERMINALS[id]?.attribute;
     if (!attribute || found.has(attribute)) return close();
-    discover(attribute);
-    setFound((prev) => new Set(prev).add(attribute));
+    bump("attributes", attribute);
     setOverlay({ kind: "discover", id: attribute });
   };
 
-  const openFromHud = (next: { kind: "journal" } | { kind: "profile" }) => {
+  const openMenu = () => {
     if (overlay) return;
     emit("ui-open");
-    setOverlay(next);
+    setOverlay({ kind: "menu" });
+  };
+
+  const choose = (c: MenuChoice) => {
+    if (c === "portfolio") return router.push("/");
+    setOverlay({ kind: c });
+  };
+
+  // Fast travel: the scene fades out and rebuilds on the target map, which unlocks it
+  const travel = (id: string) => {
+    setOverlay(null);
+    emit("travel", id);
   };
 
   return (
@@ -96,14 +158,11 @@ export default function WorldGame() {
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
         <div className={HUD_BOX}>
           <span className="font-bold tracking-[0.18em]">KRISHI.WORLD</span>
-          <span className="hidden sm:inline"> · {region}</span>
+          <span className="hidden sm:inline"> · {region.name}</span>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={() => openFromHud({ kind: "profile" })} className={HUD_BUTTON} aria-label="Open profile card">
-            Profile <span className="hidden sm:inline">(P)</span>
-          </button>
-          <button type="button" onClick={() => openFromHud({ kind: "journal" })} className={HUD_BUTTON} aria-label="Open Discovery Journal">
-            Journal <span className="hidden sm:inline">(I) · {found.size}</span>
+          <button type="button" onClick={openMenu} className={HUD_BUTTON} aria-label="Open menu">
+            Menu <span className="hidden sm:inline">(Esc)</span>
           </button>
           <Link href="/" className={HUD_BUTTON}>
             ← <span className="hidden sm:inline">Back to </span>Portfolio
@@ -113,7 +172,7 @@ export default function WorldGame() {
 
       {!overlay && (
         <p className="pointer-events-none absolute inset-x-0 bottom-4 hidden text-center text-[11px] tracking-[0.18em] text-[#f5e8c8]/80 md:block">
-          WASD / ARROWS: WALK · E: TALK / INSPECT · I: JOURNAL · P: PROFILE
+          WASD / ARROWS: WALK · E: TALK / INSPECT · ESC: MENU · M: MAP
         </p>
       )}
 
@@ -122,6 +181,10 @@ export default function WorldGame() {
       {overlay?.kind === "journal" && <Journal found={found} onClose={close} />}
       {overlay?.kind === "terminal" && <ProjectTerminal id={overlay.id} onClose={() => closeTerminal(overlay.id)} />}
       {overlay?.kind === "profile" && <ProfileCard found={found} onClose={close} />}
+      {overlay?.kind === "menu" && <PauseMenu onChoose={choose} onClose={close} />}
+      {overlay?.kind === "map" && <WorldMap visited={progress.regions} current={region.id} onTravel={travel} onClose={close} />}
+      {overlay?.kind === "achievements" && <AchievementList progress={progress} onClose={close} />}
+      {toasts[0] && <AchievementToast key={toasts[0] + toasts.length} name={toasts[0]} />}
 
       {status !== "ready" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-sm">

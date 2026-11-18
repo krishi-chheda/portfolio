@@ -119,7 +119,23 @@ An explorable top-down pixel-art world at `/world`, added alongside the portfoli
     - Four project HQs whose doors open a project terminal. Reading each terminal for the first time awards an attribute.
     - A profile card (P key or HUD button) linking LinkedIn and email only (owner's choice: no resume file).
     - The boot-screen entry choice, plus a `▶ krishi.world` navbar link.
-  - Sprints 4–5 not started (remaining 3 regions, achievements, world map, audio, touch controls, save position).
+  - Sprint 4 done:
+    - All five regions, connected: Innovation Forest (north of Origin), Adventure Coast (south of Origin), Leadership Frontier (east of Metropolis).
+    - 17 attributes.
+    - 8 achievements (J), with an unlock toast.
+    - An island world map (M) with fog over unvisited regions and fast travel to visited ones.
+    - A GBA start menu on Esc (the HUD is now just "Menu" and "← Portfolio").
+  - Sprint 5 not started: touch D-pad and interact button, audio and mute, saving position, a text-based navigation fallback, performance pass.
+- **Maps are generated:** `python scripts/worldgen.py` rewrites all five `src/game/maps/*.ts`.
+  - It validates overlaps, door access, warps, and a reachability search from each spawn to every character, crystal, sign and door.
+  - Spots listed in the script must match coordinates in `content.ts`.
+  - Edit the script and regenerate rather than hand-editing a map's layout.
+- **Topology** (warps; mirrored by `ROUTES` on the world map): Forest ↕ Origin (road cols 19–20) ↕ Coast; Origin ↔ Metropolis ↔ Frontier (rows 14–15).
+- **Region content sources:**
+  - **Forest:** `SKILL_GROUPS`, built from `ownerProfile.skills` and filtered to that list, so they can't invent a skill. Related projects are computed from tech stacks.
+  - **Frontier:** `experienceData` role, organisation, period and skills only. The `highlight` and description claims are still unverified (KOS-06), so they're never used.
+  - **Coast:** `ownerProfile.hobbies`, plus AuraLens from `additionalProjectsData`.
+- **Progress:** localStorage `krishi-world:progress:v1` = `{ attributes, regions, terminals }` (older saves are migrated by `read()`). Achievements are derived from it, never stored. `WorldGame.bump()` records a fact and toasts newly completed achievements.
 - **Owner decisions (2026-11-19):**
   - Project Metropolis has exactly 4 buildings: ClinicalBrief, AccessVision, Traffic AI and KRISHI.OS. StudentHub stays a flagship on the classic site only.
   - Profile links: LinkedIn and email only.
@@ -166,7 +182,7 @@ An explorable top-down pixel-art world at `/world`, added alongside the portfoli
   - Opening any overlay locks the scene (`lock()` resets keys). React emits `ui-closed`, and the scene unlocks and calls `resetKeys()`, so the key that closed the overlay can't re-trigger an interaction.
   - Dialogue: E, Enter or Space finishes the line, then advances; Escape closes; a tap advances. The typewriter is skipped under reduced motion; screen readers get the full line through an `sr-only` live region.
   - NPCs glance around every 2–4s (off under reduced motion) and turn to face the player when spoken to.
-- **Content rule:** game content must come from `data.ts` (via structured data files), never typed into scenes. Facts in the brief that `data.ts` doesn't have are pending owner confirmation (see Open items).
+- **Content rule:** game content must come from `data.ts` (via structured data files), never typed into scenes. That includes the Sprint 4 regions (see "Region content sources"). Facts in the brief that `data.ts` doesn't have are pending owner confirmation (see Open items).
 
 ## Env vars (names only)
 - `OPENAI_API_KEY`: server-only, optional.

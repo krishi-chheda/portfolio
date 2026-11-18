@@ -11,8 +11,12 @@ interface Events {
   discover: string; // scene -> UI: an attribute id was just collected
   "open-journal": void; // scene -> UI: the I key was pressed
   "open-profile": void; // scene -> UI: the P key was pressed
+  "open-map": void; // scene -> UI: the M key was pressed
+  "open-achievements": void; // scene -> UI: the J key was pressed
+  "open-menu": void; // scene -> UI: Escape was pressed in the world
   terminal: string; // scene -> UI: a project HQ's doors were used (project id)
-  region: string; // scene -> UI: the map the player is now in
+  region: { id: string; name: string }; // scene -> UI: the map the player is now in
+  travel: string; // UI -> scene: fast travel to a visited region (map id)
   "ui-open": void; // UI -> scene: an overlay opened (pause movement)
   "ui-closed": void; // UI -> scene: all overlays closed (resume)
 }

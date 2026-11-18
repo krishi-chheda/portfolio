@@ -234,6 +234,12 @@ l.border_gaps = [(0, 14)]
 l.add('office', 4, 2); l.add('arena', 16, 2); l.add('office', 31, 2)
 for (x, y) in [(12, 9), (27, 9), (12, 18), (27, 18)]:
     l.add('flag', x, y)
+# Plaza dressing: a central flower bed, street lamps and a pair of trees
+l.rect('*', 17, 14, 22, 15)
+for (x, y) in [(16, 12), (23, 12), (16, 17), (23, 17)]:
+    l.add('lamp', x, y)
+for (x, y) in [(6, 11), (30, 14)]:
+    l.add('tree', x, y)
 l.add('sign', 2, 12)
 l.rect('*', 6, 22, 33, 22)
 l.rect('^', 4, 24, 9, 26); l.rect('^', 30, 24, 35, 26)

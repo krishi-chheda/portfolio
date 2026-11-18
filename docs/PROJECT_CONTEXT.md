@@ -125,7 +125,15 @@ An explorable top-down pixel-art world at `/world`, added alongside the portfoli
     - 8 achievements (J), with an unlock toast.
     - An island world map (M) with fog over unvisited regions and fast travel to visited ones.
     - A GBA start menu on Esc (the HUD is now just "Menu" and "← Portfolio").
-  - Sprint 5 not started: touch D-pad and interact button, audio and mute, saving position, a text-based navigation fallback, performance pass.
+  - Sprint 5 done:
+    - Touch controls: a D-pad plus an A button, shown only on coarse pointers.
+    - Original synthesised sound effects and an optional music loop.
+    - Settings in the Esc menu (Sound / Music / Motion).
+    - Resume where you left off.
+    - A Text Guide (a play-free, accessible way to read everything).
+    - Leadership Frontier plaza dressing.
+    - The render loop sleeps behind open panels.
+  - All five sprints of the brief are done. The game ships about 357 KB gzipped on demand (Phaser + game code); the portfolio pages load none of it.
 - **Maps are generated:** `python scripts/worldgen.py` rewrites all five `src/game/maps/*.ts`.
   - It validates overlaps, door access, warps, and a reachability search from each spawn to every character, crystal, sign and door.
   - Spots listed in the script must match coordinates in `content.ts`.
@@ -182,6 +190,15 @@ An explorable top-down pixel-art world at `/world`, added alongside the portfoli
   - Opening any overlay locks the scene (`lock()` resets keys). React emits `ui-closed`, and the scene unlocks and calls `resetKeys()`, so the key that closed the overlay can't re-trigger an interaction.
   - Dialogue: E, Enter or Space finishes the line, then advances; Escape closes; a tap advances. The typewriter is skipped under reduced motion; screen readers get the full line through an `sr-only` live region.
   - NPCs glance around every 2–4s (off under reduced motion) and turn to face the player when spoken to.
+- **Sprint 5 modules:**
+  - `src/game/settings.ts`: localStorage `krishi-world:settings:v1` (`sound`, default on; `music`, default off; `reducedMotion`) and `krishi-world:position:v1` (`mapId`, `x`, `y`, `facing`, saved after every step). `reduceMotion()` = the OS setting or the in-game toggle.
+  - `src/game/audio.ts`: Web Audio synthesis only (square/triangle tones), no files. `sfx(name)` and `syncMusic()`. Audio starts only after a user gesture: WorldGame calls `syncMusic()` on the first keydown or pointerdown.
+- **Resume:** WorldScene `init()` uses the saved position on first boot. `create()` falls back to the map spawn if that tile is now blocked or the map id is unknown.
+- **Touch:**
+  - `TouchControls` emits `pad` (held direction, or null) and `pad-a`. The scene merges `padDir` into `heldDirection()`.
+  - It's hidden on fine pointers via `[@media(pointer:coarse)]:flex`, and while any overlay is open (tapping the dialogue box advances it).
+- **Motion toggle** applies live via `settings-changed`: crystal bob tweens pause and resume, and the NPC glance timer checks `this.reduceMotion`. The dialogue typewriter reads it as a prop.
+- **Render sleep:** `lock()` puts `game.loop` to sleep 300ms later if still locked (a crystal's fade finishes first). `ui-closed` and `travel` wake it. Warps lock without sleeping.
 - **Content rule:** game content must come from `data.ts` (via structured data files), never typed into scenes. That includes the Sprint 4 regions (see "Region content sources"). Facts in the brief that `data.ts` doesn't have are pending owner confirmation (see Open items).
 
 ## Env vars (names only)

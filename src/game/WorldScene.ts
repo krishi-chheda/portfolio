@@ -8,6 +8,8 @@ import { leadershipFrontier } from "./maps/leadershipFrontier";
 import { adventureCoast } from "./maps/adventureCoast";
 import { ALL_NPCS, ATTRIBUTES, DOOR_TERMINAL, DOOR_TEXT, MAP_CONTENT } from "./content";
 import { emit, on, type Dialogue } from "./bus";
+import { reduceMotion, savePosition, savedPosition } from "./settings";
+import { sfx } from "./audio";
 import { discover, discovered } from "./progress";
 
 const STEP_MS = 220; // time to walk one tile (GBA-like pace)
@@ -60,6 +62,8 @@ export class WorldScene extends Phaser.Scene {
   private def: MapDef = originValley;
   private arrival: Arrival = {};
   private reduceMotion = false;
+  private padDir: Dir | null = null; // on-screen D-pad (touch)
+  private bobs: Phaser.Tweens.Tween[] = []; // crystal bob tweens, paused when motion is reduced
 
   constructor() {
     super("world");
@@ -67,12 +71,16 @@ export class WorldScene extends Phaser.Scene {
 
   // Runs before create() on first boot and on every warp (scene.restart reuses this instance, so reset state)
   init(arrival: Arrival) {
-    this.arrival = arrival ?? {};
+    // First boot with no target: resume where this browser left off (validated against the map in create())
+    const saved = arrival?.mapId ? null : savedPosition();
+    this.arrival = saved && MAPS[saved.mapId] ? { mapId: saved.mapId, spawn: { x: saved.x, y: saved.y }, facing: saved.facing } : (arrival ?? {});
     this.def = MAPS[this.arrival.mapId ?? "origin"] ?? originValley;
     this.interactions = new Map();
     this.moving = false;
     this.locked = false;
-    this.reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    this.reduceMotion = reduceMotion();
+    this.padDir = null;
+    this.bobs = [];
   }
 
   create() {
@@ -117,6 +125,7 @@ export class WorldScene extends Phaser.Scene {
     });
 
     this.tile = { ...(this.arrival.spawn ?? this.def.spawn) };
+    if (this.blocked(this.tile.x, this.tile.y)) this.tile = { ...this.def.spawn }; // stale save (map changed)
     this.facing = this.arrival.facing ?? "down";
     this.player = this.add.sprite(0, 0, "player", 0).setOrigin(0.5, 1);
     this.placePlayer();
@@ -146,11 +155,26 @@ export class WorldScene extends Phaser.Scene {
     // React overlays pause and resume the world
     const offs = [
       on("ui-open", () => this.lock()),
+      on("pad", (dir) => {
+        this.padDir = dir;
+      }),
+      on("pad-a", () => {
+        if (!this.locked && !this.moving) this.interact();
+      }),
+      on("settings-changed", () => {
+        this.reduceMotion = reduceMotion();
+        for (const bob of this.bobs) {
+          if (this.reduceMotion) bob.pause();
+          else bob.resume();
+        }
+      }),
       on("travel", (to) => {
         const target = MAPS[to];
+        this.game.loop.wake(); // the fade needs the loop running
         if (target && to !== this.def.id) this.warp({ x: 0, y: 0, to, spawn: target.spawn, facing: "down" });
       }),
       on("ui-closed", () => {
+        this.game.loop.wake();
         this.locked = false;
         kb.resetKeys(); // the key that closed the overlay must not also trigger something here
         kb.enableGlobalCapture();
@@ -164,6 +188,7 @@ export class WorldScene extends Phaser.Scene {
     if (!this.reduceMotion) cam.fadeIn(FADE_MS);
     this.fitZoom();
     emit("region", { id: this.def.id, name: this.def.name });
+    this.savePosition();
     this.scale.on(Phaser.Scale.Events.RESIZE, this.fitZoom, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off(Phaser.Scale.Events.RESIZE, this.fitZoom, this);
@@ -175,8 +200,7 @@ export class WorldScene extends Phaser.Scene {
     if (this.locked || this.moving) return;
     const { JustDown } = Phaser.Input.Keyboard;
     if (JustDown(this.keys.e) || JustDown(this.keys.enter)) {
-      const [dx, dy] = DELTA[this.facing];
-      this.interactions.get(`${this.tile.x + dx},${this.tile.y + dy}`)?.();
+      this.interact();
       return;
     }
     for (const [key, event] of MENU_KEYS) {
@@ -210,15 +234,26 @@ export class WorldScene extends Phaser.Scene {
       onUpdate: () => this.player.setDepth(this.player.y),
       onComplete: () => {
         this.moving = false;
+        this.savePosition();
         const warp = this.def.warps.find((w) => w.x === this.tile.x && w.y === this.tile.y);
         if (warp) this.warp(warp);
       },
     });
   }
 
+  private interact() {
+    const [dx, dy] = DELTA[this.facing];
+    this.interactions.get(`${this.tile.x + dx},${this.tile.y + dy}`)?.();
+  }
+
+  private savePosition() {
+    savePosition({ mapId: this.def.id, x: this.tile.x, y: this.tile.y, facing: this.facing });
+  }
+
   // Fade out, then rebuild the scene on the target map
   private warp(w: Warp) {
     this.locked = true;
+    sfx("warp");
     const go = () => this.scene.restart({ mapId: w.to, spawn: w.spawn, facing: w.facing } satisfies Arrival);
     if (this.reduceMotion) return go();
     this.cameras.main.fadeOut(FADE_MS);
@@ -246,7 +281,6 @@ export class WorldScene extends Phaser.Scene {
     }
 
     // Characters: solid, glance around now and then, and turn to face you when you talk to them
-    const reduceMotion = this.reduceMotion;
     for (const npc of content.npcs) {
       const sprite = this.add
         .sprite(npc.x * TILE + PLAYER_W / 2, npc.y * TILE + TILE - 1, `npc-${npc.id}`, DIRS.indexOf(npc.facing))
@@ -257,15 +291,13 @@ export class WorldScene extends Phaser.Scene {
         sprite.setFrame(DIRS.indexOf(OPPOSITE[this.facing]));
         say({ speaker: npc.name, pages: npc.pages });
       });
-      if (!reduceMotion) {
-        this.time.addEvent({
-          delay: Phaser.Math.Between(2200, 4200),
-          loop: true,
-          callback: () => {
-            if (!this.locked) sprite.setFrame(Phaser.Math.Between(0, 3));
-          },
-        });
-      }
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2200, 4200),
+        loop: true,
+        callback: () => {
+          if (!this.locked && !this.reduceMotion) sprite.setFrame(Phaser.Math.Between(0, 3));
+        },
+      });
     }
 
     // Attribute crystals: bob in place; pressing E collects one (saved, then shown by the UI)
@@ -275,14 +307,15 @@ export class WorldScene extends Phaser.Scene {
       if (!attribute || have.has(attribute.id)) continue;
       const y = c.y * TILE + TILE;
       const crystal = this.add.image(c.x * TILE, y, `crystal-${attribute.rarity}`).setOrigin(0, 1).setDepth(y - 1);
-      const bob = reduceMotion ? null : this.tweens.add({ targets: crystal, y: y - 2, duration: 700, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+      const bob = this.tweens.add({ targets: crystal, y: y - 2, duration: 700, yoyo: true, repeat: -1, ease: "Sine.easeInOut", paused: this.reduceMotion });
+      this.bobs.push(bob);
       const key = `${c.x},${c.y}`;
       this.solid[c.y][c.x] = true;
       this.interactions.set(key, () => {
         discover(attribute.id);
         this.solid[c.y][c.x] = false;
         this.interactions.delete(key);
-        bob?.remove();
+        bob.remove();
         this.tweens.add({ targets: crystal, y: y - 10, alpha: 0, duration: 250, onComplete: () => crystal.destroy() });
         this.lock();
         emit("discover", attribute.id);
@@ -295,6 +328,11 @@ export class WorldScene extends Phaser.Scene {
     this.input.keyboard?.resetKeys();
     // Let arrow keys / Space reach the overlay (e.g. to scroll a terminal) while the world is paused
     this.input.keyboard?.disableGlobalCapture();
+    // Stop redrawing the world behind an open panel (battery / CPU), once any last animation (a crystal's
+    // fade-out) has played. ui-closed wakes it.
+    this.time.delayedCall(300, () => {
+      if (this.locked) this.game.loop.sleep();
+    });
     if (!this.moving) this.idle();
   }
 
@@ -309,7 +347,7 @@ export class WorldScene extends Phaser.Scene {
     if (k.right.isDown || k.d.isDown) return "right";
     if (k.up.isDown || k.w.isDown) return "up";
     if (k.down.isDown || k.s.isDown) return "down";
-    return null;
+    return this.padDir;
   }
 
   private blocked(x: number, y: number) {

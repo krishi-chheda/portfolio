@@ -17,6 +17,9 @@ interface Events {
   terminal: string; // scene -> UI: a project HQ's doors were used (project id)
   region: { id: string; name: string }; // scene -> UI: the map the player is now in
   travel: string; // UI -> scene: fast travel to a visited region (map id)
+  pad: "down" | "up" | "left" | "right" | null; // UI -> scene: on-screen D-pad held direction (null = released)
+  "pad-a": void; // UI -> scene: on-screen A button (interact)
+  "settings-changed": void; // UI -> scene: sound / music / motion toggled
   "ui-open": void; // UI -> scene: an overlay opened (pause movement)
   "ui-closed": void; // UI -> scene: all overlays closed (resume)
 }

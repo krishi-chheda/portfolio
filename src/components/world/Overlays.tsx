@@ -1,10 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ACHIEVEMENTS, ATTRIBUTES, RARITY_COLORS, REGIONS, ROUTES, TERMINALS, type Attribute, type ProgressSnapshot, type Rarity } from "@/game/content";
+import {
+  ACHIEVEMENTS,
+  ATTRIBUTES,
+  MAP_CONTENT,
+  RARITY_COLORS,
+  REGIONS,
+  ROUTES,
+  TERMINALS,
+  type Attribute,
+  type ProgressSnapshot,
+  type Rarity,
+} from "@/game/content";
+import { emit } from "@/game/bus";
+import { sfx } from "@/game/audio";
+import type { Settings } from "@/game/settings";
 import { CONTACT_EMAIL, LINKEDIN_URL, aiKnowledgeBase, currentProcesses, ownerProfile } from "@/lib/data";
 import type { Dialogue } from "@/game/bus";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // GBA-style overlays drawn by React over the canvas: crisp text, screen-reader friendly, no Phaser import.
 
@@ -49,8 +62,7 @@ function RarityBadge({ rarity }: { rarity: Rarity }) {
 // ---------- dialogue ----------
 
 /** Rounded white box with a teal double border and typewriter text. E / Enter / Space or a tap continues. */
-export function DialogueBox({ dialogue, onClose }: { dialogue: Dialogue; onClose: () => void }) {
-  const reduced = useReducedMotion();
+export function DialogueBox({ dialogue, reduced, onClose }: { dialogue: Dialogue; reduced: boolean; onClose: () => void }) {
   const [page, setPage] = useState(0);
   const [shown, setShown] = useState(0);
   const text = dialogue.pages[page] ?? "";
@@ -66,7 +78,10 @@ export function DialogueBox({ dialogue, onClose }: { dialogue: Dialogue; onClose
 
   const advance = () => {
     if (!done) return setShown(text.length); // first press finishes the line
-    if (page < dialogue.pages.length - 1) setPage(page + 1);
+    if (page < dialogue.pages.length - 1) {
+      sfx("blip");
+      setPage(page + 1);
+    }
     else onClose();
   };
   useKeys((e) => {
@@ -464,41 +479,69 @@ export function ProfileCard({ found, onClose }: { found: Set<string>; onClose: (
 
 // ---------- pause menu ----------
 
-export type MenuChoice = "journal" | "map" | "achievements" | "profile" | "portfolio";
-const MENU: { id: MenuChoice | "close"; label: string; key: string }[] = [
-  { id: "journal", label: "Journal", key: "I" },
-  { id: "map", label: "World Map", key: "M" },
-  { id: "achievements", label: "Achievements", key: "J" },
-  { id: "profile", label: "Profile", key: "P" },
-  { id: "portfolio", label: "Classic Portfolio", key: "" },
-  { id: "close", label: "Close", key: "Esc" },
-];
+export type MenuChoice = "journal" | "map" | "achievements" | "profile" | "guide" | "portfolio";
+type Toggle = "sound" | "music" | "reducedMotion";
+type Item = { id: MenuChoice | Toggle | "close"; label: string; key?: string };
 
-/** GBA start menu: a narrow panel docked top-right with a ▶ cursor. Arrows move, Enter picks, Esc closes. */
-export function PauseMenu({ onChoose, onClose }: { onChoose: (c: MenuChoice) => void; onClose: () => void }) {
+/**
+ * GBA start menu: a narrow panel docked top-right with a ▶ cursor. Arrows move, Enter picks, Esc closes.
+ * The three settings flip in place (the menu stays open).
+ */
+export function PauseMenu({
+  settings,
+  onChoose,
+  onToggle,
+  onClose,
+}: {
+  settings: Settings;
+  onChoose: (c: MenuChoice) => void;
+  onToggle: (t: Toggle) => void;
+  onClose: () => void;
+}) {
+  const items: Item[] = [
+    { id: "journal", label: "Journal", key: "I" },
+    { id: "map", label: "World Map", key: "M" },
+    { id: "achievements", label: "Achievements", key: "J" },
+    { id: "profile", label: "Profile", key: "P" },
+    { id: "guide", label: "Text Guide" },
+    { id: "sound", label: `Sound: ${settings.sound ? "On" : "Off"}` },
+    { id: "music", label: `Music: ${settings.music ? "On" : "Off"}` },
+    { id: "reducedMotion", label: `Motion: ${settings.reducedMotion ? "Reduced" : "Full"}` },
+    { id: "portfolio", label: "Classic Portfolio" },
+    { id: "close", label: "Close", key: "Esc" },
+  ];
   const [index, setIndex] = useState(0);
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   useEffect(() => refs.current[index]?.focus({ preventScroll: true }), [index]);
+  const move = (by: number) => {
+    sfx("select");
+    setIndex((i) => (i + by + items.length) % items.length);
+  };
   useKeys((e) => {
     if (e.key === "Escape") onClose();
-    else if (e.key === "ArrowDown" || e.key === "s") setIndex((i) => (i + 1) % MENU.length);
-    else if (e.key === "ArrowUp" || e.key === "w") setIndex((i) => (i - 1 + MENU.length) % MENU.length);
+    else if (e.key === "ArrowDown" || e.key === "s") move(1);
+    else if (e.key === "ArrowUp" || e.key === "w") move(-1);
   });
+  const pick = (item: Item) => {
+    if (item.id === "close") onClose();
+    else if (item.id === "sound" || item.id === "music" || item.id === "reducedMotion") onToggle(item.id);
+    else onChoose(item.id);
+  };
   return (
     <div className="absolute inset-0 bg-black/20" role="dialog" aria-modal="true" aria-label="Menu" onClick={onClose}>
       <ul
         onClick={(e) => e.stopPropagation()}
-        className={`${PIXEL} pointer-events-auto absolute top-16 right-4 w-56 border-4 border-[#46382b] bg-[#f5e8c8] py-2 text-lg text-[#2b2420] shadow-[6px_6px_0_#46382b]`}
+        className={`${PIXEL} pointer-events-auto absolute top-16 right-4 max-h-[calc(100%-5rem)] w-60 overflow-y-auto border-4 border-[#46382b] bg-[#f5e8c8] py-2 text-lg text-[#2b2420] shadow-[6px_6px_0_#46382b]`}
       >
-        {MENU.map((item, i) => (
-          <li key={item.id}>
+        {items.map((item, i) => (
+          <li key={item.id} className={item.id === "sound" ? "mt-1 border-t-2 border-[#46382b]/25 pt-1" : item.id === "portfolio" ? "mt-1 border-t-2 border-[#46382b]/25 pt-1" : ""}>
             <button
               ref={(el) => {
                 refs.current[i] = el;
               }}
               type="button"
               onMouseEnter={() => setIndex(i)}
-              onClick={() => (item.id === "close" ? onClose() : onChoose(item.id))}
+              onClick={() => pick(item)}
               className={`flex w-full items-center gap-2 px-3 py-1 text-left outline-none ${i === index ? "bg-[#f5c65b]" : ""}`}
             >
               <span aria-hidden="true" className="w-3">
@@ -510,6 +553,123 @@ export function PauseMenu({ onChoose, onClose }: { onChoose: (c: MenuChoice) => 
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+// ---------- text guide (play-free fallback) ----------
+
+/** Everything in the world as plain text, region by region: the accessible way to read it all without walking. */
+export function TextGuide({ found, onOpenTerminal, onClose }: { found: Set<string>; onOpenTerminal: (id: string) => void; onClose: () => void }) {
+  useKeys((e) => {
+    if (e.key === "Escape") onClose();
+  });
+  const attribute = (id: string) => ATTRIBUTES.find((a) => a.id === id);
+  return (
+    <Window titleId="guide-title" title="TEXT GUIDE" meta="EVERY REGION" width="max-w-3xl" footerHint="Esc to close" onClose={onClose}>
+      <div className="space-y-6 p-5">
+        <p className="text-base text-[#6e5643]">Everything the world says, without walking. Opening a project terminal here works just like visiting its building.</p>
+        {REGIONS.map((r) => {
+          const c = MAP_CONTENT[r.id];
+          if (!c) return null;
+          const terminals = r.id === "metropolis" ? Object.values(TERMINALS) : [];
+          return (
+            <section key={r.id} className="space-y-2 border-t-2 border-[#46382b]/25 pt-4" aria-labelledby={`guide-${r.id}`}>
+              <h3 id={`guide-${r.id}`} className="text-2xl">
+                {r.name} <span className="text-base text-[#6e5643]">· {r.blurb}</span>
+              </h3>
+              {c.npcs.map((npc) => (
+                <div key={npc.id}>
+                  <p className={LABEL}>{npc.name}</p>
+                  {npc.pages.map((line) => (
+                    <p key={line} className="text-base leading-snug">
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              ))}
+              {terminals.length > 0 && (
+                <div>
+                  <p className={LABEL}>Project terminals</p>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {terminals.map((t) => (
+                      <button key={t.id} type="button" onClick={() => onOpenTerminal(t.id)} className={BUTTON}>
+                        {t.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {c.crystals.length > 0 && (
+                <div>
+                  <p className={LABEL}>Attributes hidden here</p>
+                  <ul className="mt-1 space-y-0.5">
+                    {c.crystals.map((cr) => {
+                      const a = attribute(cr.attribute);
+                      return a ? (
+                        <li key={a.id} className="flex items-center gap-2 text-base">
+                          <CrystalIcon rarity={a.rarity} size={16} hidden={!found.has(a.id)} />
+                          {found.has(a.id) ? a.name : `${a.name} (not found yet)`}
+                        </li>
+                      ) : null;
+                    })}
+                  </ul>
+                </div>
+              )}
+            </section>
+          );
+        })}
+      </div>
+    </Window>
+  );
+}
+
+// ---------- touch controls ----------
+
+const PAD_DIRS = [
+  { dir: "up", label: "▲", cls: "col-start-2 row-start-1" },
+  { dir: "left", label: "◀", cls: "col-start-1 row-start-2" },
+  { dir: "right", label: "▶", cls: "col-start-3 row-start-2" },
+  { dir: "down", label: "▼", cls: "col-start-2 row-start-3" },
+] as const;
+
+/**
+ * On-screen D-pad + A button for touch screens (hidden where a fine pointer, i.e. a mouse, is present).
+ * Holding a direction walks; releasing, cancelling or sliding off stops.
+ */
+export function TouchControls() {
+  const release = () => emit("pad", null);
+  const btn =
+    "flex h-14 w-14 items-center justify-center border-4 border-[#46382b] bg-[#f5e8c8]/90 text-xl text-[#46382b] shadow-[3px_3px_0_#46382b] active:translate-x-px active:translate-y-px active:bg-[#f5c65b] select-none touch-none";
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-4 hidden items-end justify-between px-4 [@media(pointer:coarse)]:flex">
+      <div className="pointer-events-auto grid grid-cols-3 grid-rows-3 gap-1">
+        {PAD_DIRS.map((d) => (
+          <button
+            key={d.dir}
+            type="button"
+            aria-label={`Walk ${d.dir}`}
+            className={`${btn} ${d.cls}`}
+            onPointerDown={(e) => {
+              try {
+                e.currentTarget.setPointerCapture(e.pointerId); // keep receiving "up" even if the finger slides off
+              } catch {
+                // pointer already gone (e.g. a very quick tap); walking still starts and onPointerUp stops it
+              }
+              emit("pad", d.dir);
+            }}
+            onPointerUp={release}
+            onPointerCancel={release}
+            onLostPointerCapture={release}
+            onContextMenu={(e) => e.preventDefault()}
+          >
+            {d.label}
+          </button>
+        ))}
+      </div>
+      <button type="button" aria-label="Talk or inspect" className={`${btn} pointer-events-auto h-16 w-16 rounded-full font-[family-name:var(--font-pixel)] text-2xl`} onClick={() => emit("pad-a")}>
+        A
+      </button>
     </div>
   );
 }

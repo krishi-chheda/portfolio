@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import type Phaser from "phaser";
 import { emit, on, type Dialogue } from "@/game/bus";
 import { record, snapshot } from "@/game/progress";
+import { getSettings, reduceMotion, setSettings, type Settings } from "@/game/settings";
+import { sfx, stopMusic, syncMusic } from "@/game/audio";
 import { ACHIEVEMENTS, TERMINALS, type ProgressSnapshot } from "@/game/content";
 import {
   AchievementList,
@@ -16,6 +18,8 @@ import {
   PauseMenu,
   ProfileCard,
   ProjectTerminal,
+  TextGuide,
+  TouchControls,
   WorldMap,
   type MenuChoice,
 } from "./Overlays";
@@ -29,6 +33,7 @@ type Overlay =
   | { kind: "menu" }
   | { kind: "map" }
   | { kind: "achievements" }
+  | { kind: "guide" }
   | null;
 
 const EMPTY: ProgressSnapshot = { attributes: [], regions: [], terminals: [] };
@@ -50,6 +55,7 @@ export default function WorldGame() {
   const progressRef = useRef<ProgressSnapshot>(EMPTY);
   const [region, setRegion] = useState({ id: "origin", name: "Origin Valley" });
   const [toasts, setToasts] = useState<string[]>([]);
+  const [settings, setSettingsState] = useState<Settings>({ sound: true, music: false, reducedMotion: false });
   const found = new Set(progress.attributes);
 
   // Save one fact (visited region, read terminal, found attribute) and announce any achievement it completes.
@@ -62,7 +68,10 @@ export default function WorldGame() {
     progressRef.current = next;
     setProgress(next);
     const unlocked = ACHIEVEMENTS.filter((a) => !a.done(prev) && a.done(next)).map((a) => a.name);
-    if (unlocked.length) setToasts((t) => [...t, ...unlocked]);
+    if (unlocked.length) {
+      sfx("achievement");
+      setToasts((t) => [...t, ...unlocked]);
+    }
   };
   const bumpRef = useRef(bump);
   useEffect(() => {
@@ -99,9 +108,18 @@ export default function WorldGame() {
   useEffect(() => {
     progressRef.current = snapshot();
     setProgress(progressRef.current);
+    setSettingsState(getSettings());
+    // Audio may only start after a gesture: the first key press or tap starts music if it's switched on
+    const unlockAudio = () => syncMusic();
+    window.addEventListener("keydown", unlockAudio, { once: true });
+    window.addEventListener("pointerdown", unlockAudio, { once: true });
     const offs = [
-      on("dialogue", (dialogue) => setOverlay({ kind: "dialogue", dialogue })),
+      on("dialogue", (dialogue) => {
+        sfx("open");
+        setOverlay({ kind: "dialogue", dialogue });
+      }),
       on("discover", (id) => {
+        sfx("discover");
         bumpRef.current("attributes", id); // the scene already saved it; this updates the UI and achievements
         setOverlay({ kind: "discover", id });
       }),
@@ -114,9 +132,20 @@ export default function WorldGame() {
       }),
       on("open-map", () => setOverlay({ kind: "map" })),
       on("open-achievements", () => setOverlay({ kind: "achievements" })),
-      on("open-menu", () => setOverlay({ kind: "menu" })),
+      on("open-menu", () => {
+        sfx("select");
+        setOverlay({ kind: "menu" });
+      }),
+      on("open-journal", () => sfx("select")),
+      on("open-profile", () => sfx("select")),
+      on("terminal", () => sfx("open")),
     ];
-    return () => offs.forEach((off) => off());
+    return () => {
+      offs.forEach((off) => off());
+      window.removeEventListener("keydown", unlockAudio);
+      window.removeEventListener("pointerdown", unlockAudio);
+      stopMusic();
+    };
   }, []);
 
   const close = () => {
@@ -130,7 +159,16 @@ export default function WorldGame() {
     const attribute = TERMINALS[id]?.attribute;
     if (!attribute || found.has(attribute)) return close();
     bump("attributes", attribute);
+    sfx("discover");
     setOverlay({ kind: "discover", id: attribute });
+  };
+
+  const toggle = (key: "sound" | "music" | "reducedMotion") => {
+    const next = setSettings({ [key]: !settings[key] });
+    setSettingsState(next);
+    syncMusic();
+    emit("settings-changed");
+    sfx("select");
   };
 
   const openMenu = () => {
@@ -176,12 +214,16 @@ export default function WorldGame() {
         </p>
       )}
 
-      {overlay?.kind === "dialogue" && <DialogueBox key={JSON.stringify(overlay.dialogue)} dialogue={overlay.dialogue} onClose={close} />}
+      {!overlay && status === "ready" && <TouchControls />}
+      {overlay?.kind === "dialogue" && (
+        <DialogueBox key={JSON.stringify(overlay.dialogue)} dialogue={overlay.dialogue} reduced={settings.reducedMotion || reduceMotion()} onClose={close} />
+      )}
       {overlay?.kind === "discover" && <DiscoveryCard id={overlay.id} onClose={close} />}
       {overlay?.kind === "journal" && <Journal found={found} onClose={close} />}
       {overlay?.kind === "terminal" && <ProjectTerminal id={overlay.id} onClose={() => closeTerminal(overlay.id)} />}
       {overlay?.kind === "profile" && <ProfileCard found={found} onClose={close} />}
-      {overlay?.kind === "menu" && <PauseMenu onChoose={choose} onClose={close} />}
+      {overlay?.kind === "menu" && <PauseMenu settings={settings} onChoose={choose} onToggle={toggle} onClose={close} />}
+      {overlay?.kind === "guide" && <TextGuide found={found} onOpenTerminal={(id) => setOverlay({ kind: "terminal", id })} onClose={close} />}
       {overlay?.kind === "map" && <WorldMap visited={progress.regions} current={region.id} onTravel={travel} onClose={close} />}
       {overlay?.kind === "achievements" && <AchievementList progress={progress} onClose={close} />}
       {toasts[0] && <AchievementToast key={toasts[0] + toasts.length} name={toasts[0]} />}

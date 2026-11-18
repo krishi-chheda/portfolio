@@ -109,7 +109,12 @@ src/hooks/useTerminalReveal.ts, useGitHubTelemetry.ts, useChat.ts, useReducedMot
 
 ## KRISHI.WORLD (GBA-style game, in progress since 2026-11-19)
 An explorable top-down pixel-art world at `/world`, added alongside the portfolio (not replacing it). Brief: five regions (Origin Valley, Innovation Forest, Project Metropolis, Leadership Frontier, Adventure Coast), "KRISHI ATTRIBUTES" collectibles, project terminals, a journal, achievements and a world map, built in 5 sprints. No Pokémon names, sprites or maps; all art is original.
-- **Status:** Sprint 1 done (route, Phaser container, player, 4-direction walking, camera, collision, first map), plus an art pass to match the owner's reference images. Sprints 2–5 not started.
+- **Status:** Sprint 1 done (route, Phaser container, player, 4-direction walking, camera, collision, first map), plus an art pass to match the owner's reference images.
+  - Sprint 2 done:
+    - Origin Valley has 4 NPCs (guide, neighbour, professor, gardener), a signpost, mailboxes and doors to inspect.
+    - A GBA dialogue box, and the first KRISHI ATTRIBUTE ("AI Explorer").
+    - A Discovery Journal (I key or HUD button), with progress saved in localStorage.
+  - Sprints 3–5 not started.
 - **Art direction** (owner's references, 2026-11-19): Pokémon Emerald-era GBA look. That means dotted grass, bushy 2×2 scalloped trees, two-tier tiled-roof houses, soft auto-tiled path, sand and water edges, chibi sprites with a 1px dark outline, a rounded white dialogue box with a teal double border and a pixel font, a YES/NO menu, a "trainer card"-style profile card, and an island world map (5 regions as islands joined by bridges). Original art only: match the style, never copy sprites, tiles, names or maps.
 - **Engine:** `phaser` 3.90.0, the last Phaser 3 release (pinned; Phaser 4 exists). Import it as `import * as Phaser from "phaser"`: the ESM build has no default export even though the types suggest one.
 - **Loading:** `src/app/world/page.tsx` (server, metadata) renders `src/components/world/WorldGame.tsx` (client), which `import()`s `src/game/createGame.ts` in an effect. Phaser is one ~310 KB gzipped chunk that no page preloads; the portfolio's bundles are unchanged.
@@ -127,6 +132,16 @@ An explorable top-down pixel-art world at `/world`, added alongside the portfoli
 - **Depth:** objects are images anchored at the bottom of their footprint with depth = that edge, and the player's depth is their feet. So the player stands in front of things below them and behind things above. Interactions later use "the tile I'm facing". The camera follows at the largest whole-number zoom that shows about 18×12 tiles (minimum 2×), clamped to the map.
 - **Escape hatches:** "← Back to portfolio" is always visible; there's a load-failure fallback link; and there's a ⌘K palette command `krishi.world`. There's no entry choice screen yet.
 - **Testing in the hidden browser pane:** Phaser runs on rAF, which the pane freezes. In dev, `window.__krishiWorld` exposes the game. Drive it with `game.step(t, 16)` plus a real `await setTimeout(16)` between steps, because the tween manager times itself with the real clock, so synchronous stepping never advances tweens. Dispatch `KeyboardEvent`s with `keyCode` set.
+- **Sprint 2 modules:**
+  - `src/game/content.ts`: NPCs (position, facing, Look, pages), signs and door text keyed by tile, attributes, crystal placements and `RARITY_COLORS`. Built from `data.ts` imports; flavour lines never state facts about Krishi.
+  - `src/game/bus.ts`: a typed EventTarget, the only scene↔React link (`dialogue`, `discover`, `open-journal`, `ui-open`, `ui-closed`). It has no Phaser import, so React stays light.
+  - `src/game/progress.ts`: localStorage `krishi-world:progress:v1`, `{ attributes: string[] }`. Every access is try/catch'd.
+  - `src/components/world/Overlays.tsx`: DialogueBox, DiscoveryCard and Journal. Uses the Pixelify Sans font via `next/font` in `world/page.tsx`, so it only loads on `/world`.
+- **Interaction model:**
+  - E or Enter interacts with the faced tile: `interactions: Map<"x,y", fn>` in WorldScene. NPCs and crystals are solid.
+  - Opening any overlay locks the scene (`lock()` resets keys). React emits `ui-closed`, and the scene unlocks and calls `resetKeys()`, so the key that closed the overlay can't re-trigger an interaction.
+  - Dialogue: E, Enter or Space finishes the line, then advances; Escape closes; a tap advances. The typewriter is skipped under reduced motion; screen readers get the full line through an `sr-only` live region.
+  - NPCs glance around every 2–4s (off under reduced motion) and turn to face the player when spoken to.
 - **Content rule:** game content must come from `data.ts` (via structured data files), never typed into scenes. Facts in the brief that `data.ts` doesn't have are pending owner confirmation (see Open items).
 
 ## Env vars (names only)

@@ -2,16 +2,22 @@ import * as Phaser from "phaser";
 import { DIRS, OBJECTS, PLAYER_W, T, TILE, generateTextures, type Dir } from "./textures";
 import { buildMap } from "./maps/legend";
 import { originValley } from "./maps/originValley";
+import { ATTRIBUTES, DOOR_TEXT, ORIGIN_CRYSTALS, ORIGIN_NPCS, ORIGIN_SIGNS } from "./content";
+import { emit, on, type Dialogue } from "./bus";
+import { discover, discovered } from "./progress";
 
 const STEP_MS = 220; // time to walk one tile (GBA-like pace)
 const VIEW_TILES = { w: 18, h: 12 }; // aim to show about this many tiles, at an integer zoom
 
 const DELTA: Record<Dir, [number, number]> = { down: [0, 1], up: [0, -1], left: [-1, 0], right: [1, 0] };
+const OPPOSITE: Record<Dir, Dir> = { down: "up", up: "down", left: "right", right: "left" };
+
+type KeyName = "up" | "down" | "left" | "right" | "w" | "a" | "s" | "d" | "e" | "enter" | "journal";
 
 /**
  * Tile-by-tile movement, like the GBA games: the player always stands on a tile, walking is a tween to the
- * next one, and collision is a lookup in the map grid. That also gives later sprints a simple
- * "which tile am I facing?" for interactions.
+ * next one, and collision is a lookup in the map grid. Interacting means "whatever is on the tile I'm facing".
+ * Overlays (dialogue, journal) are React; while one is open the scene is locked and ignores input.
  */
 export class WorldScene extends Phaser.Scene {
   private solid: boolean[][] = [];
@@ -19,14 +25,16 @@ export class WorldScene extends Phaser.Scene {
   private tile = { x: 0, y: 0 };
   private facing: Dir = "down";
   private moving = false;
-  private keys!: Record<"up" | "down" | "left" | "right" | "w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
+  private locked = false;
+  private keys!: Record<KeyName, Phaser.Input.Keyboard.Key>;
+  private interactions = new Map<string, () => void>(); // "x,y" -> what pressing E on that tile does
 
   constructor() {
     super("world");
   }
 
   create() {
-    generateTextures(this);
+    generateTextures(this, ORIGIN_NPCS);
 
     const built = buildMap(originValley);
     this.solid = built.solid;
@@ -54,6 +62,8 @@ export class WorldScene extends Phaser.Scene {
       this.add.image(obj.x * TILE, bottom, obj.kind).setOrigin(0, 1).setDepth(bottom - 1);
     }
 
+    this.addInteractables(built.doors);
+
     DIRS.forEach((dir, d) => {
       this.anims.create({
         key: `walk-${dir}`,
@@ -69,7 +79,28 @@ export class WorldScene extends Phaser.Scene {
 
     const kb = this.input.keyboard;
     if (!kb) throw new Error("KRISHI.WORLD: keyboard input unavailable");
-    this.keys = kb.addKeys({ up: "UP", down: "DOWN", left: "LEFT", right: "RIGHT", w: "W", a: "A", s: "S", d: "D" }) as typeof this.keys;
+    this.keys = kb.addKeys({
+      up: "UP",
+      down: "DOWN",
+      left: "LEFT",
+      right: "RIGHT",
+      w: "W",
+      a: "A",
+      s: "S",
+      d: "D",
+      e: "E",
+      enter: "ENTER",
+      journal: "I",
+    }) as typeof this.keys;
+
+    // React overlays pause and resume the world
+    const offs = [
+      on("ui-open", () => this.lock()),
+      on("ui-closed", () => {
+        this.locked = false;
+        kb.resetKeys(); // the key that closed the overlay must not also trigger something here
+      }),
+    ];
 
     const cam = this.cameras.main;
     cam.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -77,24 +108,36 @@ export class WorldScene extends Phaser.Scene {
     cam.startFollow(this.player, true);
     this.fitZoom();
     this.scale.on(Phaser.Scale.Events.RESIZE, this.fitZoom, this);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off(Phaser.Scale.Events.RESIZE, this.fitZoom, this));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.scale.off(Phaser.Scale.Events.RESIZE, this.fitZoom, this);
+      offs.forEach((off) => off());
+    });
   }
 
   update() {
-    if (this.moving) return;
+    if (this.locked || this.moving) return;
+    const { JustDown } = Phaser.Input.Keyboard;
+    if (JustDown(this.keys.e) || JustDown(this.keys.enter)) {
+      const [dx, dy] = DELTA[this.facing];
+      this.interactions.get(`${this.tile.x + dx},${this.tile.y + dy}`)?.();
+      return;
+    }
+    if (JustDown(this.keys.journal)) {
+      this.lock();
+      emit("open-journal");
+      return;
+    }
+
     const dir = this.heldDirection();
     if (!dir) {
-      this.player.anims.stop();
-      this.player.setFrame(DIRS.indexOf(this.facing) * 3);
+      this.idle();
       return;
     }
     this.facing = dir;
     const [dx, dy] = DELTA[dir];
     const next = { x: this.tile.x + dx, y: this.tile.y + dy };
     if (this.blocked(next.x, next.y)) {
-      // Bump: face the obstacle without moving
-      this.player.anims.stop();
-      this.player.setFrame(DIRS.indexOf(dir) * 3);
+      this.idle(); // bump: face the obstacle without moving
       return;
     }
     this.moving = true;
@@ -110,6 +153,74 @@ export class WorldScene extends Phaser.Scene {
         this.moving = false;
       },
     });
+  }
+
+  private addInteractables(doors: { x: number; y: number; object: { kind: string } }[]) {
+    const say = (dialogue: Dialogue) => {
+      this.lock();
+      emit("dialogue", dialogue);
+    };
+
+    for (const [key, pages] of Object.entries(ORIGIN_SIGNS)) this.interactions.set(key, () => say({ pages }));
+    for (const door of doors) {
+      const pages = DOOR_TEXT[door.object.kind as keyof typeof DOOR_TEXT];
+      if (pages) this.interactions.set(`${door.x},${door.y}`, () => say({ pages }));
+    }
+
+    // Characters: solid, glance around now and then, and turn to face you when you talk to them
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    for (const npc of ORIGIN_NPCS) {
+      const sprite = this.add
+        .sprite(npc.x * TILE + PLAYER_W / 2, npc.y * TILE + TILE - 1, `npc-${npc.id}`, DIRS.indexOf(npc.facing))
+        .setOrigin(0.5, 1)
+        .setDepth(npc.y * TILE + TILE - 1);
+      this.solid[npc.y][npc.x] = true;
+      this.interactions.set(`${npc.x},${npc.y}`, () => {
+        sprite.setFrame(DIRS.indexOf(OPPOSITE[this.facing]));
+        say({ speaker: npc.name, pages: npc.pages });
+      });
+      if (!reduceMotion) {
+        this.time.addEvent({
+          delay: Phaser.Math.Between(2200, 4200),
+          loop: true,
+          callback: () => {
+            if (!this.locked) sprite.setFrame(Phaser.Math.Between(0, 3));
+          },
+        });
+      }
+    }
+
+    // Attribute crystals: bob in place; pressing E collects one (saved, then shown by the UI)
+    const have = new Set(discovered());
+    for (const c of ORIGIN_CRYSTALS) {
+      const attribute = ATTRIBUTES.find((a) => a.id === c.attribute);
+      if (!attribute || have.has(attribute.id)) continue;
+      const y = c.y * TILE + TILE;
+      const crystal = this.add.image(c.x * TILE, y, `crystal-${attribute.rarity}`).setOrigin(0, 1).setDepth(y - 1);
+      const bob = reduceMotion ? null : this.tweens.add({ targets: crystal, y: y - 2, duration: 700, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+      const key = `${c.x},${c.y}`;
+      this.solid[c.y][c.x] = true;
+      this.interactions.set(key, () => {
+        discover(attribute.id);
+        this.solid[c.y][c.x] = false;
+        this.interactions.delete(key);
+        bob?.remove();
+        this.tweens.add({ targets: crystal, y: y - 10, alpha: 0, duration: 250, onComplete: () => crystal.destroy() });
+        this.lock();
+        emit("discover", attribute.id);
+      });
+    }
+  }
+
+  private lock() {
+    this.locked = true;
+    this.input.keyboard?.resetKeys();
+    if (!this.moving) this.idle();
+  }
+
+  private idle() {
+    this.player.anims.stop();
+    this.player.setFrame(DIRS.indexOf(this.facing) * 3);
   }
 
   private heldDirection(): Dir | null {

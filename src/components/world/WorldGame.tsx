@@ -3,14 +3,25 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type Phaser from "phaser";
+import { emit, on, type Dialogue } from "@/game/bus";
+import { discovered } from "@/game/progress";
+import { DialogueBox, DiscoveryCard, Journal } from "./Overlays";
+
+type Overlay = { kind: "dialogue"; dialogue: Dialogue } | { kind: "discover"; id: string } | { kind: "journal" } | null;
+
+const HUD_BOX = "border-2 border-[#46382b] bg-[#f5e8c8] px-3 py-1.5 text-xs text-[#46382b] shadow-[3px_3px_0_#46382b]";
+const HUD_BUTTON = `${HUD_BOX} pointer-events-auto font-bold hover:bg-[#f5c65b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f5c65b]`;
 
 /**
  * Hosts the Phaser game. Phaser (and the game code) load only here, on demand, so the portfolio's bundle is
- * unaffected. React draws the HUD around the canvas and doesn't re-render during play.
+ * unaffected. React draws the HUD and the overlays (dialogue, discoveries, journal) and only re-renders when
+ * one of those changes, never per frame.
  */
 export default function WorldGame() {
   const hostRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [overlay, setOverlay] = useState<Overlay>(null);
+  const [found, setFound] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     let game: Phaser.Game | undefined;
@@ -31,27 +42,61 @@ export default function WorldGame() {
     };
   }, []);
 
+  // Saved discoveries are read after mount (localStorage is browser-only)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFound(new Set(discovered()));
+    const offs = [
+      on("dialogue", (dialogue) => setOverlay({ kind: "dialogue", dialogue })),
+      on("discover", (id) => {
+        setFound((prev) => new Set(prev).add(id)); // also covers a browser that can't save
+        setOverlay({ kind: "discover", id });
+      }),
+      on("open-journal", () => setOverlay({ kind: "journal" })),
+    ];
+    return () => offs.forEach((off) => off());
+  }, []);
+
+  const close = () => {
+    setOverlay(null);
+    emit("ui-closed");
+  };
+
+  const openJournal = () => {
+    if (overlay) return;
+    emit("ui-open");
+    setOverlay({ kind: "journal" });
+  };
+
   return (
     <main className="fixed inset-0 bg-[#1c4031] font-mono text-[#f5e8c8] select-none">
       <div ref={hostRef} className="absolute inset-0" aria-label="KRISHI.WORLD game" role="application" />
 
       {/* HUD */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-4">
-        <div className="border-2 border-[#46382b] bg-[#f5e8c8] px-3 py-1.5 text-xs text-[#46382b] shadow-[3px_3px_0_#46382b]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
+        <div className={HUD_BOX}>
           <span className="font-bold tracking-[0.18em]">KRISHI.WORLD</span>
           <span className="hidden sm:inline"> · Origin Valley</span>
         </div>
-        <Link
-          href="/"
-          className="pointer-events-auto border-2 border-[#46382b] bg-[#f5e8c8] px-3 py-1.5 text-xs font-bold text-[#46382b] shadow-[3px_3px_0_#46382b] hover:bg-[#f5c65b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f5c65b]"
-        >
-          ← Back to portfolio
-        </Link>
+        <div className="flex gap-2">
+          <button type="button" onClick={openJournal} className={HUD_BUTTON} aria-label="Open Discovery Journal">
+            Journal <span className="hidden sm:inline">(I) · {found.size}</span>
+          </button>
+          <Link href="/" className={HUD_BUTTON}>
+            ← <span className="hidden sm:inline">Back to </span>Portfolio
+          </Link>
+        </div>
       </div>
 
-      <p className="pointer-events-none absolute inset-x-0 bottom-4 hidden text-center text-[11px] tracking-[0.18em] text-[#f5e8c8]/80 md:block">
-        WASD / ARROW KEYS TO WALK
-      </p>
+      {!overlay && (
+        <p className="pointer-events-none absolute inset-x-0 bottom-4 hidden text-center text-[11px] tracking-[0.18em] text-[#f5e8c8]/80 md:block">
+          WASD / ARROWS: WALK · E: TALK / INSPECT · I: JOURNAL
+        </p>
+      )}
+
+      {overlay?.kind === "dialogue" && <DialogueBox key={JSON.stringify(overlay.dialogue)} dialogue={overlay.dialogue} onClose={close} />}
+      {overlay?.kind === "discover" && <DiscoveryCard id={overlay.id} onClose={close} />}
+      {overlay?.kind === "journal" && <Journal found={found} onClose={close} />}
 
       {status !== "ready" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-sm">

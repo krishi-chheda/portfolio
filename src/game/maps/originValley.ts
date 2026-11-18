@@ -4,6 +4,7 @@ import { borderTrees, type MapDef } from "./legend";
 // (trees, buildings, signs) placed by their top-left tile; their footprints block movement.
 // Generated from a script that checks objects don't overlap and every door opens onto a path.
 export const originValley: MapDef = {
+  id: "origin",
   name: "Origin Valley",
   spawn: { x: 21, y: 17 },
   terrain: [
@@ -21,8 +22,8 @@ export const originValley: MapDef = {
     ".....,=......=.....==......==...........",
     "......=......=.....==......==...........",
     "......=......=.....==......==.........,.",
-    "..====================================..",
-    "..====================================..",
+    "..======================================",
+    "..======================================",
     "...............,...==........==...,.....",
     "..................,==..,.....==,........",
     "...::::::::::..,...==........==.........",
@@ -39,7 +40,7 @@ export const originValley: MapDef = {
     ".,.........,,,..........................",
   ],
   objects: [
-    ...borderTrees(40, 30),
+    ...borderTrees(40, 30, [{ x: 38, y: 14 }]),
     { kind: "house", x: 4, y: 3 },
     { kind: "mailbox", x: 9, y: 6 },
     { kind: "house", x: 11, y: 3 },
@@ -55,5 +56,9 @@ export const originValley: MapDef = {
     { kind: "tree", x: 6, y: 26 },
     { kind: "tree", x: 36, y: 22 },
     { kind: "sign", x: 18, y: 13 },
+  ],
+  warps: [
+    { x: 39, y: 14, to: "metropolis", spawn: { x: 1, y: 14 }, facing: "right" },
+    { x: 39, y: 15, to: "metropolis", spawn: { x: 1, y: 15 }, facing: "right" },
   ],
 };

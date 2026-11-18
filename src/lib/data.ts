@@ -447,6 +447,45 @@ export const CONTACT_EMAIL = "krishichheda10@gmail.com";
 // The one version string shown in the UI (boot screen, navbar, README). Keep in sync with package.json "version".
 export const SYSTEM_VERSION = "v0.1.0";
 
+export const LINKEDIN_URL = "https://www.linkedin.com/in/krishi-chheda";
+export const GITHUB_URL = "https://github.com/krishi-chheda";
+
+// Confirmed by Krishi on 2026-11-19 for KRISHI.WORLD. Used by the game only; Ask Krishi and the classic
+// portfolio don't read these yet.
+export const ownerProfile = {
+  background: "Electronics and Telecommunication Engineering",
+  skills: [
+    "Python", "JavaScript", "TypeScript", "SQL", "PyTorch", "TensorFlow", "Next.js", "Flutter", "FastAPI",
+    "Computer Vision", "Deep Learning", "LLMs", "AI Agents", "Docker", "Git", "Cloud technologies",
+  ],
+  hobbies: ["Photography", "Yoga", "Aerial yoga", "Scuba diving", "Swimming", "Fitness", "Travel"],
+  // Extra project details beyond the portfolio cards
+  projectNotes: {
+    clinicalbrief: ["Document processing pipeline", "Clinical narrative visualisation", "Knowledge graph", "Pydantic data models"],
+    "traffic-ai": ["Four-lane traffic analysis"],
+  } as Record<string, string[]>,
+};
+
+// KRISHI.OS itself, as a project (game only; the portfolio keeps its four flagship cards).
+// Facts come from this repo's README and docs/PROJECT_CONTEXT.md.
+export const krishiOsProject = {
+  id: "krishi-os",
+  title: "KRISHI.OS",
+  subtitle: "Personal Developer Ecosystem",
+  description:
+    "This portfolio, presented as a small operating system: a terminal-style interface, an Ask Krishi chat assistant grounded in the portfolio's own data, a command palette, a 3D knowledge graph of skills and projects, and live GitHub telemetry.",
+  techStack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "GSAP", "Phaser"],
+  features: [
+    "Interactive terminal-style interface and command palette (Ctrl/Cmd+K)",
+    "Ask Krishi: a chat assistant (gpt-4o-mini, or local answers built from the site's data)",
+    "System Map: a rotatable 3D knowledge graph of 18 domains, projects, roles and technologies",
+    "Live GitHub telemetry for tracked repositories",
+    "KRISHI.WORLD: this pixel-art world",
+  ],
+  githubUrl: "https://github.com/krishi-chheda/portfolio",
+  liveUrl: "/",
+};
+
 export const bootLinesData = [
   "master_of_ai.monash",
   "mdas.vice_president",

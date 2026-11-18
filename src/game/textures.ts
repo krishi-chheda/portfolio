@@ -1,4 +1,5 @@
 import type Phaser from "phaser";
+import { RARITY_COLORS } from "./content";
 
 // All KRISHI.WORLD art is original and drawn in code at boot: no sprite files, nothing copyrighted.
 // Style target: GBA-era top-down RPG (dotted grass, bushy 2x2 trees, tiled roofs, dark sprite outlines).
@@ -136,6 +137,7 @@ export const T = {
   FLOWER: 2,
   TALL: 3,
   FENCE: 4,
+  PAVE: 5,
   PATH: 8, // + mask (16 variants)
   SAND: 24, // + mask
   WATER: 40, // + mask, frame A
@@ -242,12 +244,21 @@ function fenceTile(p: Pix, ox: number) {
   }
 }
 
+function paveTile(p: Pix, ox: number) {
+  for (let y = 0; y < TILE; y++)
+    for (let x = 0; x < TILE; x++) {
+      const joint = y % 8 === 7 || (x + (y < 8 ? 0 : 4)) % 8 === 7;
+      p.set(ox + x, y, joint ? "#b9b1a0" : noise(x, y, 31) < 0.08 ? "#e6e0d2" : "#d6cfbf");
+    }
+}
+
 function drawTerrainSheet(p: Pix) {
   grassTile(p, T.GRASS * TILE, 1, false);
   grassTile(p, T.GRASS_2 * TILE, 2, true);
   flowerTile(p, T.FLOWER * TILE);
   tallTile(p, T.TALL * TILE);
   fenceTile(p, T.FENCE * TILE);
+  paveTile(p, T.PAVE * TILE);
   const grassOutside = (q: Pix, ox: number) => grassTile(q, ox, 1, false);
   for (let m = 0; m < 16; m++) {
     edgedTile(p, (T.PATH + m) * TILE, m, grassOutside, pathInside, C.pathRim, 21);
@@ -263,6 +274,7 @@ export interface ObjectArt {
   w: number; // footprint in tiles
   h: number;
   door?: [number, number][]; // door tiles, relative to the footprint
+  ph?: number; // sprite height in tiles when taller than the footprint (drawn upward from its bottom)
 }
 
 export const OBJECTS = {
@@ -271,6 +283,12 @@ export const OBJECTS = {
   university: { w: 8, h: 5, door: [[3, 4], [4, 4]] },
   sign: { w: 1, h: 1 },
   mailbox: { w: 1, h: 1 },
+  lamp: { w: 1, h: 1, ph: 2 },
+  fountain: { w: 3, h: 3 },
+  "bldg-accessvision": { w: 6, h: 5, door: [[2, 4], [3, 4]] },
+  "bldg-clinicalbrief": { w: 6, h: 5, door: [[2, 4], [3, 4]] },
+  "bldg-traffic": { w: 6, h: 5, door: [[2, 4], [3, 4]] },
+  "bldg-os": { w: 6, h: 5, door: [[2, 4], [3, 4]] },
 } satisfies Record<string, ObjectArt>;
 export type ObjectKind = keyof typeof OBJECTS;
 
@@ -389,6 +407,88 @@ function drawSign(p: Pix) {
   p.outline(0, 0, 16, 16);
 }
 
+function drawLamp(p: Pix) {
+  p.rect(7, 8, 2, 23, "#3a3f4a");
+  p.rect(7, 8, 1, 23, "#5a6170");
+  p.rect(5, 29, 6, 2, "#3a3f4a");
+  p.rect(4, 2, 8, 6, "#3a3f4a");
+  p.rect(5, 3, 6, 4, C.gold);
+  p.rect(5, 3, 2, 2, "#fff1c4");
+  p.outline(0, 0, 16, 32);
+}
+
+function drawFountain(p: Pix) {
+  p.disc(24, 25, 21, "#9c9486");
+  p.disc(24, 25, 19, "#c8c0b0");
+  p.disc(24, 25, 16, C.water);
+  for (let a = 0; a < 6; a++) {
+    const x = 24 + Math.cos(a) * 11;
+    const y = 25 + Math.sin(a) * 9;
+    p.rect(x, y, 3, 1, C.waterLight);
+  }
+  p.disc(24, 21, 5, "#c8c0b0");
+  p.rect(23, 9, 3, 12, "#c8c0b0");
+  p.rect(22, 7, 5, 3, C.waterLight);
+  p.rect(23, 5, 3, 2, C.foam);
+  p.outline(0, 0, 48, 48);
+}
+
+type Emblem = "eye" | "cross" | "light" | "prompt";
+
+/** A project HQ: flat roof in the project's colour, glass facade, double door, and an emblem sign. */
+function drawTower(p: Pix, roof: string, roofDark: string, roofLight: string, emblem: Emblem) {
+  const W_ = 96;
+  // Roof slab with a parapet
+  p.rect(1, 2, W_ - 2, 30, roofDark);
+  p.rect(3, 4, W_ - 6, 26, roof);
+  for (let x = 6; x < W_ - 6; x += 10) p.rect(x, 8, 6, 4, roofLight); // rooftop units
+  p.rect(3, 4, W_ - 6, 1, roofLight);
+  // Facade: glass grid
+  p.rect(2, 32, W_ - 4, 47, "#e8e4da");
+  for (let y = 36; y < 58; y += 11)
+    for (let x = 6; x < W_ - 8; x += 12) {
+      p.rect(x, y, 9, 8, "#2f4a5c");
+      p.rect(x + 1, y + 1, 7, 6, C.glass);
+      p.rect(x + 1, y + 1, 3, 2, C.glassLight);
+    }
+  p.rect(2, 32, W_ - 4, 2, roofDark);
+  // Emblem sign over the door
+  p.rect(36, 58, 24, 9, "#1f1d24");
+  const ink = roofLight;
+  if (emblem === "eye") {
+    p.rect(42, 62, 12, 1, ink);
+    p.rect(44, 60, 8, 5, ink);
+    p.rect(47, 61, 2, 3, "#1f1d24");
+  } else if (emblem === "cross") {
+    p.rect(46, 59, 4, 7, C.white);
+    p.rect(44, 61, 8, 3, C.white);
+  } else if (emblem === "light") {
+    p.rect(45, 59, 6, 7, "#3a3f4a");
+    p.set(47, 60, C.red);
+    p.set(48, 60, C.red);
+    p.set(47, 62, C.gold);
+    p.set(48, 62, C.gold);
+    p.set(47, 64, "#34d399");
+    p.set(48, 64, "#34d399");
+  } else {
+    // >_
+    p.set(42, 60, "#34d399");
+    p.set(43, 61, "#34d399");
+    p.set(44, 62, "#34d399");
+    p.set(43, 63, "#34d399");
+    p.set(42, 64, "#34d399");
+    p.rect(46, 64, 6, 1, "#34d399");
+  }
+  // Double door on tile columns 2-3 (x 32..63), bottom row
+  p.rect(36, 68, 24, 11, "#2f4a5c");
+  p.rect(37, 69, 10, 10, C.glass);
+  p.rect(49, 69, 10, 10, C.glass);
+  p.rect(38, 70, 3, 4, C.glassLight);
+  p.rect(50, 70, 3, 4, C.glassLight);
+  p.rect(2, 77, W_ - 4, 2, "#c9c2b2");
+  p.outline(0, 0, W_, 80);
+}
+
 function drawMailbox(p: Pix) {
   p.rect(7, 9, 2, 6, C.woodDark);
   p.rect(3, 3, 10, 7, C.red);
@@ -405,8 +505,20 @@ export const DIRS: Dir[] = ["down", "up", "left", "right"];
 export const PLAYER_W = 16;
 export const PLAYER_H = 24;
 
+export interface Look {
+  hair: string;
+  hairLight: string;
+  top: string;
+  topDark: string;
+  trim: string; // zip / coat seam
+  pants: string;
+  band: string | null; // headband colour
+}
+
+export const PLAYER_LOOK: Look = { hair: C.hair, hairLight: C.hairLight, top: C.hoodie, topDark: C.hoodieDark, trim: C.wall, pants: C.pants, band: C.accent };
+
 /** Chibi walker (big head, GBA proportions) in a 16x24 cell. step 0 = standing, 1/2 = alternate feet. */
-function drawPlayer(p: Pix, ox: number, dir: Dir, step: number) {
+function drawWalker(p: Pix, ox: number, dir: Dir, step: number, l: Look) {
   const side = dir === "left" || dir === "right";
   const flip = (x: number) => (dir === "left" ? ox + 15 - x : ox + x);
   const s = (x: number, y: number, c: string) => p.set(flip(x), y, c);
@@ -418,52 +530,52 @@ function drawPlayer(p: Pix, ox: number, dir: Dir, step: number) {
   const lift = (foot: 1 | 2) => (step === foot ? 1 : 0);
   if (side) {
     const stride = step === 0 ? 0 : step === 1 ? 2 : -2;
-    r(6 + stride, 18, 3, 3, C.pants);
-    r(7 - stride, 18, 3, 3, C.pants);
+    r(6 + stride, 18, 3, 3, l.pants);
+    r(7 - stride, 18, 3, 3, l.pants);
     r(6 + stride, 21, 3, 1, C.shoe);
     r(7 - stride, 21, 3, 1, C.shoe);
   } else {
-    r(5, 18, 3, 3 - lift(1), C.pants);
-    r(9, 18, 3, 3 - lift(2), C.pants);
+    r(5, 18, 3, 3 - lift(1), l.pants);
+    r(9, 18, 3, 3 - lift(2), l.pants);
     r(5, 21 - lift(1), 3, 1, C.shoe);
     r(9, 21 - lift(2), 3, 1, C.shoe);
   }
   // Hoodie
-  r(4, 12, 9, 6, C.hoodie);
-  r(4, 16, 9, 2, C.hoodieDark);
+  r(4, 12, 9, 6, l.top);
+  r(4, 16, 9, 2, l.topDark);
   if (!side) {
-    r(8, 13, 1, 4, C.wall); // zip
+    r(8, 13, 1, 4, l.trim); // zip / coat seam
     const swing = step === 1 ? 1 : step === 2 ? -1 : 0;
-    r(3, 12 + swing, 1, 4, C.hoodieDark);
-    r(13, 12 - swing, 1, 4, C.hoodieDark);
+    r(3, 12 + swing, 1, 4, l.topDark);
+    r(13, 12 - swing, 1, 4, l.topDark);
     s(3, 16 + swing, C.skin);
     s(13, 16 - swing, C.skin);
   } else {
     const swing = step === 1 ? 1 : step === 2 ? -1 : 0;
-    r(8 + swing, 13, 2, 4, C.hoodieDark);
+    r(8 + swing, 13, 2, 4, l.topDark);
     r(8 + swing, 17, 2, 1, C.skin);
   }
   // Head (big, GBA chibi)
   r(3, 3, 11, 9, C.skin);
   r(3, 10, 11, 2, C.skinShade);
   // Hair + emerald headband (the KRISHI.OS accent)
-  r(3, 1, 11, 4, C.hair);
-  s(4, 0, C.hair);
-  s(7, 0, C.hair);
-  s(11, 0, C.hair);
-  r(5, 1, 3, 1, C.hairLight);
-  r(3, 4, 11, 1, C.accent);
+  r(3, 1, 11, 4, l.hair);
+  s(4, 0, l.hair);
+  s(7, 0, l.hair);
+  s(11, 0, l.hair);
+  r(5, 1, 3, 1, l.hairLight);
+  if (l.band) r(3, 4, 11, 1, l.band);
   if (dir === "up") {
-    r(3, 5, 11, 6, C.hair);
-    r(5, 6, 2, 2, C.hairLight);
-    s(8, 4, C.hoodieDark); // headband knot
+    r(3, 5, 11, 6, l.hair);
+    r(5, 6, 2, 2, l.hairLight);
+    if (l.band) s(8, 4, l.topDark); // headband knot
   } else if (side) {
-    r(3, 5, 4, 4, C.hair); // back of the head
+    r(3, 5, 4, 4, l.hair); // back of the head
     r(11, 7, 1, 2, C.outline); // eye
     s(13, 8, C.skinShade);
   } else {
-    r(3, 5, 1, 3, C.hair);
-    r(13, 5, 1, 3, C.hair);
+    r(3, 5, 1, 3, l.hair);
+    r(13, 5, 1, 3, l.hair);
     r(5, 7, 1, 2, C.outline);
     r(11, 7, 1, 2, C.outline);
     s(8, 10, C.skinShade);
@@ -473,25 +585,62 @@ function drawPlayer(p: Pix, ox: number, dir: Dir, step: number) {
   for (let x = 4; x < 13; x++) if (p.alpha(ox + x, 23) === 0) p.set(ox + x, 23, C.outline, 70);
 }
 
+
+/** A faceted crystal: the in-world form of a KRISHI ATTRIBUTE. */
+function drawCrystal(p: Pix, [light, mid, dark]: [string, string, string]) {
+  for (let y = 0; y < 13; y++) {
+    const half = y < 5 ? y + 1 : Math.max(0, 12 - y);
+    for (let x = 8 - half; x < 8 + half; x++) p.set(x, y + 1, x < 8 ? (y < 5 ? light : mid) : y < 5 ? mid : dark);
+  }
+  p.set(6, 3, C.white);
+  p.set(5, 4, C.white);
+  p.outline(0, 0, 16, 16);
+}
+
 /** Draws every texture once into Phaser's texture manager. */
-export function generateTextures(scene: Phaser.Scene) {
+export function generateTextures(scene: Phaser.Scene, npcs: { id: string; look: Look }[] = []) {
   if (scene.textures.exists("tiles")) return;
 
   const sheet = new Pix(TILE * SHEET_TILES, TILE);
   drawTerrainSheet(sheet);
   sheet.toTexture(scene, "tiles");
 
-  const objects: Record<ObjectKind, (p: Pix) => void> = { tree: drawTree, house: drawHouse, university: drawUniversity, sign: drawSign, mailbox: drawMailbox };
+  const objects: Record<ObjectKind, (p: Pix) => void> = {
+    tree: drawTree,
+    house: drawHouse,
+    university: drawUniversity,
+    sign: drawSign,
+    mailbox: drawMailbox,
+    lamp: drawLamp,
+    fountain: drawFountain,
+    "bldg-accessvision": (q) => drawTower(q, C.slate, C.slateDark, C.slateLight, "eye"),
+    "bldg-clinicalbrief": (q) => drawTower(q, "#3aa38f", "#257566", "#8fdccb", "cross"),
+    "bldg-traffic": (q) => drawTower(q, "#d9a23f", "#a8742a", "#f5d27b", "light"),
+    "bldg-os": (q) => drawTower(q, "#1c2a24", "#0a0c0b", "#34d399", "prompt"),
+  };
   for (const kind of Object.keys(objects) as ObjectKind[]) {
-    const { w, h } = OBJECTS[kind];
-    const p = new Pix(w * TILE, h * TILE);
+    const art: ObjectArt = OBJECTS[kind];
+    const p = new Pix(art.w * TILE, (art.ph ?? art.h) * TILE);
     objects[kind](p);
     p.toTexture(scene, kind);
   }
 
   // 4 directions x 3 frames in one row: down0 down1 down2 up0 ... right2
   const player = new Pix(PLAYER_W * 12, PLAYER_H);
-  DIRS.forEach((dir, d) => [0, 1, 2].forEach((step) => drawPlayer(player, (d * 3 + step) * PLAYER_W, dir, step)));
+  DIRS.forEach((dir, d) => [0, 1, 2].forEach((step) => drawWalker(player, (d * 3 + step) * PLAYER_W, dir, step, PLAYER_LOOK)));
   const tex = player.toTexture(scene, "player");
   for (let i = 0; i < 12; i++) tex.add(i, 0, i * PLAYER_W, 0, PLAYER_W, PLAYER_H);
+
+  for (const [rarity, colors] of Object.entries(RARITY_COLORS)) {
+    const crystal = new Pix(16, 16);
+    drawCrystal(crystal, colors);
+    crystal.toTexture(scene, `crystal-${rarity}`);
+  }
+
+  for (const { id, look } of npcs) {
+    const p = new Pix(PLAYER_W * 4, PLAYER_H);
+    DIRS.forEach((dir, d) => drawWalker(p, d * PLAYER_W, dir, 0, look));
+    const t = p.toTexture(scene, `npc-${id}`);
+    for (let i = 0; i < 4; i++) t.add(i, 0, i * PLAYER_W, 0, PLAYER_W, PLAYER_H);
+  }
 }

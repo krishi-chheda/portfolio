@@ -1,4 +1,4 @@
-import { E, N, OBJECTS, S, T, W, type ObjectKind } from "../textures";
+import { E, N, OBJECTS, S, T, W, type Dir, type ObjectKind } from "../textures";
 
 export interface MapObject {
   kind: ObjectKind;
@@ -6,26 +6,38 @@ export interface MapObject {
   y: number;
 }
 
+/** Stepping onto (x, y) moves the player to another map. */
+export interface Warp {
+  x: number;
+  y: number;
+  to: string; // target map id
+  spawn: { x: number; y: number };
+  facing: Dir;
+}
+
 export interface MapDef {
+  id: string;
   name: string;
   spawn: { x: number; y: number };
   terrain: string[];
   objects: MapObject[];
+  warps: Warp[];
 }
 
 // Terrain characters. Path, sand and water are auto-tiled from their neighbours.
-const PLAIN: Record<string, number> = { ".": T.GRASS, ",": T.GRASS_2, "*": T.FLOWER, "^": T.TALL, F: T.FENCE };
+const PLAIN: Record<string, number> = { ".": T.GRASS, ",": T.GRASS_2, "*": T.FLOWER, "^": T.TALL, F: T.FENCE, p: T.PAVE };
 const EDGED: Record<string, number> = { "=": T.PATH, ":": T.SAND, "~": T.WATER };
 // Which neighbouring characters count as "same terrain" (sand blends into water; water draws its own shore)
-const JOINS: Record<string, string> = { "=": "=", ":": ":~", "~": "~" };
+// (a road also runs flush into pavement)
+const JOINS: Record<string, string> = { "=": "=p", ":": ":~", "~": "~" };
 const BLOCKING = new Set(["~", "F"]);
 
-/** A ring of 2x2 trees around the map edge. */
-export function borderTrees(width: number, height: number): MapObject[] {
+/** A ring of 2x2 trees around the map edge, minus any tree placed at a `gaps` position (exits). */
+export function borderTrees(width: number, height: number, gaps: { x: number; y: number }[] = []): MapObject[] {
   const trees: MapObject[] = [];
   for (let x = 0; x < width; x += 2) trees.push({ kind: "tree", x, y: 0 }, { kind: "tree", x, y: height - 2 });
   for (let y = 2; y < height - 2; y += 2) trees.push({ kind: "tree", x: 0, y }, { kind: "tree", x: width - 2, y });
-  return trees;
+  return trees.filter((t) => !gaps.some((g) => g.x === t.x && g.y === t.y));
 }
 
 export interface BuiltMap {

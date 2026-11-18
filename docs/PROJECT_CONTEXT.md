@@ -114,7 +114,31 @@ An explorable top-down pixel-art world at `/world`, added alongside the portfoli
     - Origin Valley has 4 NPCs (guide, neighbour, professor, gardener), a signpost, mailboxes and doors to inspect.
     - A GBA dialogue box, and the first KRISHI ATTRIBUTE ("AI Explorer").
     - A Discovery Journal (I key or HUD button), with progress saved in localStorage.
-  - Sprints 3–5 not started.
+  - Sprint 3 done:
+    - Project Metropolis (second map, reached by Origin Valley's east road; warps both ways with a camera fade).
+    - Four project HQs whose doors open a project terminal. Reading each terminal for the first time awards an attribute.
+    - A profile card (P key or HUD button) linking LinkedIn and email only (owner's choice: no resume file).
+    - The boot-screen entry choice, plus a `▶ krishi.world` navbar link.
+  - Sprints 4–5 not started (remaining 3 regions, achievements, world map, audio, touch controls, save position).
+- **Owner decisions (2026-11-19):**
+  - Project Metropolis has exactly 4 buildings: ClinicalBrief, AccessVision, Traffic AI and KRISHI.OS. StudentHub stays a flagship on the classic site only.
+  - Profile links: LinkedIn and email only.
+  - Brief facts confirmed and stored in `data.ts` `ownerProfile` (game only; Ask Krishi doesn't read them):
+    - Electronics & Telecommunication background
+    - skills list
+    - hobbies
+    - ClinicalBrief's document pipeline, narrative visualisation, knowledge graph and Pydantic
+    - Traffic AI's four-lane analysis
+  - No certifications were named, so none are shown.
+- **One UI theme in the game:** every panel (discovery, journal, terminal, profile) uses the shared `Window` in `Overlays.tsx`: cream body, dark-brown border and shadow, forest-green title bar, Pixelify Sans, and white chips with brown borders. Only the dialogue box differs (GBA teal frame, the classic speech-box convention). Don't introduce a second panel style (an emerald/monospace terminal was tried and dropped for clashing).
+- **Maps and warps:**
+  - `MapDef` has `id` and `warps` (step onto a tile and you land on another map's spawn and facing).
+  - WorldScene `init()` takes `{ mapId, spawn, facing }`; a warp calls `scene.restart()`. Per-map content lives in `content.ts` `MAP_CONTENT`.
+  - `borderTrees(w, h, gaps)` leaves exits.
+  - The scene calls `disableGlobalCapture()` while an overlay is open, so arrow keys and Space can scroll panels.
+- **Entry choice:** the first visit (no `krishi-world:entry` in localStorage) ends the boot on "Enter the world" or "View classic portfolio".
+  - The pick is saved and never asked again. Escape or a background tap picks classic. If storage is blocked, there's no choice screen.
+  - Returning "world" visitors are not auto-redirected (a deliberate choice: never trap anyone); the navbar link and ⌘K `krishi.world` switch over.
 - **Art direction** (owner's references, 2026-11-19): Pokémon Emerald-era GBA look. That means dotted grass, bushy 2×2 scalloped trees, two-tier tiled-roof houses, soft auto-tiled path, sand and water edges, chibi sprites with a 1px dark outline, a rounded white dialogue box with a teal double border and a pixel font, a YES/NO menu, a "trainer card"-style profile card, and an island world map (5 regions as islands joined by bridges). Original art only: match the style, never copy sprites, tiles, names or maps.
 - **Engine:** `phaser` 3.90.0, the last Phaser 3 release (pinned; Phaser 4 exists). Import it as `import * as Phaser from "phaser"`: the ESM build has no default export even though the types suggest one.
 - **Loading:** `src/app/world/page.tsx` (server, metadata) renders `src/components/world/WorldGame.tsx` (client), which `import()`s `src/game/createGame.ts` in an effect. Phaser is one ~310 KB gzipped chunk that no page preloads; the portfolio's bundles are unchanged.

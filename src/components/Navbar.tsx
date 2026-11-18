@@ -123,6 +123,13 @@ export default function Navbar() {
 
         {/* Right: palette + clock + mobile menu */}
         <div className="flex items-center gap-3 shrink-0">
+          {/* The way across to the game (the boot choice is only offered once) */}
+          <Link
+            href="/world"
+            className="hidden sm:inline border border-accent/50 px-2 py-1 text-accent hover:bg-accent hover:text-bg transition-colors duration-150"
+          >
+            ▶ krishi.world
+          </Link>
           <button
             type="button"
             onClick={() => setIsPaletteOpen(true)}
@@ -163,6 +170,12 @@ export default function Navbar() {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link href="/world" className="flex gap-4 py-1.5 text-accent hover:text-accent-2 transition-colors duration-150">
+                <span className="text-ink-faint">-rwxr-xr-x</span>
+                <span>krishi.world ▶</span>
+              </Link>
+            </li>
           </ul>
         </nav>
       )}

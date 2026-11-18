@@ -1,8 +1,9 @@
 import * as Phaser from "phaser";
 import { DIRS, OBJECTS, PLAYER_W, T, TILE, generateTextures, type Dir } from "./textures";
-import { buildMap } from "./maps/legend";
+import { buildMap, type MapDef, type Warp } from "./maps/legend";
 import { originValley } from "./maps/originValley";
-import { ATTRIBUTES, DOOR_TEXT, ORIGIN_CRYSTALS, ORIGIN_NPCS, ORIGIN_SIGNS } from "./content";
+import { projectMetropolis } from "./maps/projectMetropolis";
+import { ALL_NPCS, ATTRIBUTES, DOOR_TERMINAL, DOOR_TEXT, MAP_CONTENT } from "./content";
 import { emit, on, type Dialogue } from "./bus";
 import { discover, discovered } from "./progress";
 
@@ -12,7 +13,17 @@ const VIEW_TILES = { w: 18, h: 12 }; // aim to show about this many tiles, at an
 const DELTA: Record<Dir, [number, number]> = { down: [0, 1], up: [0, -1], left: [-1, 0], right: [1, 0] };
 const OPPOSITE: Record<Dir, Dir> = { down: "up", up: "down", left: "right", right: "left" };
 
-type KeyName = "up" | "down" | "left" | "right" | "w" | "a" | "s" | "d" | "e" | "enter" | "journal";
+const MAPS: Record<string, MapDef> = { origin: originValley, metropolis: projectMetropolis };
+const FADE_MS = 200;
+
+type KeyName = "up" | "down" | "left" | "right" | "w" | "a" | "s" | "d" | "e" | "enter" | "journal" | "profile";
+
+/** What scene.restart() passes between maps. */
+interface Arrival {
+  mapId?: string;
+  spawn?: { x: number; y: number };
+  facing?: Dir;
+}
 
 /**
  * Tile-by-tile movement, like the GBA games: the player always stands on a tile, walking is a tween to the
@@ -28,15 +39,28 @@ export class WorldScene extends Phaser.Scene {
   private locked = false;
   private keys!: Record<KeyName, Phaser.Input.Keyboard.Key>;
   private interactions = new Map<string, () => void>(); // "x,y" -> what pressing E on that tile does
+  private def: MapDef = originValley;
+  private arrival: Arrival = {};
+  private reduceMotion = false;
 
   constructor() {
     super("world");
   }
 
-  create() {
-    generateTextures(this, ORIGIN_NPCS);
+  // Runs before create() on first boot and on every warp (scene.restart reuses this instance, so reset state)
+  init(arrival: Arrival) {
+    this.arrival = arrival ?? {};
+    this.def = MAPS[this.arrival.mapId ?? "origin"] ?? originValley;
+    this.interactions = new Map();
+    this.moving = false;
+    this.locked = false;
+    this.reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
 
-    const built = buildMap(originValley);
+  create() {
+    generateTextures(this, ALL_NPCS); // no-op after the first map
+
+    const built = buildMap(this.def);
     this.solid = built.solid;
     const map = this.make.tilemap({ data: built.tiles, tileWidth: TILE, tileHeight: TILE });
     const tileset = map.addTilesetImage("tiles", "tiles", TILE, TILE, 0, 0);
@@ -56,7 +80,7 @@ export class WorldScene extends Phaser.Scene {
 
     // Trees and buildings are sprites anchored at the bottom of their footprint and depth-sorted by that edge,
     // so the player walks in front of things below them and behind things above.
-    for (const obj of originValley.objects) {
+    for (const obj of this.def.objects) {
       const { h } = OBJECTS[obj.kind];
       const bottom = (obj.y + h) * TILE;
       this.add.image(obj.x * TILE, bottom, obj.kind).setOrigin(0, 1).setDepth(bottom - 1);
@@ -65,6 +89,7 @@ export class WorldScene extends Phaser.Scene {
     this.addInteractables(built.doors);
 
     DIRS.forEach((dir, d) => {
+      if (this.anims.exists(`walk-${dir}`)) return;
       this.anims.create({
         key: `walk-${dir}`,
         frames: [1, 0, 2, 0].map((step) => ({ key: "player", frame: d * 3 + step })),
@@ -73,9 +98,11 @@ export class WorldScene extends Phaser.Scene {
       });
     });
 
-    this.tile = { ...originValley.spawn };
+    this.tile = { ...(this.arrival.spawn ?? this.def.spawn) };
+    this.facing = this.arrival.facing ?? "down";
     this.player = this.add.sprite(0, 0, "player", 0).setOrigin(0.5, 1);
     this.placePlayer();
+    this.idle();
 
     const kb = this.input.keyboard;
     if (!kb) throw new Error("KRISHI.WORLD: keyboard input unavailable");
@@ -91,6 +118,7 @@ export class WorldScene extends Phaser.Scene {
       e: "E",
       enter: "ENTER",
       journal: "I",
+      profile: "P",
     }) as typeof this.keys;
 
     // React overlays pause and resume the world
@@ -99,6 +127,7 @@ export class WorldScene extends Phaser.Scene {
       on("ui-closed", () => {
         this.locked = false;
         kb.resetKeys(); // the key that closed the overlay must not also trigger something here
+        kb.enableGlobalCapture();
       }),
     ];
 
@@ -106,7 +135,9 @@ export class WorldScene extends Phaser.Scene {
     cam.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     cam.setRoundPixels(true);
     cam.startFollow(this.player, true);
+    if (!this.reduceMotion) cam.fadeIn(FADE_MS);
     this.fitZoom();
+    emit("region", this.def.name);
     this.scale.on(Phaser.Scale.Events.RESIZE, this.fitZoom, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off(Phaser.Scale.Events.RESIZE, this.fitZoom, this);
@@ -125,6 +156,11 @@ export class WorldScene extends Phaser.Scene {
     if (JustDown(this.keys.journal)) {
       this.lock();
       emit("open-journal");
+      return;
+    }
+    if (JustDown(this.keys.profile)) {
+      this.lock();
+      emit("open-profile");
       return;
     }
 
@@ -151,25 +187,44 @@ export class WorldScene extends Phaser.Scene {
       onUpdate: () => this.player.setDepth(this.player.y),
       onComplete: () => {
         this.moving = false;
+        const warp = this.def.warps.find((w) => w.x === this.tile.x && w.y === this.tile.y);
+        if (warp) this.warp(warp);
       },
     });
   }
 
+  // Fade out, then rebuild the scene on the target map
+  private warp(w: Warp) {
+    this.locked = true;
+    const go = () => this.scene.restart({ mapId: w.to, spawn: w.spawn, facing: w.facing } satisfies Arrival);
+    if (this.reduceMotion) return go();
+    this.cameras.main.fadeOut(FADE_MS);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, go);
+  }
+
   private addInteractables(doors: { x: number; y: number; object: { kind: string } }[]) {
+    const content = MAP_CONTENT[this.def.id] ?? { npcs: [], signs: {}, crystals: [] };
     const say = (dialogue: Dialogue) => {
       this.lock();
       emit("dialogue", dialogue);
     };
 
-    for (const [key, pages] of Object.entries(ORIGIN_SIGNS)) this.interactions.set(key, () => say({ pages }));
+    for (const [key, pages] of Object.entries(content.signs)) this.interactions.set(key, () => say({ pages }));
     for (const door of doors) {
-      const pages = DOOR_TEXT[door.object.kind as keyof typeof DOOR_TEXT];
-      if (pages) this.interactions.set(`${door.x},${door.y}`, () => say({ pages }));
+      const kind = door.object.kind as keyof typeof DOOR_TEXT;
+      const terminal = DOOR_TERMINAL[kind];
+      const pages = DOOR_TEXT[kind];
+      if (terminal)
+        this.interactions.set(`${door.x},${door.y}`, () => {
+          this.lock();
+          emit("terminal", terminal);
+        });
+      else if (pages) this.interactions.set(`${door.x},${door.y}`, () => say({ pages }));
     }
 
     // Characters: solid, glance around now and then, and turn to face you when you talk to them
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    for (const npc of ORIGIN_NPCS) {
+    const reduceMotion = this.reduceMotion;
+    for (const npc of content.npcs) {
       const sprite = this.add
         .sprite(npc.x * TILE + PLAYER_W / 2, npc.y * TILE + TILE - 1, `npc-${npc.id}`, DIRS.indexOf(npc.facing))
         .setOrigin(0.5, 1)
@@ -192,7 +247,7 @@ export class WorldScene extends Phaser.Scene {
 
     // Attribute crystals: bob in place; pressing E collects one (saved, then shown by the UI)
     const have = new Set(discovered());
-    for (const c of ORIGIN_CRYSTALS) {
+    for (const c of content.crystals) {
       const attribute = ATTRIBUTES.find((a) => a.id === c.attribute);
       if (!attribute || have.has(attribute.id)) continue;
       const y = c.y * TILE + TILE;
@@ -215,6 +270,8 @@ export class WorldScene extends Phaser.Scene {
   private lock() {
     this.locked = true;
     this.input.keyboard?.resetKeys();
+    // Let arrow keys / Space reach the overlay (e.g. to scroll a terminal) while the world is paused
+    this.input.keyboard?.disableGlobalCapture();
     if (!this.moving) this.idle();
   }
 

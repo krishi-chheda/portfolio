@@ -10,6 +10,9 @@ interface Events {
   dialogue: Dialogue; // scene -> UI: show a conversation or inspection text
   discover: string; // scene -> UI: an attribute id was just collected
   "open-journal": void; // scene -> UI: the I key was pressed
+  "open-profile": void; // scene -> UI: the P key was pressed
+  terminal: string; // scene -> UI: a project HQ's doors were used (project id)
+  region: string; // scene -> UI: the map the player is now in
   "ui-open": void; // UI -> scene: an overlay opened (pause movement)
   "ui-closed": void; // UI -> scene: all overlays closed (resume)
 }

@@ -50,6 +50,7 @@ const cases = [
   ["How does the copilot stay grounded?", R.cb, "copilot"],
   ["What are Krishi's hobbies?", R.none, "scuba diving"],
   ["Does he do yoga?", R.none, "aerial yoga"],
+  ["Does Krishi lift weights?", R.none, "fitness & lifting", "Fitness & Lifting"],
   ["Does Krishi like photography?", R.none, "photography", "AuraLens AI is one of"],
   ["Does Krishi know PyTorch?", R.map, "PyTorch"],
   ["What are his deep learning skills?", R.map, "TensorFlow"],

@@ -415,7 +415,7 @@ export const aiKnowledgeBase = {
     fullName: "Krishi Chheda",
     tagline: "AI Engineer, Builder, and Community Leader",
     roleSummary: "Krishi is an international student based in Melbourne, studying for a Master of Artificial Intelligence at Monash University. He is Vice President of the Monash Data & AI Society (MDAS), having previously served as Media & Marketing Officer (Oct 2025–Jan 2026) and Media & Marketing Director (Jan–May 2026). He is passionate about bridging the gap between machine learning models and highly-usable, production-grade applications.",
-    interests: ["Formula 1", "Fitness & Lifting", "High-Agency Startups", "Applied ML Research", "Agentic AI"]
+    interests: ["Formula 1", "High-Agency Startups", "Applied ML Research", "Agentic AI"] // fitness lives in ownerProfile.hobbies
   },
   careerGoals: "Krishi aims to work in high-growth environments where he can deploy AI models to production. He is looking for engineering opportunities in AI Engineering, Machine Learning, Software Engineering, or Technology Consulting in Australia or globally.",
   projects: projectsData,
@@ -458,7 +458,7 @@ export const ownerProfile = {
     "Python", "JavaScript", "TypeScript", "SQL", "PyTorch", "TensorFlow", "Next.js", "Flutter", "FastAPI",
     "Computer Vision", "Deep Learning", "LLMs", "AI Agents", "Docker", "Git", "Cloud technologies",
   ],
-  hobbies: ["Photography", "Yoga", "Aerial yoga", "Scuba diving", "Swimming", "Fitness", "Travel"],
+  hobbies: ["Photography", "Yoga", "Aerial yoga", "Scuba diving", "Swimming", "Fitness & lifting", "Travel"],
   // Extra project details beyond the portfolio cards
   projectNotes: {
     clinicalbrief: ["Document processing pipeline", "Clinical narrative visualisation", "Knowledge graph", "Pydantic data models"],

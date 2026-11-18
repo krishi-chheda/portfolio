@@ -302,7 +302,7 @@ ${followUps(["Tell me about AccessVision", "Tell me about ClinicalBrief", "Tell 
   {
     terms: [
       "hobby", "hobbies", "interests", "interest", "fitness", "free time", "outside of work", "outside tech", "for fun", "weekend", "weekends",
-      "photography", "photos", "yoga", "aerial yoga", "scuba", "scuba diving", "diving", "dive", "swimming", "swim", "travel", "travelling", "traveling", "gym",
+      "photography", "photos", "yoga", "aerial yoga", "scuba", "scuba diving", "diving", "dive", "swimming", "swim", "travel", "travelling", "traveling", "gym", "lift", "lifts", "lifting", "weights", "weightlifting", "strength",
     ],
     reply: () => `Outside engineering, Krishi's hobbies are ${ownerProfile.hobbies.join(", ").toLowerCase()}. He's also interested in ${aiKnowledgeBase.aboutMe.interests.join(", ")}.
 

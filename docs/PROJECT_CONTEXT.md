@@ -244,7 +244,7 @@ An explorable top-down pixel-art world at `/world`, added alongside the portfoli
 npx tsc --noEmit     # passes
 npm run lint         # passes (0 problems)
 npm run build        # passes; all pages static except the two API routes
-npm run check:chat   # 36 routing cases + empty-message and rate-limit checks + a walk of every suggested follow-up (fallback mode, needs the dev server)
+npm run check:chat   # 37 routing cases + empty-message and rate-limit checks + a walk of every suggested follow-up (fallback mode, needs the dev server)
 npm run dev          # .claude/launch.json "dev" on :3000
 ```
 No automated UI tests. Browser checks are manual via the preview tools.

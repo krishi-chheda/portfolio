@@ -1,5 +1,5 @@
 import type Phaser from "phaser";
-import { RARITY_COLORS } from "./content";
+import { RARITY_COLORS } from "@/lib/retro";
 
 // All KRISHI.WORLD art is original and drawn in code at boot: no sprite files, nothing copyrighted.
 // Style target: GBA-era top-down RPG (dotted grass, bushy 2x2 trees, tiled roofs, dark sprite outlines).

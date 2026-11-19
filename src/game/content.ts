@@ -9,15 +9,10 @@ import {
   projectsData,
 } from "@/lib/data";
 import type { Dir, Look, ObjectKind } from "./textures";
+import { FEATURED, type ProjectDetail } from "@/lib/portfolio";
 
-export type Rarity = "Common" | "Rare" | "Epic" | "Legendary";
-// Light / mid / dark shades per rarity: crystal sprites and journal icons. Presentation only.
-export const RARITY_COLORS: Record<Rarity, [string, string, string]> = {
-  Common: ["#c9eab0", "#97cd74", "#5e9e48"],
-  Rare: ["#d4f0f8", "#7bc9df", "#4791c4"],
-  Epic: ["#e2d0fa", "#b48be8", "#7a52b8"],
-  Legendary: ["#fff1c4", "#f5c65b", "#c9902e"],
-};
+export { RARITY_COLORS, type Rarity } from "@/lib/retro";
+import type { Rarity } from "@/lib/retro";
 
 // Everything the world says about Krishi is built from src/lib/data.ts, so the game can't drift from the
 // portfolio or claim anything new. Flavour lines (greetings, jokes) never state facts about him.
@@ -218,69 +213,21 @@ export const MAP_CONTENT: Record<string, MapContent> = {
 export const ALL_NPCS = Object.values(MAP_CONTENT).flatMap((c) => c.npcs);
 
 // ---------- project terminals ----------
+// Same project details as Classic Mode (src/lib/portfolio.ts); the game only adds which attribute a first
+// read awards.
 
-export interface TerminalProject {
-  id: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  problem?: string;
-  solution?: string;
-  status?: string;
-  techStack: string[];
-  flow: { label: string; description: string }[];
-  features: string[]; // decisions / features
-  achievements: string[];
-  challenge?: string;
-  tradeOffs?: string;
-  extras: string[]; // owner-confirmed details beyond the portfolio card
-  githubUrl?: string;
-  liveUrl?: string;
-  attribute: string; // granted the first time this terminal is read
-}
+export type TerminalProject = ProjectDetail & { attribute: string };
 
-function fromPortfolio(id: string, attribute: string): TerminalProject {
-  const p = project(id);
-  return {
-    id,
-    title: p.title,
-    subtitle: p.subtitle,
-    description: p.description,
-    problem: p.overview.problem,
-    solution: p.overview.solution,
-    status: p.overview.status,
-    techStack: p.techStack,
-    flow: p.architecture.flow,
-    features: p.architecture.decisions,
-    achievements: [p.keyOutcome, ...p.impact.achievements.filter((a) => a !== p.keyOutcome)],
-    challenge: p.challenge,
-    tradeOffs: p.tradeOffs,
-    extras: ownerProfile.projectNotes[id] ?? [],
-    githubUrl: p.githubUrl,
-    liveUrl: p.liveUrl,
-    attribute,
-  };
-}
-
-export const TERMINALS: Record<string, TerminalProject> = {
-  "accessible-vision": fromPortfolio("accessible-vision", "computer-vision"),
-  clinicalbrief: fromPortfolio("clinicalbrief", "researcher"),
-  "traffic-ai": fromPortfolio("traffic-ai", "problem-solver"),
-  "krishi-os": {
-    id: krishiOsProject.id,
-    title: krishiOsProject.title,
-    subtitle: krishiOsProject.subtitle,
-    description: krishiOsProject.description,
-    techStack: krishiOsProject.techStack,
-    flow: [],
-    features: krishiOsProject.features,
-    achievements: [],
-    extras: [],
-    githubUrl: krishiOsProject.githubUrl,
-    liveUrl: krishiOsProject.liveUrl,
-    attribute: "innovator",
-  },
+const TERMINAL_ATTRIBUTE: Record<string, string> = {
+  clinicalbrief: "researcher",
+  "accessible-vision": "computer-vision",
+  "traffic-ai": "problem-solver",
+  "krishi-os": "innovator",
 };
+
+export const TERMINALS: Record<string, TerminalProject> = Object.fromEntries(
+  FEATURED.map((p) => [p.id, { ...p, attribute: TERMINAL_ATTRIBUTE[p.id] }])
+);
 
 // Which building's doors open which terminal
 export const DOOR_TERMINAL: Partial<Record<ObjectKind, string>> = {

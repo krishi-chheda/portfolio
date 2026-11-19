@@ -450,13 +450,14 @@ export const SYSTEM_VERSION = "v0.1.0";
 export const LINKEDIN_URL = "https://www.linkedin.com/in/krishi-chheda";
 export const GITHUB_URL = "https://github.com/krishi-chheda";
 
-// Confirmed by Krishi on 2026-11-19. Used by KRISHI.WORLD and by Ask Krishi (background, skills and hobbies:
-// LLM facts + local answers); the classic portfolio sections don't show them yet.
+// Confirmed by Krishi (2026-11-19; Dart, React, Linux, MySQL, CUDA and Jetson Nano added 2026-11-20).
+// Used by both modes and by Ask Krishi.
 export const ownerProfile = {
   background: "Electronics and Telecommunication Engineering",
   skills: [
-    "Python", "JavaScript", "TypeScript", "SQL", "PyTorch", "TensorFlow", "Next.js", "Flutter", "FastAPI",
-    "Computer Vision", "Deep Learning", "LLMs", "AI Agents", "Docker", "Git", "Cloud technologies",
+    "Python", "JavaScript", "TypeScript", "SQL", "Dart", "PyTorch", "TensorFlow", "Computer Vision", "Deep Learning",
+    "LLMs", "AI Agents", "Next.js", "React", "Flutter", "FastAPI", "Docker", "Git", "Linux", "MySQL", "CUDA",
+    "Jetson Nano", "Cloud technologies",
   ],
   hobbies: ["Photography", "Yoga", "Aerial yoga", "Scuba diving", "Swimming", "Fitness & lifting", "Travel"],
   // Extra project details beyond the portfolio cards
@@ -494,4 +495,87 @@ export const bootLinesData = [
   "accessvision.yolo",
   "clinicalbrief.platform",
   "leadership.framework"
+];
+
+// ================= Shared portfolio sources (KRISHI.WORLD 2.0) =================
+// Both modes read these: Classic Mode renders them as sections, Adventure Mode as NPCs, crystals and buildings.
+// Only owner-confirmed or already-published facts; nothing here is a placeholder.
+
+export const profile = {
+  name: aiKnowledgeBase.aboutMe.fullName,
+  title: "AI Engineer & Product Builder",
+  tagline: aiKnowledgeBase.aboutMe.tagline,
+  summary: aiKnowledgeBase.aboutMe.roleSummary,
+  location: currentProcesses.location,
+  status: "Open to AI Engineering, Machine Learning, Software Engineering and Technology Consulting roles",
+  technicalInterests: currentProcesses.learning,
+  personalInterests: ownerProfile.hobbies,
+  otherInterests: aiKnowledgeBase.aboutMe.interests,
+};
+
+export const contact = {
+  email: CONTACT_EMAIL,
+  linkedin: LINKEDIN_URL,
+  github: GITHUB_URL,
+  resume: null as string | null, // no PDF yet (owner's choice): LinkedIn stands in for the resume
+};
+
+export interface EducationEntry {
+  title: string;
+  org?: string;
+  period?: string;
+  status: string;
+  details: string[];
+}
+
+export const education: EducationEntry[] = [
+  {
+    title: "Master of Artificial Intelligence",
+    org: "Monash University, Melbourne",
+    period: `Jul 2025 – ${currentProcesses.graduation}`,
+    status: "In progress",
+    details: [`Currently focused on ${currentProcesses.learning.join(", ")}.`],
+  },
+  {
+    title: ownerProfile.background,
+    status: "Engineering background",
+    details: ["The foundation Krishi moved into AI from."],
+  },
+];
+// Certifications: none listed yet. Add entries here (name, issuer, year) and both modes pick them up.
+export const certifications: { name: string; issuer: string; year: string }[] = [];
+
+export interface SkillCategory {
+  id: string;
+  name: string;
+  skills: string[];
+}
+
+// Skilldex categories (owner's grouping). Every name must be in ownerProfile.skills.
+export const skillCategories: SkillCategory[] = [
+  { id: "programming", name: "Programming", skills: ["Python", "JavaScript", "TypeScript", "SQL", "Dart"] },
+  { id: "ai-ml", name: "AI & Machine Learning", skills: ["PyTorch", "TensorFlow", "Computer Vision", "Deep Learning", "LLMs", "AI Agents"] },
+  { id: "development", name: "Development", skills: ["Next.js", "React", "Flutter", "FastAPI", "Docker"] },
+  { id: "infra", name: "Infrastructure & Tools", skills: ["Git", "Linux", "MySQL", "CUDA", "Jetson Nano", "Cloud technologies"] },
+];
+
+export type MilestoneKind = "leadership" | "academic" | "project" | "professional";
+
+export interface Milestone {
+  title: string;
+  kind: MilestoneKind;
+  date?: string; // only where a date is confirmed
+  detail: string;
+}
+
+// Real milestones, newest first. Dates come from the confirmed career timeline (docs/PROJECT_CONTEXT.md).
+export const milestones: Milestone[] = [
+  { title: "Vice President, MDAS", kind: "leadership", date: "Jul 2026", detail: "Vice President of the Monash Data & AI Society." },
+  { title: "Media & Marketing Director, MDAS", kind: "leadership", date: "Jan 2026", detail: "Promoted to lead MDAS media and marketing." },
+  { title: "Joined MDAS", kind: "leadership", date: "Oct 2025", detail: "Started as Media & Marketing Officer." },
+  { title: "Started the Master of AI", kind: "academic", date: "Jul 2025", detail: "Monash University, Melbourne." },
+  { title: "Launched StudentHub", kind: "project", date: "Jan–May 2025", detail: "A deployed portal for students settling in Melbourne." },
+  { title: "IT Intern, Mysahayak", kind: "professional", date: "Jan–May 2025", detail: "Flutter features, Python backend services and QA in Agile sprints." },
+  { title: "Built Traffic AI", kind: "project", date: "Oct–Dec 2024", detail: "Density-based traffic signal scheduling on an NVIDIA Jetson Nano." },
+  { title: "AccessVision under load", kind: "project", detail: impactLog[0] ? `${impactLog[0].value} ${impactLog[0].label}.` : "Load-tested grounded VQA." },
 ];

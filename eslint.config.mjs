@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated launch-video output (frames, Chrome profiles); not source
+    "brag-output*/**",
   ]),
 ]);
 

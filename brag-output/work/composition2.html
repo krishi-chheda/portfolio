@@ -1,0 +1,531 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Geist Mono"; src: url("fonts/geist-mono.woff2") format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "Pixelify"; src: url("fonts/pixelify.woff2") format("woff2"); font-weight: 400 700; }
+  html, body { margin: 0; background: #000; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #0a0c0b; font-family: "Geist Mono", monospace; color: #e4e8e3; }
+  .abs { position: absolute; }
+  .layer { position: absolute; inset: 0; }
+  img { display: block; }
+  .pix { image-rendering: pixelated; }
+  .pixtext { font-family: "Pixelify"; }
+  /* OS */
+  .bar { position: absolute; left: 0; right: 0; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 64px; font-size: 18px; letter-spacing: .12em; text-transform: uppercase; color: #7c8780; border-color: #222826; border-style: solid; border-width: 0; }
+  #wall { background: radial-gradient(1200px 700px at 70% 30%, rgba(52,211,153,.10), transparent 60%), radial-gradient(900px 600px at 15% 85%, rgba(217,180,90,.06), transparent 60%), #0a0c0b; }
+  #wall::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(52,211,153,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(52,211,153,.05) 1px, transparent 1px); background-size: 64px 64px; }
+  #menubar { position: absolute; left: 0; right: 0; top: 0; height: 44px; background: rgba(16,19,18,.92); border-bottom: 1px solid #222826; display: flex; align-items: center; gap: 30px; padding: 0 24px; font-size: 17px; color: #a1aaa3; }
+  #menubar b { color: #34d399; letter-spacing: .04em; }
+  #dock { position: absolute; left: 50%; bottom: 22px; display: flex; gap: 18px; padding: 14px 18px; background: rgba(16,19,18,.88); border: 1px solid #2a332e; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+  .icon { position: relative; width: 84px; height: 84px; border: 1px solid #2a332e; background: #101312; display: flex; align-items: center; justify-content: center; font-size: 30px; color: #34d399; }
+  .icon .lbl { position: absolute; bottom: 104px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 15px; color: #e4e8e3; background: #0a0c0b; border: 1px solid #2a332e; padding: 4px 10px; opacity: 0; }
+  .win { position: absolute; background: #0a0c0b; border: 1px solid #2f3a34; box-shadow: 0 30px 90px rgba(0,0,0,.7); overflow: hidden; transform-origin: center bottom; }
+  .win .tb { height: 38px; display: flex; align-items: center; gap: 10px; padding: 0 14px; background: #121614; border-bottom: 1px solid #222826; font-size: 15px; color: #7c8780; }
+  .tl { width: 12px; height: 12px; border-radius: 50%; }
+  .term { padding: 18px 22px; font-size: 22px; line-height: 1.55; white-space: pre; color: #e4e8e3; }
+  .term .p { color: #34d399; }
+  .term .o { color: #a1aaa3; }
+  #cursor { position: absolute; width: 34px; height: 34px; z-index: 50; pointer-events: none; }
+  #ring { position: absolute; width: 60px; height: 60px; margin: -30px 0 0 -30px; border: 3px solid #34d399; border-radius: 50%; z-index: 49; }
+  /* game */
+  .chip { position: absolute; left: 50%; font-family: "Pixelify"; font-size: 40px; letter-spacing: .08em; color: #2b2420; background: #f5e8c8; border: 6px solid #46382b; box-shadow: 8px 8px 0 #46382b; padding: 10px 26px; white-space: nowrap; }
+  .chip span { color: #285943; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ===== A. boot (particles) ===== -->
+  <div id="boot" class="layer">
+    <canvas id="particles" width="1920" height="1080" class="abs" style="left:0;top:0"></canvas>
+    <div class="bar" style="top:0;border-bottom-width:1px"><span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#34d399;margin-right:14px;vertical-align:middle"></span><b style="color:#34d399">KRISHI.OS V0.1.0</b>&nbsp;&nbsp;| AI ENGINEER PORTFOLIO SYSTEM</span><span>BOOTING…</span></div>
+    <div class="abs" style="left:660px;width:600px;top:620px;font-size:20px;letter-spacing:.2em;text-transform:uppercase">
+      <p id="tagline" style="margin:0 0 26px;text-align:center;color:#34d399;font-size:26px"></p>
+      <div style="display:flex;justify-content:space-between;color:#7c8780"><span>mount <span id="module" style="text-transform:none;color:#a1aaa3"></span></span><span id="pct" style="color:#34d399"></span></div>
+      <div style="margin-top:12px;height:2px;background:#222826"><div id="pbar" style="height:2px;background:#34d399;box-shadow:0 0 12px #34d399;transform-origin:left"></div></div>
+    </div>
+  </div>
+
+  <!-- ===== B. the desktop ===== -->
+  <div id="desk" class="layer">
+    <div id="wall" class="layer"></div>
+    <div class="abs" style="left:0;right:0;top:330px;text-align:center;font-size:150px;font-weight:800;color:rgba(52,211,153,.05);letter-spacing:-.02em">KRISHI.OS</div>
+
+    <div id="w-proj" class="win" style="left:820px;top:96px;width:1010px;height:700px">
+      <div class="tb"><span class="tl" style="background:#e0564a"></span><span class="tl" style="background:#d9b45a"></span><span class="tl" style="background:#34d399"></span><span style="margin-left:10px">Projects.app — ~/projects/accessible-vision</span></div>
+      <div style="width:1010px;height:662px;background:url(captures/os_projects.png) -420px -230px / 1920px 1080px no-repeat"></div>
+    </div>
+    <div id="w-map" class="win" style="left:330px;top:300px;width:900px;height:560px">
+      <div class="tb"><span class="tl" style="background:#e0564a"></span><span class="tl" style="background:#d9b45a"></span><span class="tl" style="background:#34d399"></span><span style="margin-left:10px">SystemMap.app — 18 nodes · 29 connections</span></div>
+      <div style="width:900px;height:522px;background:url(captures/os_map.png) -440px -300px / 1920px 1080px no-repeat"></div>
+    </div>
+    <div id="w-term" class="win" style="left:110px;top:120px;width:880px;height:430px">
+      <div class="tb"><span class="tl" style="background:#e0564a"></span><span class="tl" style="background:#d9b45a"></span><span class="tl" style="background:#34d399"></span><span style="margin-left:10px">Terminal — krishi@os</span></div>
+      <div class="term" id="term"></div>
+    </div>
+    <div id="w-slot" class="win" style="left:560px;top:150px;width:800px;height:640px;transform-origin:center">
+      <div class="tb"><span class="tl" style="background:#e0564a"></span><span class="tl" style="background:#d9b45a"></span><span class="tl" style="background:#34d399"></span><span style="margin-left:10px">Cartridge Slot</span></div>
+      <div style="position:relative;height:602px;background:#16201b">
+        <div id="cstage" class="abs" style="left:50%;top:44px;width:448px;margin-left:-224px;font-size:26px">
+          <div style="position:relative;height:14em;width:16em;overflow:hidden">
+            <div id="cart" class="abs" style="bottom:0;left:50%;margin-left:-5em;width:10em">
+              <div style="position:relative;border-radius:.9em .9em .25em .25em;border:.25em solid #3a3f4a;background:#a8adb5;padding:1.1em .75em .6em;box-shadow:.3em .3em 0 #3a3f4a">
+                <div class="abs" style="left:2.2em;right:2.2em;top:.35em"><div style="height:.12em;background:#8a9099;margin-bottom:.15em"></div><div style="height:.12em;background:#8a9099"></div></div>
+                <div style="border:.15em solid #3a3f4a;background:#f5e8c8;overflow:hidden">
+                  <div class="pixtext" style="background:#285943;color:#f5e8c8;text-align:center;font-size:.95em;letter-spacing:.08em;padding:.15em .4em">KRISHI.WORLD</div>
+                  <div style="display:flex;align-items:center;gap:.4em;padding:.4em .5em">
+                    <svg viewBox="0 0 16 22" shape-rendering="crispEdges" style="height:3.2em;width:auto;flex:none" class="sprite"></svg>
+                    <p class="pixtext" style="margin:0;font-size:.62em;line-height:1.3;color:#46382b">Explore the mind.<br>Discover the builder.</p>
+                  </div>
+                </div>
+                <div style="margin-top:.5em;display:flex;justify-content:center;gap:.18em" class="pins"></div>
+              </div>
+            </div>
+          </div>
+          <div style="width:16em;box-sizing:border-box;border:.25em solid #3a3f4a;border-top:0;border-radius:0 0 .6em .6em;background:#5b6b7e;padding:.5em 1em .8em;box-shadow:.3em .3em 0 #0a0c0b">
+            <div style="margin:0 auto;height:.8em;width:12em;border-radius:.2em;background:#0a0c0b"></div>
+            <div style="margin-top:.6em;display:flex;justify-content:space-between;align-items:center;font-size:.7em;letter-spacing:.2em;color:#c8ccd4"><span>KRISHI.OS</span><span>POWER <span id="led" style="display:inline-block;width:.7em;height:.7em;border-radius:50%;background:#e0564a;vertical-align:middle;margin-left:.4em"></span></span></div>
+          </div>
+        </div>
+        <p id="slotmsg" class="abs" style="left:0;right:0;bottom:30px;margin:0;text-align:center;font-size:22px;color:#a1aaa3"></p>
+      </div>
+    </div>
+
+    <div id="menubar"><b>◆ KRISHI.OS</b><span>File</span><span>View</span><span>Go</span><span>Window</span><span style="margin-left:auto;color:#7c8780">Krishi Chheda · AI Engineer &amp; Product Builder</span><span style="margin-left:auto;color:#34d399">● available</span><span>MELBOURNE</span><span id="clock">10:24</span></div>
+    <div id="dock">
+      <div class="icon" id="i-term">&gt;_<span class="lbl">Terminal</span></div>
+      <div class="icon" id="i-proj"><svg width="40" height="34" viewBox="0 0 20 17"><path d="M1 3h7l2 2h9v11H1z" fill="none" stroke="#34d399" stroke-width="1.6"/></svg><span class="lbl">Projects</span></div>
+      <div class="icon" id="i-map"><svg width="42" height="42" viewBox="0 0 20 20"><g stroke="#34d399" stroke-width="1.2" fill="#34d399"><line x1="4" y1="5" x2="15" y2="4"/><line x1="4" y1="5" x2="9" y2="15"/><line x1="15" y1="4" x2="9" y2="15"/><line x1="15" y1="4" x2="17" y2="13"/><circle cx="4" cy="5" r="2"/><circle cx="15" cy="4" r="2"/><circle cx="9" cy="15" r="2"/><circle cx="17" cy="13" r="1.6"/></g></svg><span class="lbl">System Map</span></div>
+      <div class="icon" id="i-chat"><svg width="40" height="36" viewBox="0 0 20 18"><path d="M2 2h16v10H8l-4 4v-4H2z" fill="none" stroke="#34d399" stroke-width="1.6"/></svg><span class="lbl">Ask Krishi</span></div>
+      <div class="icon" id="i-cart" style="border-color:#34d399"><svg width="30" height="38" viewBox="0 0 10 12" shape-rendering="crispEdges"><path d="M1 0h7l1 1v11H1z" fill="#34d399"/><rect x="2" y="3" width="6" height="4" fill="#101312"/><rect x="2" y="10" width="6" height="1" fill="#101312"/></svg><span class="lbl">KRISHI.WORLD</span></div>
+    </div>
+    <div id="ring"></div>
+    <svg id="cursor" viewBox="0 0 24 24"><path d="M3 2l7 19 2.6-7.7L20 11z" fill="#e4e8e3" stroke="#0a0c0b" stroke-width="1.6" stroke-linejoin="round"/></svg>
+  </div>
+
+  <!-- ===== C. the switch: pixelate + GBA palette ===== -->
+  <canvas id="pixel" class="layer pix" width="1920" height="1080"></canvas>
+  <img id="snap" src="captures/desktop_snapshot.png" style="display:none">
+
+  <!-- ===== D. KRISHI.WORLD boot splash ===== -->
+  <div id="gboot" class="layer" style="background:#f5e8c8">
+    <div id="glogo" class="abs pixtext" style="left:0;right:0;top:380px;text-align:center;font-size:150px;color:#285943;text-shadow:9px 9px 0 #78b85a">KRISHI.WORLD</div>
+    <div id="gsub" class="abs pixtext" style="left:0;right:0;top:600px;text-align:center;font-size:40px;letter-spacing:.06em;color:#46382b">Explore the mind. Discover the builder.</div>
+    <svg viewBox="0 0 16 22" shape-rendering="crispEdges" class="abs sprite" id="gsprite" style="left:912px;top:690px;height:120px"></svg>
+  </div>
+
+  <!-- ===== E. the world ===== -->
+  <div id="world" class="layer">
+    <img id="g-origin" class="layer pix" src="captures/w_origin.png" style="width:1920px;height:1080px">
+    <div id="dialogue" class="abs" style="left:570px;top:926px;width:780px;height:140px">
+      <img src="captures/w_dialogue.png" style="width:780px;height:140px">
+      <div id="m1" class="abs" style="top:42px;height:36px;background:#fff"></div>
+      <div id="m2" class="abs" style="top:82px;height:28px;background:#fff"></div>
+      <div id="m3" class="abs" style="left:758px;top:94px;width:22px;height:22px;background:#fff"></div>
+    </div>
+    <img id="g-metro" class="layer pix" src="captures/w_metro.png" style="width:1920px;height:1080px">
+    <img id="g-forest" class="layer pix" src="captures/w_forest.png" style="width:1920px;height:1080px">
+    <img id="g-coast" class="layer pix" src="captures/w_coast.png" style="width:1920px;height:1080px">
+    <div id="wdim" class="layer" style="background:#000;opacity:0"></div>
+    <img id="terminal" class="abs" src="captures/w_terminal.png" style="left:512px;top:150px;width:896px;transform-origin:center top">
+    <img id="card" class="abs" src="captures/w_card.png" style="left:736px;top:300px;width:448px;transform-origin:center">
+    <img id="map" class="abs" src="captures/w_map.png" style="left:576px;top:250px;width:768px;transform-origin:center">
+    <img id="toast" class="abs" src="captures/w_toast1.png" style="left:840px;top:120px;width:241px">
+    <div id="chip" class="chip"></div>
+  </div>
+
+  <!-- ===== F. outro ===== -->
+  <div id="outro" class="layer">
+    <div id="o-left" class="abs" style="left:0;top:0;width:960px;height:1080px;background:#0a0c0b;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="font-size:120px;font-weight:800;color:#34d399;letter-spacing:-.02em">KRISHI.OS</div>
+      <div style="margin-top:14px;font-size:28px;letter-spacing:.24em;color:#7c8780;text-transform:uppercase">the operating system</div>
+    </div>
+    <div id="o-right" class="abs" style="left:960px;top:0;width:960px;height:1080px;background:#78b85a;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <svg viewBox="0 0 16 22" shape-rendering="crispEdges" style="height:150px;margin-bottom:22px" class="sprite"></svg>
+      <div class="pixtext" style="font-size:112px;color:#f5e8c8;text-shadow:7px 7px 0 #285943">KRISHI.WORLD</div>
+      <div class="pixtext" style="margin-top:14px;font-size:34px;letter-spacing:.14em;color:#285943">THE GAME INSIDE IT</div>
+    </div>
+    <div class="abs" style="left:0;right:0;top:820px;text-align:center">
+      <div id="o-line" style="display:inline-block;background:#0a0c0b;border:2px solid #34d399;padding:18px 40px;font-size:42px;color:#e4e8e3;box-shadow:8px 8px 0 #285943">Two ways to explore one builder.</div>
+      <div id="o-url" style="margin-top:26px;font-size:30px;letter-spacing:.06em;color:#0a0c0b"><span style="background:#f5e8c8;padding:6px 16px;border:2px solid #46382b">krishi-portfolio.vercel.app</span></div>
+    </div>
+  </div>
+
+  <canvas id="intro" class="layer" width="1920" height="1080"></canvas>
+  <div id="flash" class="layer" style="background:#fff;opacity:0"></div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const eOut = (x) => 1 - Math.pow(1 - x, 3);
+const eIn = (x) => x * x * x;
+const eIO = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const eBack = (x) => { const c = 1.6; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const eBounce = (x) => { const n = 7.5625, d = 2.75; if (x < 1 / d) return n * x * x; if (x < 2 / d) return n * (x -= 1.5 / d) * x + 0.75; if (x < 2.5 / d) return n * (x -= 2.25 / d) * x + 0.9375; return n * (x -= 2.625 / d) * x + 0.984375; };
+const show = (el, on) => { el.style.display = on ? "" : "none"; };
+const css = (el, s) => Object.assign(el.style, s);
+function hash(n) { n = (n ^ 61) ^ (n >>> 16); n = n + (n << 3); n = n ^ (n >>> 4); n = Math.imul(n, 0x27d4eb2d); n = n ^ (n >>> 15); return (n >>> 0) / 4294967296; }
+
+// sprite + cartridge pins
+const PX = [[3,1,11,4,"#3b2a20"],[4,0,1,1,"#3b2a20"],[7,0,1,1,"#3b2a20"],[11,0,1,1,"#3b2a20"],[3,4,11,1,"#34d399"],[3,5,11,7,"#f2c9a0"],[3,10,11,2,"#d9a37a"],[3,5,1,3,"#3b2a20"],[13,5,1,3,"#3b2a20"],[5,7,1,2,"#1f1d24"],[11,7,1,2,"#1f1d24"],[4,12,9,6,"#2fae7c"],[4,16,9,2,"#1f7d58"],[8,13,1,4,"#f5e8c8"],[3,12,1,4,"#1f7d58"],[13,12,1,4,"#1f7d58"],[5,18,3,3,"#2c3a5a"],[9,18,3,3,"#2c3a5a"],[5,21,3,1,"#2a2220"],[9,21,3,1,"#2a2220"]];
+document.querySelectorAll(".sprite").forEach((s) => (s.innerHTML = PX.map(([x,y,w,h,c]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`).join("")));
+document.querySelectorAll(".pins").forEach((p) => (p.innerHTML = Array.from({ length: 12 }, () => '<span style="width:.42em;height:.7em;background:#c9902e;display:block"></span>').join("")));
+
+// ---------- A. particles ----------
+const cv = $("particles"), ctx = cv.getContext("2d");
+let particles = [];
+function buildParticles() {
+  const w = 1920, h = 1080, s = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+  s.canvas.width = w; s.canvas.height = h;
+  s.font = '800 230px "Geist Mono"'; s.textAlign = "center"; s.textBaseline = "middle";
+  s.fillText("KRISHI.OS", w / 2, 420);
+  const px = s.getImageData(0, 0, w, h).data, step = 7, reach = Math.hypot(w, h) * 0.6;
+  let k = 0;
+  for (let y = 0; y < h; y += step) for (let x = 0; x < w; x += step) {
+    if (px[(y * w + x) * 4 + 3] < 128) continue;
+    k++;
+    const a = hash(k * 3 + 1) * Math.PI * 2, r = reach * (0.5 + hash(k * 3 + 2) * 0.5);
+    particles.push({ tx: x, ty: y, ox: Math.cos(a) * r, oy: Math.sin(a) * r, d: (x / w) * 0.25 + hash(k * 3 + 3) * 0.15 });
+  }
+}
+function drawParticles(p, glow) {
+  ctx.clearRect(0, 0, 1920, 1080);
+  ctx.fillStyle = "#34d399";
+  for (const q of particles) {
+    const l = clamp((p - q.d) / 0.6), rem = 1 - l * l * (3 - 2 * l), a = rem * Math.PI * 1.5, c = Math.cos(a), s = Math.sin(a);
+    ctx.globalAlpha = 0.3 + 0.7 * (1 - rem);
+    ctx.fillRect(q.tx + (q.ox * c - q.oy * s) * rem, q.ty + (q.ox * s + q.oy * c) * rem, 4.5, 4.5);
+  }
+  ctx.globalAlpha = 1;
+  if (glow > 0) { ctx.shadowColor = "#34d399"; ctx.shadowBlur = 30 * glow; ctx.globalAlpha = 0.25 * glow; for (const q of particles) if (hash(q.tx * 7 + q.ty) < 0.15) ctx.fillRect(q.tx, q.ty, 4.5, 4.5); ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+}
+const MODULES = ["master_of_ai.monash", "mdas.vice_president", "studenthub.platform", "traffic_ai.yolo", "accessvision.yolo", "clinicalbrief.platform", "leadership.framework"];
+const TAG = "AI ENGINEER & PRODUCT BUILDER", GLYPHS = "!<>-_/[]{}=+*^?#01";
+const scramble = (text, prog, t) => { const n = Math.floor(prog * text.length); let o = text.slice(0, n); for (let i = n; i < text.length; i++) o += text[i] === " " ? " " : GLYPHS[Math.floor(hash(i * 97 + Math.floor(t * 30)) * GLYPHS.length)]; return o; };
+
+// ---------- B. desktop session ----------
+// Cursor keyframes [t, x, y]; clicks at the listed times
+const DOCK_Y = 1080 - 22 - 15 - 42; // icon centre
+const iconX = (i) => 960 - (5 * 84 + 4 * 18) / 2 + 42 + i * (84 + 18);
+const CUR = [[2.75, 1460, 760], [3.3, iconX(0), DOCK_Y], [3.5, iconX(0), DOCK_Y], [5.0, iconX(1), DOCK_Y], [5.9, iconX(2), DOCK_Y], [6.55, 520, 330], [7.9, 520, 330], [8.4, 1500, 900]];
+const CLICKS = [3.3, 5.0, 5.9, 6.55];
+function cursorAt(t) {
+  for (let i = 0; i < CUR.length - 1; i++) {
+    const [t0, x0, y0] = CUR[i], [t1, x1, y1] = CUR[i + 1];
+    if (t <= t1) { const p = eIO(seg(t, t0, t1)); return [x0 + (x1 - x0) * p, y0 + (y1 - y0) * p]; }
+  }
+  return CUR[CUR.length - 1].slice(1);
+}
+const TERM = [
+  { cmd: "whoami", at: 3.75, out: "Krishi Chheda — AI Engineer & Product Builder" },
+  { cmd: "ls projects/", at: 4.3, out: "accessible-vision/  clinicalbrief/  studenthub/  traffic-ai/" },
+  { cmd: "./insert-cartridge krishi.world", at: 6.85, out: "" },
+];
+const CPS = 26; // typed characters per second
+function termText(t) {
+  let html = "";
+  for (const line of TERM) {
+    if (t < line.at) break;
+    const n = Math.min(line.cmd.length, Math.floor((t - line.at) * CPS));
+    html += `<span class="p">krishi@os:~$</span> ${line.cmd.slice(0, n)}`;
+    const doneAt = line.at + line.cmd.length / CPS;
+    if (t >= doneAt + 0.08 && line.out) html += `\n<span class="o">${line.out}</span>\n`;
+    else if (n < line.cmd.length || !line.out) { html += Math.floor(t * 3) % 2 ? "▌" : " "; break; }
+  }
+  return html;
+}
+function openWin(el, t, a, fromX, fromY) {
+  const p = eOut(seg(t, a, a + 0.28));
+  const r = el.getBoundingClientRect ? null : null;
+  show(el, t >= a);
+  if (t < a) return;
+  const W = parseFloat(el.style.width), H = parseFloat(el.style.height), L = parseFloat(el.style.left), T = parseFloat(el.style.top);
+  const dx = (fromX - (L + W / 2)) * (1 - p), dy = (fromY - (T + H / 2)) * (1 - p);
+  css(el, { opacity: Math.min(1, p * 1.4), transform: `translate(${dx}px, ${dy}px) scale(${0.08 + 0.92 * p})` });
+}
+
+// ---------- C. pixelation ----------
+const pcv = $("pixel"), pctx = pcv.getContext("2d");
+const small = document.createElement("canvas"), sctx = small.getContext("2d", { willReadFrequently: true });
+const PAL = [[28, 64, 49], [40, 89, 67], [120, 184, 90], [245, 232, 200]]; // the world's four greens/cream
+function pixelate(t) {
+  const p = seg(t, 9.05, 9.75), q = seg(t, 9.3, 9.75);
+  const block = Math.max(1, Math.round(1 + 47 * eIn(p)));
+  const sw = Math.ceil(1920 / block), sh = Math.ceil(1080 / block);
+  small.width = sw; small.height = sh;
+  sctx.imageSmoothingEnabled = true;
+  sctx.drawImage($("snap"), 0, 0, sw, sh);
+  if (q > 0) {
+    const img = sctx.getImageData(0, 0, sw, sh), d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const lum = (0.3 * d[i] + 0.59 * d[i + 1] + 0.11 * d[i + 2]) / 255;
+      const c = PAL[Math.min(3, Math.floor(Math.pow(lum, 0.6) * 4.2))];
+      d[i] += (c[0] - d[i]) * q; d[i + 1] += (c[1] - d[i + 1]) * q; d[i + 2] += (c[2] - d[i + 2]) * q;
+    }
+    sctx.putImageData(img, 0, 0);
+  }
+  pctx.imageSmoothingEnabled = false;
+  pctx.clearRect(0, 0, 1920, 1080);
+  pctx.drawImage(small, 0, 0, sw * block, sh * block);
+  // scanlines
+  pctx.fillStyle = `rgba(0,0,0,${0.18 * p})`;
+  for (let y = 0; y < 1080; y += 4) pctx.fillRect(0, y, 1920, 2);
+}
+
+// ---------- timeline ----------
+window.TOTAL = 25.0;
+window.SNAPSHOT = false; // true while rendering desktop_snapshot.png (hides the pixel layer)
+function renderOld(t) {
+  // A. boot
+  const bootOn = t < 2.75;
+  show($("boot"), bootOn);
+  if (bootOn) {
+    const p = seg(t, 0.1, 1.55);
+    drawParticles(p, seg(t, 1.55, 1.85) * (1 - seg(t, 2.2, 2.6)));
+    const done = Math.min(1, p / 0.85);
+    $("pct").textContent = String(Math.round(done * 100)).padStart(3, "0") + "%";
+    $("module").textContent = MODULES[Math.min(MODULES.length - 1, Math.floor(done * MODULES.length))];
+    $("pbar").style.transform = `scaleX(${done})`;
+    const tp = seg(t, 1.3, 1.85);
+    $("tagline").textContent = tp > 0 ? scramble(TAG, tp, t) : "";
+    // the wordmark shrinks up into the menu bar
+    const out = eIn(seg(t, 2.25, 2.75));
+    css($("boot"), { opacity: 1 - seg(t, 2.5, 2.75), transform: `translate(${-820 * out}px, ${-400 * out}px) scale(${1 - 0.85 * out})`, transformOrigin: "50% 40%" });
+  }
+
+  // B. desktop
+  const deskOn = t >= 2.45 && t < 9.1;
+  show($("desk"), deskOn);
+  if (deskOn) {
+    css($("desk"), { opacity: seg(t, 2.45, 2.75) });
+    css($("menubar"), { transform: `translateY(${-50 * (1 - eOut(seg(t, 2.5, 2.8)))}px)` });
+    css($("dock"), { transform: `translateX(-50%) translateY(${140 * (1 - eOut(seg(t, 2.6, 2.95)))}px)` });
+    $("clock").textContent = "10:24";
+    // windows (z-order changes when the terminal is clicked again)
+    openWin($("w-term"), t, 3.35, iconX(0), DOCK_Y);
+    openWin($("w-proj"), t, 5.05, iconX(1), DOCK_Y);
+    openWin($("w-map"), t, 5.95, iconX(2), DOCK_Y);
+    openWin($("w-slot"), t, 7.95, iconX(4), DOCK_Y);
+    $("w-term").style.zIndex = t >= 6.55 ? 4 : 1;
+    $("w-proj").style.zIndex = 2; $("w-map").style.zIndex = 3; $("w-slot").style.zIndex = 6;
+    $("w-proj").querySelector("div:last-child").style.backgroundPosition = `${-420}px ${-230 - 40 * seg(t, 5.05, 9.1)}px`;
+    $("term").innerHTML = termText(t);
+    // icon labels on hover
+    const [cx, cy] = cursorAt(t);
+    for (const [id, i] of [["i-term", 0], ["i-proj", 1], ["i-map", 2], ["i-chat", 3], ["i-cart", 4]]) {
+      const hover = Math.abs(cx - iconX(i)) < 46 && Math.abs(cy - DOCK_Y) < 46;
+      $(id).querySelector(".lbl").style.opacity = hover ? 1 : 0;
+      $(id).style.background = hover ? "#16201b" : "#101312";
+    }
+    $("i-cart").style.boxShadow = t >= 7.6 && t < 8.1 ? `0 0 ${24 * Math.sin(Math.PI * seg(t, 7.6, 8.1))}px #34d399` : "none";
+    // cursor + click ring
+    const vis = t >= 2.75;
+    show($("cursor"), vis); show($("ring"), vis);
+    css($("cursor"), { left: cx - 4 + "px", top: cy - 3 + "px", transform: `scale(${CLICKS.some((c) => t >= c && t < c + 0.1) ? 0.85 : 1})` });
+    const click = CLICKS.find((c) => t >= c && t < c + 0.35);
+    css($("ring"), { left: cx + "px", top: cy + "px", opacity: click !== undefined ? 1 - seg(t, click, click + 0.35) : 0, transform: `scale(${click !== undefined ? 0.3 + 0.9 * seg(t, click, click + 0.35) : 0})` });
+    // cartridge slot
+    const em = 26, drop = eOut(seg(t, 8.05, 8.45)), push = eIn(seg(t, 8.55, 8.8));
+    css($("cart"), { transform: `translateY(${-700 * (1 - drop) + push * 6.2 * em}px)` });
+    css($("cstage"), { transform: `translateX(${t > 8.8 && t < 8.92 ? (Math.floor((t - 8.8) / 0.03) % 2 ? 4 : -4) : 0}px)` });
+    css($("led"), t >= 8.8 ? { background: "#34d399", boxShadow: "0 0 14px #34d399" } : { background: "#e0564a", boxShadow: "none" });
+    $("slotmsg").innerHTML = t >= 8.82 ? '<span style="color:#34d399">●</span> Cartridge detected: <b style="color:#e4e8e3">KRISHI.WORLD</b>' : t >= 8.0 ? "Waiting for cartridge…" : "";
+  }
+
+  // C. the switch: the desktop pixelates into the game palette
+  const pixOn = !window.SNAPSHOT && t >= 9.05 && t < 9.95;
+  show($("pixel"), pixOn);
+  if (pixOn) pixelate(t);
+
+  // D. KRISHI.WORLD splash
+  const gOn = t >= 9.9 && t < 11.45;
+  show($("gboot"), gOn);
+  if (gOn) {
+    const d = seg(t, 9.95, 10.45);
+    css($("glogo"), { transform: `translateY(${-560 * (1 - eBounce(d))}px)` });
+    css($("gsub"), { opacity: seg(t, 10.55, 10.8) });
+    css($("gsprite"), { opacity: seg(t, 10.7, 10.85), transform: `translateY(${Math.floor(t * 4) % 2 ? -4 : 0}px)` });
+  }
+
+  // E. world
+  const wOn = t >= 11.3 && t < 20.6;
+  show($("world"), wOn);
+  if (wOn) {
+    const sc = (a, b) => 1 + 0.03 * seg(t, a, b);
+    show($("g-origin"), t < 13.8); css($("g-origin"), { transform: `scale(${sc(11.3, 13.8)})` });
+    show($("g-metro"), t >= 13.8 && t < 16.0); css($("g-metro"), { transform: `scale(${sc(13.8, 16.0)})` });
+    show($("g-forest"), t >= 16.0 && t < 19.0); css($("g-forest"), { transform: `scale(${sc(16.0, 19.0)})` });
+    show($("g-coast"), t >= 19.0); css($("g-coast"), { transform: `scale(${sc(19.0, 20.6)})` });
+    const dOn = t >= 11.5 && t < 13.8;
+    show($("dialogue"), dOn);
+    if (dOn) {
+      const pin = eOut(seg(t, 11.5, 11.7));
+      css($("dialogue"), { opacity: pin, transform: `translateY(${(1 - pin) * 30}px)` });
+      const l1 = seg(t, 11.75, 12.85), l2 = seg(t, 12.85, 13.05);
+      const x1 = 36 + 700 * l1, x2 = 36 + 104 * l2;
+      css($("m1"), { left: x1 + "px", width: Math.max(0, 736 - x1) + "px" });
+      css($("m2"), { left: x2 + "px", width: Math.max(0, 140 - x2) + "px" });
+      show($("m3"), l2 < 1);
+    }
+    const termIn = eOut(seg(t, 13.95, 14.25)), cardIn = seg(t, 16.35, 16.6), mapIn = seg(t, 17.8, 18.05);
+    $("wdim").style.opacity = t >= 13.8 && t < 16.0 ? 0.5 * termIn : t >= 16.0 && t < 19.0 ? 0.45 * Math.max(cardIn * (1 - seg(t, 17.65, 17.8)), mapIn) : 0;
+    show($("terminal"), t >= 13.95 && t < 16.0);
+    css($("terminal"), { opacity: termIn, transform: `translateY(${(1 - termIn) * 40 - 60 * seg(t, 14.4, 16.0)}px) scale(${0.82 + 0.04 * termIn})` });
+    show($("card"), t >= 16.35 && t < 17.8);
+    css($("card"), { opacity: Math.min(cardIn, 1 - seg(t, 17.65, 17.8)), transform: `scale(${1.25 * (0.85 + 0.15 * eBack(cardIn))})` });
+    show($("map"), t >= 17.8 && t < 19.0);
+    css($("map"), { opacity: mapIn * (1 - seg(t, 18.85, 19.0)), transform: `scale(${1.05 * (0.9 + 0.1 * eBack(mapIn))})` });
+    const toastIn = eOut(seg(t, 19.15, 19.45));
+    show($("toast"), t >= 19.15);
+    css($("toast"), { opacity: toastIn, transform: `translateY(${(1 - toastIn) * -60}px) scale(1.9)`, transformOrigin: "center top" });
+    const chips = [[11.5, 13.7, "5 REGIONS TO <span>EXPLORE</span>", 120], [14.05, 15.95, "EVERY PROJECT IS A <span>BUILDING</span>", 46], [16.1, 17.75, "SKILLS ARE <span>COLLECTIBLES</span>", 120], [17.85, 18.95, "FAST-TRAVEL THE <span>MAP</span>", 120], [19.5, 20.55, "VISIT ALL <span>FIVE REGIONS</span>", 360]];
+    const c = chips.find(([a, b]) => t >= a && t < b);
+    show($("chip"), !!c);
+    if (c) {
+      const [a, b, html, top] = c, ci = eOut(seg(t, a, a + 0.25)), co = seg(t, b - 0.15, b);
+      $("chip").innerHTML = html;
+      css($("chip"), { top: top + "px", opacity: ci * (1 - co), transform: `translateX(-50%) translateY(${(1 - ci) * -24}px)` });
+    }
+  }
+  $("flash").style.opacity = t < 11.1 ? 0 : t < 11.3 ? seg(t, 11.1, 11.3) : 1 - eOut(seg(t, 11.3, 11.85));
+
+  // F. outro
+  const oOn = t >= 20.4;
+  show($("outro"), oOn);
+  if (oOn) {
+    const l = eOut(seg(t, 20.4, 20.85)), r = eOut(seg(t, 20.5, 20.95));
+    css($("o-left"), { transform: `translateX(${(1 - l) * -960}px)` });
+    css($("o-right"), { transform: `translateX(${(1 - r) * 960}px)` });
+    const li = eOut(seg(t, 21.15, 21.5)), ui = eOut(seg(t, 21.65, 21.95));
+    css($("o-line"), { opacity: li, transform: `translateY(${(1 - li) * 24}px)` });
+    css($("o-url"), { opacity: ui, transform: `translateY(${(1 - ui) * 16}px)` });
+    css($("outro"), { opacity: 1 - seg(t, 23.7, 24.0) });
+  }
+}
+// ---------- 0. the pixel computer (new opening) + time remap ----------
+// New timeline T: 0-2.6 pixel computer boots; 2.6-13.9 the OS chain (old t = T - 2.6);
+// 13.9-21.36 the game, 18% tighter; then the outro at its original pace.
+function oldTime(T) {
+  if (T < 2.6) return 0;
+  if (T < 13.9) return T - 2.6;
+  if (T < 21.36) return 11.3 + (T - 13.9) / 0.82;
+  return 20.4 + (T - 21.36);
+}
+window.oldTime = oldTime;
+
+const VW = 240, VH = 135; // virtual pixel resolution of the intro (x8 = 1920x1080)
+const lo = document.createElement("canvas");
+lo.width = VW; lo.height = VH;
+const lctx = lo.getContext("2d");
+const ictx = $("intro").getContext("2d");
+const SCREEN = { x: 82, y: 30, w: 76, h: 52 }; // monitor glass, in virtual pixels
+function R(c, x, y, w, h) { lctx.fillStyle = c; lctx.fillRect(x, y, w, h); }
+function drawComputer(T) {
+  lctx.imageSmoothingEnabled = false;
+  // room + desk
+  R("#0b0f0d", 0, 0, VW, VH);
+  for (let y = 0; y < 104; y += 6) R("rgba(52,211,153,0.025)", 0, y, VW, 1);
+  R("#2b2420", 0, 104, VW, 31);
+  R("#46382b", 0, 104, VW, 3);
+  // monitor case
+  R("#5b6b7e", 70, 20, 102, 80);
+  R("#c8ccd4", 72, 22, 98, 76);
+  R("#9aa0a8", 72, 94, 98, 4);
+  R("#e8eaee", 72, 22, 98, 2);
+  R("#3a3f4a", SCREEN.x - 3, SCREEN.y - 3, SCREEN.w + 6, SCREEN.h + 6);
+  // stand + keyboard + mug + plant
+  R("#9aa0a8", 108, 100, 26, 5);
+  R("#5b6b7e", 102, 105, 38, 2);
+  R("#5b6b7e", 58, 112, 126, 14);
+  R("#c8ccd4", 60, 113, 122, 11);
+  for (let r = 0; r < 3; r++) for (let k = 0; k < 15; k++) R("#9aa0a8", 62 + k * 8 - (r % 2) * 2, 114 + r * 3, 6, 2);
+  R("#e0564a", 196, 96, 10, 10); R("#a83a32", 196, 104, 10, 2); R("#e0564a", 206, 98, 3, 5);
+  R("#46382b", 30, 92, 12, 12); R("#285943", 28, 82, 6, 10); R("#78b85a", 34, 78, 6, 14); R("#285943", 40, 84, 5, 8);
+  // power LED + button (pressed at 0.35)
+  const on = T >= 0.35;
+  R(on ? "#34d399" : "#e0564a", 158, 90, 3, 2);
+  R(T >= 0.3 && T < 0.42 ? "#3a3f4a" : "#5b6b7e", 150, 89, 5, 4);
+  // the glass: dark, then a CRT warm-up line that opens vertically, then boot text
+  R("#050706", SCREEN.x, SCREEN.y, SCREEN.w, SCREEN.h);
+  const open = seg(T, 0.45, 0.75);
+  if (open > 0) {
+    const h = Math.max(1, Math.round(SCREEN.h * eOut(open)));
+    const y = SCREEN.y + Math.round((SCREEN.h - h) / 2);
+    R(open < 1 ? "#a7f3d0" : "#0a0c0b", SCREEN.x, y, SCREEN.w, h);
+    if (open >= 1) {
+      lctx.font = "7px Pixelify";
+      lctx.textBaseline = "top";
+      const lines = [[0.8, "KRISHI.OS BIOS v0.1.0", "#34d399"], [1.0, "MEM CHECK ...... OK", "#a1aaa3"], [1.2, "LOADING KRISHI.OS", "#a1aaa3"]];
+      lines.forEach(([at, text, color], i) => {
+        if (T < at) return;
+        const n = Math.min(text.length, Math.floor((T - at) * 60));
+        lctx.fillStyle = color;
+        lctx.fillText(text.slice(0, n), SCREEN.x + 4, SCREEN.y + 4 + i * 9);
+      });
+      if (T >= 1.35) {
+        const bar = seg(T, 1.35, 2.0);
+        R("#222826", SCREEN.x + 4, SCREEN.y + 34, SCREEN.w - 8, 3);
+        R("#34d399", SCREEN.x + 4, SCREEN.y + 34, Math.round((SCREEN.w - 8) * bar), 3);
+      }
+      if (Math.floor(T * 3) % 2) R("#34d399", SCREEN.x + 4, SCREEN.y + 44, 3, 5); // cursor
+      // fade the text out as the camera dives in, so the screen is dark when it fills the frame
+      const fadeOut = seg(T, 2.15, 2.45);
+      if (fadeOut > 0) { lctx.globalAlpha = fadeOut; R("#0a0c0b", SCREEN.x, SCREEN.y, SCREEN.w, SCREEN.h); lctx.globalAlpha = 1; }
+    }
+    // scanlines on the glass
+    for (let y = SCREEN.y; y < SCREEN.y + SCREEN.h; y += 2) { lctx.globalAlpha = 0.25; R("#000", SCREEN.x, y, SCREEN.w, 1); lctx.globalAlpha = 1; }
+  }
+  // dark-room fade in
+  const fin = seg(T, 0, 0.3);
+  if (fin < 1) { lctx.globalAlpha = 1 - fin; R("#000", 0, 0, VW, VH); lctx.globalAlpha = 1; }
+}
+function renderIntro(T) {
+  drawComputer(T);
+  // camera: hold the whole computer, then dive into the screen until the glass fills the frame
+  const z = eIn(seg(T, 1.75, 2.6));
+  const cx0 = VW / 2, cy0 = VH / 2, cx1 = SCREEN.x + SCREEN.w / 2, cy1 = SCREEN.y + SCREEN.h / 2;
+  const scale = 8 * Math.pow(1920 / SCREEN.w / 8 * 1.06, z);
+  const cx = cx0 + (cx1 - cx0) * Math.min(1, z * 1.6), cy = cy0 + (cy1 - cy0) * Math.min(1, z * 1.6);
+  ictx.imageSmoothingEnabled = false;
+  ictx.fillStyle = "#000";
+  ictx.fillRect(0, 0, 1920, 1080);
+  ictx.drawImage(lo, 960 - cx * scale, 540 - cy * scale, VW * scale, VH * scale);
+}
+// After the dive: the hi-res particle boot comes into focus out of big pixels
+const dp = document.createElement("canvas"), dctx = dp.getContext("2d");
+function depixel(T) {
+  const p = seg(T, 2.6, 3.15), block = Math.max(1, Math.round(24 * (1 - eOut(p))));
+  const w = Math.ceil(1920 / block), h = Math.ceil(1080 / block);
+  dp.width = w; dp.height = h;
+  dctx.fillStyle = "#0a0c0b"; dctx.fillRect(0, 0, w, h);
+  dctx.drawImage($("particles"), 0, 0, w, h);
+  ictx.imageSmoothingEnabled = false;
+  ictx.drawImage(dp, 0, 0, w * block, h * block);
+}
+
+function renderAt(T) {
+  renderOld(oldTime(T));
+  const introOn = T < 3.15 && !window.SNAPSHOT;
+  show($("intro"), introOn);
+  if (T < 2.6) { renderIntro(T); $("boot").style.visibility = "hidden"; }
+  else if (introOn) { depixel(T); $("boot").style.visibility = "visible"; $("intro").style.opacity = String(1 - seg(T, 2.95, 3.15)); }
+  else { $("boot").style.visibility = "visible"; $("intro").style.opacity = "1"; }
+  if (T < 2.6) $("intro").style.opacity = "1";
+}
+window.renderAt = renderAt;
+window.ready = (async () => {
+  await document.fonts.load('800 230px "Geist Mono"');
+  await document.fonts.load('40px "Pixelify"');
+  await document.fonts.ready;
+  await Promise.all([...document.images].map((i) => (i.complete ? 0 : new Promise((r) => (i.onload = i.onerror = r)))));
+  buildParticles();
+  renderAt(0);
+  return particles.length;
+})();
+</script>
+</body>
+</html>

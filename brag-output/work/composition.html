@@ -1,0 +1,329 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Geist Mono"; src: url("fonts/geist-mono.woff2") format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "Pixelify"; src: url("fonts/pixelify.woff2") format("woff2"); font-weight: 400 700; }
+  html, body { margin: 0; background: #000; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #0a0c0b; font-family: "Geist Mono", monospace; color: #e4e8e3; }
+  .abs { position: absolute; }
+  .layer { position: absolute; inset: 0; }
+  img { display: block; image-rendering: auto; }
+  .pix { image-rendering: pixelated; }
+  /* cybertech */
+  .bar { position: absolute; left: 0; right: 0; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 64px; font-size: 18px; letter-spacing: .12em; text-transform: uppercase; color: #7c8780; border-color: #222826; border-style: solid; border-width: 0; }
+  .win { position: absolute; border: 1px solid #2a332e; background: #0a0c0b; box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(52,211,153,.08); overflow: hidden; }
+  .win .title { height: 40px; display: flex; align-items: center; gap: 14px; padding: 0 18px; font-size: 16px; color: #7c8780; border-bottom: 1px solid #222826; background: #101312; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #222826; }
+  .caption { position: absolute; left: 0; right: 0; text-align: center; font-size: 44px; letter-spacing: -.01em; color: #e4e8e3; }
+  .caption b { color: #34d399; font-weight: 600; }
+  /* gaming */
+  .chip { position: absolute; left: 50%; font-family: "Pixelify"; font-size: 40px; letter-spacing: .08em; color: #2b2420; background: #f5e8c8; border: 6px solid #46382b; box-shadow: 8px 8px 0 #46382b; padding: 10px 26px; white-space: nowrap; }
+  .chip span { color: #285943; }
+  .pixtext { font-family: "Pixelify"; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ===== 1. KRISHI.OS boot (particles) ===== -->
+  <div id="boot" class="layer">
+    <canvas id="particles" width="1920" height="1080" class="abs" style="left:0;top:0"></canvas>
+    <div class="bar" style="top:0;border-bottom-width:1px">
+      <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#34d399;margin-right:14px;vertical-align:middle"></span><b style="color:#34d399">KRISHI.OS V0.1.0</b>&nbsp;&nbsp;| AI ENGINEER PORTFOLIO SYSTEM</span>
+      <span>2026-11-19 · MELBOURNE</span>
+    </div>
+    <div class="abs" id="readout" style="left:660px;width:600px;top:620px;font-size:20px;letter-spacing:.2em;text-transform:uppercase">
+      <p id="tagline" style="margin:0 0 26px;text-align:center;color:#34d399;font-size:26px"></p>
+      <div style="display:flex;justify-content:space-between;color:#7c8780"><span>mount <span id="module" style="text-transform:none;color:#a1aaa3"></span></span><span id="pct" style="color:#34d399"></span></div>
+      <div style="margin-top:12px;height:2px;background:#222826"><div id="pbar" style="height:2px;background:#34d399;box-shadow:0 0 12px #34d399;transform-origin:left"></div></div>
+    </div>
+    <div class="bar" style="bottom:0;border-top-width:1px"><span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#d9b45a;margin-right:14px;vertical-align:middle"></span>CONNECTING TO KRISHI.OS</span><span>ESC TO SKIP</span></div>
+  </div>
+
+  <!-- ===== 2-3. the portfolio + ⌘K ===== -->
+  <div id="os" class="layer">
+    <p class="caption" id="cap-os" style="top:60px">A portfolio built as an <b>operating system</b>.</p>
+    <div class="win" id="win" style="left:240px;top:170px;width:1440px;height:850px">
+      <div class="title"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span id="wintitle" style="margin-left:10px">krishi.os — ~/</span></div>
+      <div style="position:relative;width:1440px;height:810px;overflow:hidden">
+        <img id="s-hero" class="abs" src="captures/os_hero.png" style="left:0;top:0;width:1440px">
+        <img id="s-projects" class="abs" src="captures/os_projects.png" style="left:0;top:0;width:1440px">
+        <img id="s-map" class="abs" src="captures/os_map.png" style="left:0;top:0;width:1440px">
+        <div id="dim" class="layer" style="background:#000;opacity:0"></div>
+      </div>
+    </div>
+    <div id="palette" class="abs" style="left:960px;top:330px;width:576px;height:166px;transform-origin:center top">
+      <img src="captures/os_palette.png" style="width:576px;height:166px">
+      <div id="palmask" class="abs" style="top:12px;height:24px;background:#0a0c0b"></div>
+      <div id="caret" class="abs" style="top:15px;width:2px;height:18px;background:#34d399"></div>
+      <div id="palflash" class="abs" style="left:0;top:50px;width:576px;height:82px;background:#34d399;opacity:0;mix-blend-mode:screen"></div>
+    </div>
+  </div>
+
+  <!-- ===== 4. the hinge: console + cartridge ===== -->
+  <div id="hinge" class="layer" style="background:#16201b">
+    <div id="cstage" class="abs" style="left:50%;top:150px;width:448px;margin-left:-224px;font-size:28px">
+      <div style="position:relative;height:14em;width:16em;overflow:hidden">
+        <div id="cart" class="abs" style="bottom:0;left:50%;margin-left:-5em;width:10em">
+          <div style="position:relative;border-radius:.9em .9em .25em .25em;border:.25em solid #3a3f4a;background:#a8adb5;padding:1.1em .75em .6em;box-shadow:.3em .3em 0 #3a3f4a">
+            <div class="abs" style="left:2.2em;right:2.2em;top:.35em"><div style="height:.12em;background:#8a9099;margin-bottom:.15em"></div><div style="height:.12em;background:#8a9099"></div></div>
+            <div style="border:.15em solid #3a3f4a;background:#f5e8c8;overflow:hidden">
+              <div class="pixtext" style="background:#285943;color:#f5e8c8;text-align:center;font-size:.95em;letter-spacing:.08em;padding:.15em .4em">KRISHI.WORLD</div>
+              <div style="display:flex;align-items:center;gap:.4em;padding:.4em .5em">
+                <svg viewBox="0 0 16 22" shape-rendering="crispEdges" style="height:3.2em;width:auto;flex:none" id="sprite"></svg>
+                <p class="pixtext" style="margin:0;font-size:.62em;line-height:1.3;color:#46382b">Explore the mind.<br>Discover the builder.</p>
+              </div>
+            </div>
+            <div style="margin-top:.5em;display:flex;justify-content:center;gap:.18em" id="pins"></div>
+          </div>
+        </div>
+      </div>
+      <div style="width:16em;box-sizing:border-box;border:.25em solid #3a3f4a;border-top:0;border-radius:0 0 .6em .6em;background:#5b6b7e;padding:.5em 1em .8em;box-shadow:.3em .3em 0 #0a0c0b">
+        <div style="margin:0 auto;height:.8em;width:12em;border-radius:.2em;background:#0a0c0b"></div>
+        <div style="margin-top:.6em;display:flex;justify-content:space-between;align-items:center;font-size:.7em;letter-spacing:.2em;color:#c8ccd4"><span>KRISHI.OS</span><span>POWER <span id="led" style="display:inline-block;width:.7em;height:.7em;border-radius:50%;background:#e0564a;vertical-align:middle;margin-left:.4em"></span></span></div>
+      </div>
+    </div>
+    <p id="cap-cart" class="abs pixtext" style="left:0;right:0;top:820px;text-align:center;font-size:56px;color:#f5e8c8;margin:0">…with a game cartridge inside.</p>
+  </div>
+
+  <!-- ===== 5-8. KRISHI.WORLD ===== -->
+  <div id="world" class="layer">
+    <img id="g-origin" class="layer pix" src="captures/w_origin.png" style="width:1920px;height:1080px">
+    <div id="dialogue" class="abs" style="left:570px;top:926px;width:780px;height:140px">
+      <img src="captures/w_dialogue.png" style="width:780px;height:140px">
+      <div id="m1" class="abs" style="top:42px;height:36px;background:#fff"></div>
+      <div id="m2" class="abs" style="top:82px;height:28px;background:#fff"></div>
+      <div id="m3" class="abs" style="left:758px;top:94px;width:22px;height:22px;background:#fff"></div>
+    </div>
+
+    <img id="g-metro" class="layer pix" src="captures/w_metro.png" style="width:1920px;height:1080px">
+    <img id="g-forest" class="layer pix" src="captures/w_forest.png" style="width:1920px;height:1080px">
+    <img id="g-coast" class="layer pix" src="captures/w_coast.png" style="width:1920px;height:1080px">
+    <div id="wdim" class="layer" style="background:#000;opacity:0"></div>
+    <img id="terminal" class="abs" src="captures/w_terminal.png" style="left:512px;top:150px;width:896px;transform-origin:center top">
+    <img id="card" class="abs" src="captures/w_card.png" style="left:736px;top:300px;width:448px;transform-origin:center">
+    <img id="map" class="abs" src="captures/w_map.png" style="left:576px;top:250px;width:768px;transform-origin:center">
+    <img id="toast" class="abs" src="captures/w_toast1.png" style="left:840px;top:120px;width:241px">
+    <div id="chip" class="chip"></div>
+  </div>
+
+  <!-- ===== 9. outro ===== -->
+  <div id="outro" class="layer">
+    <div id="o-left" class="abs" style="left:0;top:0;width:960px;height:1080px;background:#0a0c0b;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="font-size:120px;font-weight:800;color:#34d399;letter-spacing:-.02em">KRISHI.OS</div>
+      <div style="margin-top:14px;font-size:28px;letter-spacing:.24em;color:#7c8780;text-transform:uppercase">the classic portfolio</div>
+    </div>
+    <div id="o-right" class="abs" style="left:960px;top:0;width:960px;height:1080px;background:#78b85a;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <svg viewBox="0 0 16 22" shape-rendering="crispEdges" style="height:150px;margin-bottom:22px" id="sprite2"></svg>
+      <div class="pixtext" style="font-size:112px;color:#f5e8c8;text-shadow:7px 7px 0 #285943">KRISHI.WORLD</div>
+      <div class="pixtext" style="margin-top:14px;font-size:34px;letter-spacing:.14em;color:#285943">THE PIXEL ADVENTURE</div>
+    </div>
+    <div id="o-band" class="abs" style="left:0;right:0;top:820px;text-align:center">
+      <div id="o-line" style="display:inline-block;background:#0a0c0b;border:2px solid #34d399;padding:18px 40px;font-size:42px;color:#e4e8e3;box-shadow:8px 8px 0 #285943">Two ways to explore one builder.</div>
+      <div id="o-url" style="margin-top:26px;font-size:30px;letter-spacing:.06em;color:#0a0c0b"><span style="background:#f5e8c8;padding:6px 16px;border:2px solid #46382b">krishi-portfolio.vercel.app</span></div>
+    </div>
+  </div>
+
+  <div id="flash" class="layer" style="background:#fff;opacity:0"></div>
+</div>
+
+<script>
+// ---------- helpers ----------
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const eOut = (x) => 1 - Math.pow(1 - x, 3);
+const eIn = (x) => x * x * x;
+const eIO = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const eBack = (x) => { const c = 1.6; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const show = (el, on) => { el.style.display = on ? "" : "none"; };
+const css = (el, s) => Object.assign(el.style, s);
+function hash(n) { n = (n ^ 61) ^ (n >>> 16); n = n + (n << 3); n = n ^ (n >>> 4); n = Math.imul(n, 0x27d4eb2d); n = n ^ (n >>> 15); return (n >>> 0) / 4294967296; }
+
+// Player sprite (same pixels as the in-game walker)
+const PX = [[3,1,11,4,"#3b2a20"],[4,0,1,1,"#3b2a20"],[7,0,1,1,"#3b2a20"],[11,0,1,1,"#3b2a20"],[3,4,11,1,"#34d399"],[3,5,11,7,"#f2c9a0"],[3,10,11,2,"#d9a37a"],[3,5,1,3,"#3b2a20"],[13,5,1,3,"#3b2a20"],[5,7,1,2,"#1f1d24"],[11,7,1,2,"#1f1d24"],[4,12,9,6,"#2fae7c"],[4,16,9,2,"#1f7d58"],[8,13,1,4,"#f5e8c8"],[3,12,1,4,"#1f7d58"],[13,12,1,4,"#1f7d58"],[5,18,3,3,"#2c3a5a"],[9,18,3,3,"#2c3a5a"],[5,21,3,1,"#2a2220"],[9,21,3,1,"#2a2220"]];
+for (const id of ["sprite", "sprite2"]) $(id).innerHTML = PX.map(([x,y,w,h,c]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`).join("");
+$("pins").innerHTML = Array.from({ length: 12 }, () => '<span style="width:.42em;height:.7em;background:#c9902e;display:block"></span>').join("");
+
+// ---------- particles (seeded, a pure function of t) ----------
+const cv = $("particles"), ctx = cv.getContext("2d");
+let particles = [];
+function buildParticles() {
+  const w = 1920, h = 1080, s = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+  s.canvas.width = w; s.canvas.height = h;
+  const fontSize = 230, cx = w / 2, cy = 420;
+  s.font = `800 ${fontSize}px "Geist Mono"`; s.textAlign = "center"; s.textBaseline = "middle";
+  s.fillText("KRISHI.OS", cx, cy);
+  const px = s.getImageData(0, 0, w, h).data, step = 7, reach = Math.hypot(w, h) * 0.6;
+  let k = 0;
+  for (let y = 0; y < h; y += step) for (let x = 0; x < w; x += step) {
+    if (px[(y * w + x) * 4 + 3] < 128) continue;
+    k++;
+    const a = hash(k * 3 + 1) * Math.PI * 2, r = reach * (0.5 + hash(k * 3 + 2) * 0.5);
+    particles.push({ tx: x, ty: y, ox: Math.cos(a) * r, oy: Math.sin(a) * r, d: (x / w) * 0.25 + hash(k * 3 + 3) * 0.15 });
+  }
+}
+function drawParticles(p, glow) {
+  ctx.clearRect(0, 0, 1920, 1080);
+  ctx.fillStyle = "#34d399";
+  for (const q of particles) {
+    const l = clamp((p - q.d) / 0.6), rem = 1 - l * l * (3 - 2 * l), a = rem * Math.PI * 1.5, c = Math.cos(a), s = Math.sin(a);
+    ctx.globalAlpha = 0.3 + 0.7 * (1 - rem);
+    ctx.fillRect(q.tx + (q.ox * c - q.oy * s) * rem, q.ty + (q.ox * s + q.oy * c) * rem, 4.5, 4.5);
+  }
+  ctx.globalAlpha = 1;
+  if (glow > 0) { ctx.shadowColor = "#34d399"; ctx.shadowBlur = 30 * glow; ctx.globalAlpha = 0.25 * glow; for (const q of particles) if (hash(q.tx * 7 + q.ty) < 0.15) ctx.fillRect(q.tx, q.ty, 4.5, 4.5); ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+}
+const MODULES = ["master_of_ai.monash", "mdas.vice_president", "studenthub.platform", "traffic_ai.yolo", "accessvision.yolo", "clinicalbrief.platform", "leadership.framework"];
+const TAG = "AI ENGINEER & PRODUCT BUILDER", GLYPHS = "!<>-_/[]{}=+*^?#01";
+function scramble(text, prog, t) {
+  const n = Math.floor(prog * text.length);
+  let out = text.slice(0, n);
+  for (let i = n; i < text.length; i++) out += text[i] === " " ? " " : GLYPHS[Math.floor(hash(i * 97 + Math.floor(t * 30)) * GLYPHS.length)];
+  return out;
+}
+
+// ---------- timeline ----------
+const T = { end: 22.5 };
+function renderAt(t) {
+  // 1. boot
+  const bootOn = t < 3.1;
+  show($("boot"), bootOn);
+  if (bootOn) {
+    const p = seg(t, 0.15, 1.75);
+    drawParticles(p, seg(t, 1.75, 2.1) * (1 - seg(t, 2.6, 3.0)));
+    const done = Math.min(1, p / 0.85);
+    $("pct").textContent = String(Math.round(done * 100)).padStart(3, "0") + "%";
+    $("module").textContent = MODULES[Math.min(MODULES.length - 1, Math.floor(done * MODULES.length))];
+    $("pbar").style.transform = `scaleX(${done})`;
+    const tp = seg(t, 1.45, 2.05);
+    $("tagline").textContent = tp > 0 ? scramble(TAG, tp, t) : "";
+    const out = seg(t, 2.75, 3.05);
+    css($("boot"), { opacity: 1 - out, transform: `translateY(${-40 * eIn(out)}px)` });
+  }
+
+  // 2-3. portfolio windows + palette
+  const osOn = t >= 3.05 && t < 7.95;
+  show($("os"), osOn);
+  if (osOn) {
+    const inn = eOut(seg(t, 3.05, 3.5));
+    css($("os"), { opacity: inn });
+    css($("cap-os"), { opacity: seg(t, 3.15, 3.5) * (1 - seg(t, 6.25, 6.5)), transform: `translateY(${(1 - eOut(seg(t, 3.15, 3.55))) * 20}px)` });
+    css($("win"), { transform: `translateY(${(1 - inn) * 60}px)` });
+    // slides: hero -> projects -> map, staggered (old out, then new in)
+    const slides = [["s-hero", 3.05, 4.35, "~/"], ["s-projects", 4.35, 5.6, "~/projects"], ["s-map", 5.6, 99, "~/system-map"]];
+    for (const [id, a, b] of slides) {
+      const el = $(id), inP = a <= 3.1 ? 1 : eOut(seg(t, a, a + 0.38)), outP = eIn(seg(t, b - 0.22, b));
+      const vis = t >= a && t < b;
+      show(el, vis);
+      if (vis) css(el, { transform: `translateX(${(1 - inP) * 220 - outP * 220}px) scale(${1 + 0.035 * seg(t, a, b === 99 ? 7.9 : b)})`, transformOrigin: "50% 20%", opacity: Math.min(inP, 1 - outP) });
+    }
+    $("wintitle").textContent = "krishi.os — " + (t < 4.35 ? "~/" : t < 5.6 ? "~/projects" : "~/system-map");
+    // ⌘K palette
+    const palIn = seg(t, 6.35, 6.6);
+    show($("palette"), palIn > 0);
+    $("dim").style.opacity = 0.55 * palIn;
+    if (palIn > 0) {
+      css($("palette"), { opacity: palIn, transform: `translateX(-50%) scale(${1.55 * (0.94 + 0.06 * eBack(palIn))})` });
+      const n = Math.floor(seg(t, 6.65, 7.25) * 12), x0 = 46 + n * 8.2;
+      css($("palmask"), { left: x0 + "px", width: Math.max(0, 150 - x0) + "px" });
+      css($("caret"), { left: x0 + 1 + "px", opacity: Math.floor(t * 4) % 2 || n < 12 ? 1 : 0 });
+      $("palflash").style.opacity = 0.35 * Math.sin(Math.PI * seg(t, 7.35, 7.6));
+    }
+    // CRT power-off of the whole OS layer
+    const crt = seg(t, 7.6, 7.92);
+    css($("os"), { clipPath: crt > 0 ? `inset(${49.9 * eIn(crt)}% 0 ${49.9 * eIn(crt)}% 0)` : "none", filter: `brightness(${1 + 1.2 * crt})` });
+  }
+
+  // 4. hinge
+  const hOn = t >= 7.92 && t < 10.05;
+  show($("hinge"), hOn);
+  if (hOn) {
+    css($("hinge"), { opacity: seg(t, 7.92, 8.08) });
+    const em = 28, drop = eOut(seg(t, 8.08, 8.6)), push = eIn(seg(t, 8.82, 9.12));
+    const y = -900 * (1 - drop) + push * 6.2 * em;
+    const shake = t > 9.12 && t < 9.26 ? (Math.floor((t - 9.12) / 0.035) % 2 ? 4 : -4) : 0;
+    css($("cart"), { transform: `translateY(${y}px)` });
+    css($("cstage"), { transform: `translateX(${shake}px)` });
+    css($("led"), t >= 9.12 ? { background: "#34d399", boxShadow: "0 0 14px #34d399" } : { background: "#e0564a", boxShadow: "none" });
+    css($("cap-cart"), { opacity: seg(t, 8.05, 8.3), transform: `translateY(${(1 - eOut(seg(t, 8.05, 8.4))) * 18}px)` });
+  }
+
+  // 5-8. world
+  const wOn = t >= 9.6 && t < 19.4;
+  show($("world"), wOn);
+  if (wOn) {
+    const sc = (a, b) => 1 + 0.03 * seg(t, a, b);
+    show($("g-origin"), t < 12.6); css($("g-origin"), { transform: `scale(${sc(9.6, 12.6)})` });
+    show($("g-metro"), t >= 12.6 && t < 14.8); css($("g-metro"), { transform: `scale(${sc(12.6, 14.8)})` });
+    show($("g-forest"), t >= 14.8 && t < 17.8); css($("g-forest"), { transform: `scale(${sc(14.8, 17.8)})` });
+    show($("g-coast"), t >= 17.8); css($("g-coast"), { transform: `scale(${sc(17.8, 19.4)})` });
+
+    // dialogue types the guide's line
+    const dOn = t >= 10.25 && t < 12.6;
+    show($("dialogue"), dOn);
+    if (dOn) {
+      const pin = eOut(seg(t, 10.25, 10.45));
+      css($("dialogue"), { opacity: pin, transform: `translateY(${(1 - pin) * 30}px)` });
+      const l1 = seg(t, 10.5, 11.6), l2 = seg(t, 11.6, 11.8);
+      const x1 = 36 + 700 * l1, x2 = 36 + 104 * l2;
+      css($("m1"), { left: x1 + "px", width: Math.max(0, 736 - x1) + "px" });
+      css($("m2"), { left: x2 + "px", width: Math.max(0, 140 - x2) + "px" });
+      show($("m3"), l2 < 1);
+    }
+    // dims behind panels
+    const termIn = eOut(seg(t, 12.75, 13.05)), cardIn = seg(t, 15.25, 15.5), mapIn = seg(t, 16.6, 16.85);
+    $("wdim").style.opacity = t >= 12.6 && t < 14.8 ? 0.5 * termIn : t >= 14.8 && t < 17.8 ? 0.45 * Math.max(cardIn * (1 - seg(t, 16.45, 16.6)), mapIn) : 0;
+    show($("terminal"), t >= 12.75 && t < 14.8);
+    css($("terminal"), { opacity: termIn, transform: `translateY(${(1 - termIn) * 40 - 60 * seg(t, 13.2, 14.8)}px) scale(${0.82 + 0.04 * termIn})` });
+    show($("card"), t >= 15.25 && t < 16.6);
+    css($("card"), { opacity: Math.min(cardIn, 1 - seg(t, 16.45, 16.6)), transform: `scale(${1.25 * (0.85 + 0.15 * eBack(cardIn))})` });
+    show($("map"), t >= 16.6 && t < 17.8);
+    css($("map"), { opacity: mapIn * (1 - seg(t, 17.65, 17.8)), transform: `scale(${1.05 * (0.9 + 0.1 * eBack(mapIn))})` });
+    const toastIn = eOut(seg(t, 18.0, 18.3));
+    show($("toast"), t >= 18.0);
+    css($("toast"), { opacity: toastIn, transform: `translateY(${(1 - toastIn) * -60}px) scale(1.9)`, transformOrigin: "center top" });
+
+    // chips (one at a time; each held well past reading time)
+    const chips = [[10.3, 12.5, "5 REGIONS TO <span>EXPLORE</span>", 120], [12.85, 14.75, "EVERY PROJECT IS A <span>BUILDING</span>", 46], [14.9, 16.55, "SKILLS ARE <span>COLLECTIBLES</span>", 120], [16.65, 17.75, "FAST-TRAVEL THE <span>MAP</span>", 120], [18.35, 19.4, "VISIT ALL <span>FIVE REGIONS</span>", 300]];
+    const c = chips.find(([a, b]) => t >= a && t < b);
+    show($("chip"), !!c);
+    if (c) {
+      const [a, b, html, top] = c, ci = eOut(seg(t, a, a + 0.25)), co = seg(t, b - 0.15, b);
+      $("chip").innerHTML = html;
+      css($("chip"), { top: top + "px", opacity: ci * (1 - co), transform: `translateX(-50%) translateY(${(1 - ci) * -24}px)` });
+    }
+  }
+
+  // white flash from the cartridge into the world
+  $("flash").style.opacity = t < 9.45 ? 0 : t < 9.6 ? seg(t, 9.45, 9.6) : 1 - eOut(seg(t, 9.6, 10.15));
+
+  // 9. outro
+  const oOn = t >= 19.2;
+  show($("outro"), oOn);
+  if (oOn) {
+    const l = eOut(seg(t, 19.2, 19.65)), r = eOut(seg(t, 19.3, 19.75));
+    css($("o-left"), { transform: `translateX(${(1 - l) * -960}px)` });
+    css($("o-right"), { transform: `translateX(${(1 - r) * 960}px)` });
+    const li = eOut(seg(t, 19.95, 20.3)), ui = eOut(seg(t, 20.45, 20.75));
+    css($("o-line"), { opacity: li, transform: `translateY(${(1 - li) * 24}px)` });
+    css($("o-url"), { opacity: ui, transform: `translateY(${(1 - ui) * 16}px)` });
+    css($("outro"), { opacity: 1 - seg(t, 22.2, 22.5) });
+  }
+}
+window.renderAt = renderAt;
+window.TOTAL = T.end;
+window.ready = (async () => {
+  await document.fonts.load('800 230px "Geist Mono"');
+  await document.fonts.load('40px "Pixelify"');
+  await document.fonts.ready;
+  await Promise.all([...document.images].map((i) => (i.complete ? 0 : new Promise((r) => (i.onload = i.onerror = r)))));
+  buildParticles();
+  renderAt(0);
+  return particles.length;
+})();
+</script>
+</body>
+</html>

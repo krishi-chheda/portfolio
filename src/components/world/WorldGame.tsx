@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type Phaser from "phaser";
+import gsap from "gsap";
+import { CartridgeIntro } from "./Cartridge";
 import { emit, on, type Dialogue } from "@/game/bus";
 import { record, snapshot } from "@/game/progress";
 import { getSettings, reduceMotion, setSettings, type Settings } from "@/game/settings";
@@ -51,6 +53,9 @@ export default function WorldGame() {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [overlay, setOverlay] = useState<Overlay>(null);
   const router = useRouter();
+  const mainRef = useRef<HTMLElement>(null);
+  const [intro, setIntro] = useState(true); // the cartridge insert plays until the game is loaded and seated
+  const exiting = useRef(false);
   const [progress, setProgress] = useState<ProgressSnapshot>(EMPTY);
   const progressRef = useRef<ProgressSnapshot>(EMPTY);
   const [region, setRegion] = useState({ id: "origin", name: "Origin Valley" });
@@ -177,8 +182,22 @@ export default function WorldGame() {
     setOverlay({ kind: "menu" });
   };
 
+  // Leaving is a console power-off: the screen collapses to a line (same CRT effect as the portfolio's boot exit)
+  const exitToOS = () => {
+    if (exiting.current) return;
+    exiting.current = true;
+    if (reduceMotion() || !mainRef.current) return router.push("/");
+    gsap.to(mainRef.current, {
+      clipPath: "inset(49.8% 0% 49.8% 0%)",
+      filter: "brightness(1.8)",
+      duration: 0.35,
+      ease: "power2.in",
+      onComplete: () => router.push("/"),
+    });
+  };
+
   const choose = (c: MenuChoice) => {
-    if (c === "portfolio") return router.push("/");
+    if (c === "portfolio") return exitToOS();
     setOverlay({ kind: c });
   };
 
@@ -189,7 +208,7 @@ export default function WorldGame() {
   };
 
   return (
-    <main className="fixed inset-0 bg-[#1c4031] font-mono text-[#f5e8c8] select-none">
+    <main ref={mainRef} className="fixed inset-0 bg-[#1c4031] font-mono text-[#f5e8c8] select-none">
       <div ref={hostRef} className="absolute inset-0" aria-label="KRISHI.WORLD game" role="application" />
 
       {/* HUD */}
@@ -202,8 +221,17 @@ export default function WorldGame() {
           <button type="button" onClick={openMenu} className={HUD_BUTTON} aria-label="Open menu">
             Menu <span className="hidden sm:inline">(Esc)</span>
           </button>
-          <Link href="/" className={HUD_BUTTON}>
-            ← <span className="hidden sm:inline">Back to </span>Portfolio
+          {/* A real link (middle / Ctrl-click still open a new tab); a plain click plays the power-off first */}
+          <Link
+            href="/"
+            className={HUD_BUTTON}
+            onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+              e.preventDefault();
+              exitToOS();
+            }}
+          >
+            ⏻ <span className="hidden sm:inline">Exit to </span>KRISHI.OS
           </Link>
         </div>
       </div>
@@ -228,18 +256,14 @@ export default function WorldGame() {
       {overlay?.kind === "achievements" && <AchievementList progress={progress} onClose={close} />}
       {toasts[0] && <AchievementToast key={toasts[0] + toasts.length} name={toasts[0]} />}
 
-      {status !== "ready" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-sm">
-          {status === "loading" ? (
-            <p className="tracking-[0.18em]">LOADING WORLD…</p>
-          ) : (
-            <>
-              <p>The world couldn&apos;t load in this browser.</p>
-              <Link href="/" className="underline">
-                Go to the classic portfolio
-              </Link>
-            </>
-          )}
+      {intro && status !== "error" && <CartridgeIntro ready={status === "ready"} onDone={() => setIntro(false)} />}
+
+      {status === "error" && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-[#16201b] text-sm">
+          <p>The world couldn&apos;t load in this browser.</p>
+          <Link href="/" className="underline">
+            Go to the classic portfolio
+          </Link>
         </div>
       )}
     </main>

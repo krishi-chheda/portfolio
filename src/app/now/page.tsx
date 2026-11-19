@@ -6,10 +6,13 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Card from "@/components/ui/Card";
 import { useTerminalReveal } from "@/hooks/useTerminalReveal";
+import { ownerProfile } from "@/lib/data";
 
 const h2 = "text-sm font-normal uppercase tracking-[0.18em] text-ink flex items-center gap-2 mb-3";
 const icon = "w-4 h-4 text-accent";
 const link = "text-accent hover:text-accent-2 underline decoration-dotted underline-offset-2 transition-colors duration-150";
+// The same "Fitness & lifting" wording as Ask Krishi and KRISHI.WORLD
+const FITNESS = ownerProfile.hobbies.find((h) => h.toLowerCase().startsWith("fitness")) ?? "Fitness";
 
 export default function NowPage() {
   const revealRef = useTerminalReveal<HTMLElement>();
@@ -78,8 +81,9 @@ export default function NowPage() {
                 <p>
                   <strong className="font-semibold text-ink">Formula 1:</strong> Tracking the current championship calendar. Analyzing telemetry and race dynamics (and hoping to catch another live GP paddock session soon).
                 </p>
+                {/* Owner-confirmed hobby (data.ts ownerProfile.hobbies); no routine details until Krishi supplies them */}
                 <p>
-                  <strong className="font-semibold text-ink">Fitness & Lifting:</strong> Consistently executing 4 strength sessions a week at the gym to balance the desk hours.
+                  <strong className="font-semibold text-ink">{FITNESS}:</strong> Lifting and staying fit, alongside yoga and aerial yoga.
                 </p>
                 <p>
                   <strong className="font-semibold text-ink">Street Photography:</strong> Taking my camera out on weekend mornings. Capturing the raw geometric alleys of Melbourne CBD and the coastal light along the Great Ocean Road.

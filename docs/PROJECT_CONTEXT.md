@@ -199,6 +199,15 @@ An explorable top-down pixel-art world at `/world`, added alongside the portfoli
   - It's hidden on fine pointers via `[@media(pointer:coarse)]:flex`, and while any overlay is open (tapping the dialogue box advances it).
 - **Motion toggle** applies live via `settings-changed`: crystal bob tweens pause and resume, and the NPC glance timer checks `this.reduceMotion`. The dialogue typewriter reads it as a prop.
 - **Render sleep:** `lock()` puts `game.loop` to sleep 300ms later if still locked (a crystal's fade finishes first). `ui-closed` and `travel` wake it. Warps lock without sleeping.
+- **OS ↔ game bridge (2026-11-20; owner chose to keep the classic site's cybertech look):** the story is "KRISHI.OS is the computer, KRISHI.WORLD is a cartridge you launch on it".
+  - `src/components/world/Cartridge.tsx` holds `Cartridge` (an em-sized grey cart with a KRISHI.WORLD label and the `PlayerSprite` SVG) and `CartridgeIntro`.
+  - `/world` always opens with `CartridgeIntro`: the cart drops in, pushes into the console slot, clicks, the LED turns red→green, and a white flash reveals the game.
+    - It doubles as the loading screen: the reveal waits for Phaser.
+    - Any key or tap skips it; reduced motion skips it entirely.
+  - Leaving is "⏻ Exit to KRISHI.OS" (HUD link and Esc menu): a CRT power-off (GSAP clip-path collapse plus brightness), then `/`, which boots the OS again.
+    - The HUD exit is a real `<Link>`; modified clicks keep their default behaviour.
+  - The boot choice's "Enter the world" card shows a mini `Cartridge`; the navbar `krishi.world` link has a cartridge icon.
+  - **Font:** `src/lib/pixelFont.ts` is the single Pixelify Sans definition, with `preload: false`. Checked on a production build: returning visitors and `/readme` download only Geist Mono, and the pixel font loads on a first visit only once the cartridge choice is shown. (In dev, Turbopack loads the font CSS everywhere; ignore that.)
 - **Content rule:** game content must come from `data.ts` (via structured data files), never typed into scenes. That includes the Sprint 4 regions (see "Region content sources"). Facts in the brief that `data.ts` doesn't have are pending owner confirmation (see Open items).
 
 ## Env vars (names only)

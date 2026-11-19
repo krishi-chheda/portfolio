@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { SYSTEM_VERSION, bootLinesData } from "@/lib/data";
 import { scrambleText } from "@/lib/motion";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { Cartridge } from "@/components/world/Cartridge";
 
 // Remembers the visitor's pick so the choice is only offered once (switching later: navbar / palette / in-game button)
 const ENTRY_KEY = "krishi-world:entry";
@@ -274,9 +275,13 @@ function EntryChoice({ onChoose }: { onChoose: (world: boolean) => void }) {
     <div role="group" aria-label="Choose how to explore" className="space-y-3">
       <p className="text-center text-[11px] uppercase tracking-[0.2em] text-ink-faint">Choose your experience</p>
       <div className="flex flex-col gap-3 sm:flex-row">
-        <button ref={firstRef} type="button" onClick={() => onChoose(true)} className={card}>
-          <span className="block text-sm font-bold uppercase tracking-[0.18em] text-accent">▶ Enter the world</span>
-          <span className="mt-1 block text-xs leading-relaxed text-ink-soft">Explore my journey through an interactive pixel-art adventure.</span>
+        <button ref={firstRef} type="button" onClick={() => onChoose(true)} className={`${card} flex items-center gap-4`}>
+          {/* The game is a cartridge you launch on KRISHI.OS; /world plays the insert */}
+          <Cartridge className="shrink-0 text-[8px] transition-[translate] duration-150 group-hover:-translate-y-1" />
+          <span>
+            <span className="block text-sm font-bold uppercase tracking-[0.18em] text-accent">▶ Enter the world</span>
+            <span className="mt-1 block text-xs leading-relaxed text-ink-soft">Explore my journey through an interactive pixel-art adventure.</span>
+          </span>
         </button>
         <button type="button" onClick={() => onChoose(false)} className={card}>
           <span className="block text-sm font-bold uppercase tracking-[0.18em] text-ink group-hover:text-accent">View classic portfolio</span>

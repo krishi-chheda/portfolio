@@ -507,7 +507,7 @@ export function PauseMenu({
     { id: "sound", label: `Sound: ${settings.sound ? "On" : "Off"}` },
     { id: "music", label: `Music: ${settings.music ? "On" : "Off"}` },
     { id: "reducedMotion", label: `Motion: ${settings.reducedMotion ? "Reduced" : "Full"}` },
-    { id: "portfolio", label: "Classic Portfolio" },
+    { id: "portfolio", label: "Exit to KRISHI.OS" },
     { id: "close", label: "Close", key: "Esc" },
   ];
   const [index, setIndex] = useState(0);

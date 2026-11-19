@@ -126,9 +126,15 @@ export default function Navbar() {
           {/* The way across to the game (the boot choice is only offered once) */}
           <Link
             href="/world"
-            className="hidden sm:inline border border-accent/50 px-2 py-1 text-accent hover:bg-accent hover:text-bg transition-colors duration-150"
+            className="group hidden sm:inline-flex items-center gap-1.5 border border-accent/50 px-2 py-1 text-accent hover:bg-accent hover:text-bg transition-colors duration-150"
           >
-            ▶ krishi.world
+            {/* A tiny game cartridge: this link launches the game */}
+            <svg viewBox="0 0 10 12" aria-hidden="true" shapeRendering="crispEdges" className="h-3 w-2.5 transition-[translate] duration-150 group-hover:translate-y-px">
+              <path d="M1 0h7l1 1v11H1z" fill="currentColor" />
+              <rect x="2" y="3" width="6" height="4" className="fill-bg group-hover:fill-accent" />
+              <rect x="2" y="10" width="6" height="1" className="fill-bg group-hover:fill-accent" />
+            </svg>
+            krishi.world
           </Link>
           <button
             type="button"

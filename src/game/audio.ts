@@ -5,7 +5,7 @@
 import { getSettings } from "./settings";
 
 type Wave = OscillatorType;
-export type Sfx = "blip" | "open" | "select" | "discover" | "achievement" | "warp";
+export type Sfx = "blip" | "open" | "select" | "discover" | "achievement" | "warp" | "bump" | "rustle";
 
 let ctx: AudioContext | null = null;
 
@@ -44,6 +44,23 @@ const SFX: Record<Sfx, (c: AudioContext, t: number) => void> = {
   discover: (c, t) => [72, 76, 79, 84].forEach((n, i) => tone(c, note(n), t + i * 0.08, 0.14, "triangle", 0.08)),
   achievement: (c, t) => [67, 72, 76, 79, 84].forEach((n, i) => tone(c, note(n), t + i * 0.07, i === 4 ? 0.35 : 0.1, "square", 0.04)),
   warp: (c, t) => tone(c, 520, t, 0.25, "triangle", 0.06, 130),
+  bump: (c, t) => tone(c, 110, t, 0.07, "square", 0.035, 70), // walking into something
+  rustle: (c, t) => {
+    // a short burst of filtered noise: stepping through tall grass or flowers
+    const len = Math.floor(c.sampleRate * 0.09);
+    const buf = c.createBuffer(1, len, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const src = c.createBufferSource();
+    const filter = c.createBiquadFilter();
+    const gain = c.createGain();
+    src.buffer = buf;
+    filter.type = "highpass";
+    filter.frequency.value = 2200;
+    gain.gain.value = 0.05;
+    src.connect(filter).connect(gain).connect(c.destination);
+    src.start(t);
+  },
 };
 
 export function sfx(name: Sfx) {

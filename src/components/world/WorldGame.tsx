@@ -10,7 +10,9 @@ import { emit, on, type Dialogue } from "@/game/bus";
 import { record, snapshot } from "@/game/progress";
 import { getSettings, reduceMotion, setSettings, type Settings } from "@/game/settings";
 import { sfx, stopMusic, syncMusic } from "@/game/audio";
-import { ACHIEVEMENTS, TERMINALS, type ProgressSnapshot } from "@/game/content";
+import { ACHIEVEMENTS, ATTRIBUTES, REGIONS, TERMINALS, type ProgressSnapshot } from "@/game/content";
+import { PIXEL } from "@/components/retro/styles";
+import { contact } from "@/lib/data";
 import {
   AchievementList,
   AchievementToast,
@@ -40,8 +42,8 @@ type Overlay =
 
 const EMPTY: ProgressSnapshot = { attributes: [], regions: [], terminals: [] };
 
-const HUD_BOX = "border-2 border-[#46382b] bg-[#f5e8c8] px-3 py-1.5 text-xs text-[#46382b] shadow-[3px_3px_0_#46382b]";
-const HUD_BUTTON = `${HUD_BOX} pointer-events-auto font-bold hover:bg-[#f5c65b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f5c65b]`;
+const HUD_BOX = "border-2 border-[#46382b] bg-[#f5e8c8] px-3 py-1 text-sm text-[#2b2420] shadow-[3px_3px_0_#46382b]";
+const HUD_BUTTON = `${HUD_BOX} pointer-events-auto transition-colors hover:bg-[#f5c65b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f5c65b]`;
 
 /**
  * Hosts the Phaser game. Phaser (and the game code) load only here, on demand, so the portfolio's bundle is
@@ -61,6 +63,8 @@ export default function WorldGame() {
   const [region, setRegion] = useState({ id: "origin", name: "Origin Valley" });
   const [toasts, setToasts] = useState<string[]>([]);
   const [settings, setSettingsState] = useState<Settings>({ sound: true, music: false, reducedMotion: false });
+  const [banner, setBanner] = useState<{ name: string; blurb: string; at: number } | null>(null); // "you've arrived" sign
+  const [walked, setWalked] = useState(false); // fades the controls hint after the first step
   const found = new Set(progress.attributes);
 
   // Save one fact (visited region, read terminal, found attribute) and announce any achievement it completes.
@@ -83,6 +87,13 @@ export default function WorldGame() {
     bumpRef.current = bump;
   });
 
+  // The location sign shows for 2.8s each time a region loads (after the cartridge intro on first load)
+  useEffect(() => {
+    if (!banner || intro) return;
+    const id = setTimeout(() => setBanner(null), 2800);
+    return () => clearTimeout(id);
+  }, [banner, intro]);
+
   // One toast at a time, 3.5s each
   useEffect(() => {
     if (!toasts.length) return;
@@ -91,6 +102,11 @@ export default function WorldGame() {
   }, [toasts]);
 
   useEffect(() => {
+    try {
+      localStorage.setItem("krishi-world:entry", "world"); // the title screen badges the last mode played
+    } catch {
+      // not remembered
+    }
     let game: Phaser.Game | undefined;
     let cancelled = false;
     import("@/game/createGame")
@@ -133,8 +149,10 @@ export default function WorldGame() {
       on("terminal", (id) => setOverlay({ kind: "terminal", id })),
       on("region", (r) => {
         setRegion(r);
+        setBanner({ name: r.name, blurb: REGIONS.find((x) => x.id === r.id)?.blurb ?? "", at: Date.now() });
         bumpRef.current("regions", r.id);
       }),
+      on("moved", () => setWalked(true)),
       on("open-map", () => setOverlay({ kind: "map" })),
       on("open-achievements", () => setOverlay({ kind: "achievements" })),
       on("open-menu", () => {
@@ -182,22 +200,31 @@ export default function WorldGame() {
     setOverlay({ kind: "menu" });
   };
 
-  // Leaving is a console power-off: the screen collapses to a line (same CRT effect as the portfolio's boot exit)
-  const exitToOS = () => {
+  // Leaving is a console power-off: the screen collapses to a line, then the next screen loads
+  const leave = (href: "/" | "/classic") => {
     if (exiting.current) return;
     exiting.current = true;
-    if (reduceMotion() || !mainRef.current) return router.push("/");
+    if (reduceMotion() || !mainRef.current) return router.push(href);
     gsap.to(mainRef.current, {
       clipPath: "inset(49.8% 0% 49.8% 0%)",
       filter: "brightness(1.8)",
       duration: 0.35,
       ease: "power2.in",
-      onComplete: () => router.push("/"),
+      onComplete: () => router.push(href),
     });
+  };
+  // A real link (middle / Ctrl-click still open a new tab); a plain click plays the power-off first
+  const leaveOnClick = (e: React.MouseEvent, href: "/" | "/classic") => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    leave(href);
   };
 
   const choose = (c: MenuChoice) => {
-    if (c === "portfolio") return exitToOS();
+    if (c === "classic") return leave("/classic");
+    if (c === "mainMenu") return leave("/");
+    if (c === "resume") return void window.open(contact.linkedin, "_blank", "noopener,noreferrer");
+    if (c === "contact") return window.location.assign(`mailto:${contact.email}`);
     setOverlay({ kind: c });
   };
 
@@ -208,37 +235,65 @@ export default function WorldGame() {
   };
 
   return (
-    <main ref={mainRef} className="fixed inset-0 bg-[#1c4031] font-mono text-[#f5e8c8] select-none">
+    <main ref={mainRef} className={`${PIXEL} fixed inset-0 bg-[#1c4031] text-[#f5e8c8] select-none`}>
       <div ref={hostRef} className="absolute inset-0" aria-label="KRISHI.WORLD game" role="application" />
 
       {/* HUD */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
-        <div className={HUD_BOX}>
-          <span className="font-bold tracking-[0.18em]">KRISHI.WORLD</span>
-          <span className="hidden sm:inline"> · {region.name}</span>
+      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3 sm:p-4">
+        <div className="flex flex-wrap items-start gap-2">
+          <div className={HUD_BOX}>
+            <span className="tracking-[0.15em]">KRISHI.WORLD</span>
+            <span className="hidden text-[#285943] sm:inline"> · {region.name}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (overlay) return;
+              emit("ui-open");
+              setOverlay({ kind: "journal" });
+            }}
+            className={`${HUD_BUTTON} flex items-center gap-1.5`}
+            aria-label={`Journal: ${found.size} of ${ATTRIBUTES.length} attributes found`}
+          >
+            <svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true" shapeRendering="crispEdges">
+              <path d="M8 1 L14 7 L8 15 L2 7 Z" fill="#b48be8" stroke="#1f1d24" strokeWidth="1.2" />
+            </svg>
+            {found.size}/{ATTRIBUTES.length}
+          </button>
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={openMenu} className={HUD_BUTTON} aria-label="Open menu">
             Menu <span className="hidden sm:inline">(Esc)</span>
           </button>
-          {/* A real link (middle / Ctrl-click still open a new tab); a plain click plays the power-off first */}
-          <Link
-            href="/"
-            className={HUD_BUTTON}
-            onClick={(e) => {
-              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-              e.preventDefault();
-              exitToOS();
-            }}
-          >
-            ⏻ <span className="hidden sm:inline">Exit to </span>KRISHI.OS
+          <Link href="/classic" className={HUD_BUTTON} onClick={(e) => leaveOnClick(e, "/classic")}>
+            Classic<span className="hidden sm:inline"> Portfolio</span>
+          </Link>
+          <Link href="/" className={HUD_BUTTON} onClick={(e) => leaveOnClick(e, "/")} aria-label="Main Menu">
+            ⏻<span className="hidden sm:inline"> Main Menu</span>
           </Link>
         </div>
       </div>
 
+      {/* Location sign: slides in from the top-left when a region loads, like a GBA area name */}
+      {banner && !intro && status === "ready" && (
+        <div
+          key={banner.at}
+          role="status"
+          className={`pointer-events-none absolute top-[6.75rem] left-3 border-4 border-[#46382b] bg-[repeating-linear-gradient(180deg,#f5e8c8_0_10px,#ecdcb6_10px_12px)] px-4 py-2 text-[#2b2420] shadow-[4px_4px_0_#46382b] sm:top-[4.5rem] sm:left-4 ${settings.reducedMotion ? "" : "motion-safe:animate-[kw-banner_2.8s_ease-in-out_both]"}`}
+        >
+          <p className="text-xl leading-tight tracking-[0.08em] sm:text-2xl">{banner.name}</p>
+          {banner.blurb && <p className="text-sm text-[#285943]">{banner.blurb}</p>}
+        </div>
+      )}
+
       {!overlay && (
-        <p className="pointer-events-none absolute inset-x-0 bottom-4 hidden text-center text-[11px] tracking-[0.18em] text-[#f5e8c8]/80 md:block">
-          WASD / ARROWS: WALK · E: TALK / INSPECT · ESC: MENU · M: MAP
+        <p
+          className={`pointer-events-none absolute inset-x-0 bottom-4 hidden justify-center transition-opacity duration-700 md:flex ${walked ? "opacity-0" : "opacity-100"}`}
+          aria-hidden={walked}
+        >
+          <span className="border-2 border-[#46382b] bg-[#f5e8c8]/95 px-3 py-1 text-sm tracking-[0.1em] text-[#2b2420] shadow-[3px_3px_0_#46382b]">
+            WASD / ARROWS walk · E talk / inspect · Esc menu · M map
+          </span>
         </p>
       )}
 
@@ -261,7 +316,7 @@ export default function WorldGame() {
       {status === "error" && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-[#16201b] text-sm">
           <p>The world couldn&apos;t load in this browser.</p>
-          <Link href="/" className="underline">
+          <Link href="/classic" className="underline">
             Go to the classic portfolio
           </Link>
         </div>

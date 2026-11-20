@@ -222,7 +222,7 @@ export function ProjectTerminal({ id, onClose }: { id: string; onClose: () => vo
   if (!project) return null;
   return (
     <Window titleId="terminal-title" title={`${project.title.toUpperCase()} HQ`} meta="TERMINAL" width="max-w-4xl" footerHint="Esc to close" onClose={onClose}>
-      <ProjectBody project={project} liveLabelInternal="Open the classic portfolio" />
+      <ProjectBody project={project} liveLabelInternal="Back to the title screen" />
     </Window>
   );
 }
@@ -283,7 +283,7 @@ export function ProfileCard({ found, onClose }: { found: Set<string>; onClose: (
 
 // ---------- pause menu ----------
 
-export type MenuChoice = "journal" | "map" | "achievements" | "profile" | "guide" | "portfolio";
+export type MenuChoice = "journal" | "map" | "achievements" | "profile" | "guide" | "classic" | "resume" | "contact" | "mainMenu";
 type Toggle = "sound" | "music" | "reducedMotion";
 type Item = { id: MenuChoice | Toggle | "close"; label: string; key?: string };
 
@@ -311,7 +311,10 @@ export function PauseMenu({
     { id: "sound", label: `Sound: ${settings.sound ? "On" : "Off"}` },
     { id: "music", label: `Music: ${settings.music ? "On" : "Off"}` },
     { id: "reducedMotion", label: `Motion: ${settings.reducedMotion ? "Reduced" : "Full"}` },
-    { id: "portfolio", label: "Exit to KRISHI.OS" },
+    { id: "classic", label: "Classic Portfolio" },
+    { id: "resume", label: "Resume ↗" },
+    { id: "contact", label: "Contact" },
+    { id: "mainMenu", label: "Main Menu" },
     { id: "close", label: "Close", key: "Esc" },
   ];
   const [index, setIndex] = useState(0);
@@ -338,7 +341,7 @@ export function PauseMenu({
         className={`${PIXEL} pointer-events-auto absolute top-16 right-4 max-h-[calc(100%-5rem)] w-60 overflow-y-auto border-4 border-[#46382b] bg-[#f5e8c8] py-2 text-lg text-[#2b2420] shadow-[6px_6px_0_#46382b]`}
       >
         {items.map((item, i) => (
-          <li key={item.id} className={item.id === "sound" ? "mt-1 border-t-2 border-[#46382b]/25 pt-1" : item.id === "portfolio" ? "mt-1 border-t-2 border-[#46382b]/25 pt-1" : ""}>
+          <li key={item.id} className={item.id === "sound" ? "mt-1 border-t-2 border-[#46382b]/25 pt-1" : item.id === "classic" ? "mt-1 border-t-2 border-[#46382b]/25 pt-1" : ""}>
             <button
               ref={(el) => {
                 refs.current[i] = el;

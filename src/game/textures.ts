@@ -106,6 +106,13 @@ class Pix {
       }
     for (const [x, y] of marks) this.set(x, y, color);
   }
+  toCanvas() {
+    const c = document.createElement("canvas");
+    c.width = this.w;
+    c.height = this.h;
+    c.getContext("2d")?.putImageData(new ImageData(this.data, this.w, this.h), 0, 0);
+    return c;
+  }
   toTexture(scene: Phaser.Scene, key: string) {
     const tex = scene.textures.createCanvas(key, this.w, this.h);
     if (!tex) throw new Error(`Could not create texture ${key}`);
@@ -770,6 +777,150 @@ function drawCrystal(p: Pix, [light, mid, dark]: [string, string, string]) {
   p.outline(0, 0, 16, 16);
 }
 
+const OBJECT_PAINTERS: Record<ObjectKind, (p: Pix) => void> = {
+  tree: drawTree,
+  house: drawHouse,
+  university: drawUniversity,
+  sign: drawSign,
+  mailbox: drawMailbox,
+  lamp: drawLamp,
+  fountain: drawFountain,
+  "bldg-accessvision": (q) => drawTower(q, C.slate, C.slateDark, C.slateLight, "eye"),
+  "bldg-clinicalbrief": (q) => drawTower(q, "#3aa38f", "#257566", "#8fdccb", "cross"),
+  "bldg-traffic": (q) => drawTower(q, "#d9a23f", "#a8742a", "#f5d27b", "light"),
+  "bldg-os": (q) => drawTower(q, "#1c2a24", "#0a0c0b", "#34d399", "prompt"),
+  lab: drawLab,
+  computer: drawComputer,
+  arena: drawArena,
+  office: drawOffice,
+  flag: drawFlag,
+  palm: drawPalm,
+  hut: drawHut,
+  buoy: drawBuoy,
+  tripod: drawTripod,
+  mat: drawMat,
+};
+
+/**
+ * The same art as plain canvases (no Phaser), for React screens that show the world (the title screen and Classic
+ * Mode). Painted once per page.
+ */
+let painted: { sheet: HTMLCanvasElement; objects: Record<ObjectKind, HTMLCanvasElement>; player: HTMLCanvasElement; portrait: HTMLCanvasElement } | null = null;
+// ---------- trainer-card portrait (Classic Mode, title screen) ----------
+// The player as a 32x32 head-and-shoulders bust, like a GBA trainer card: same hair, emerald headband and hoodie
+// as the walking sprite, drawn bigger so the face reads. Frame 0 eyes open, frame 1 blinking.
+export const PORTRAIT = 32;
+const MOUTH = "#a8604a";
+const BLUSH = "#f0a890";
+
+function drawPortrait(p: Pix, ox: number, blink: boolean) {
+  const r = (x: number, y: number, w: number, h: number, c: string, a = 255) => p.rect(ox + x, y, w, h, c, a);
+  const d = (x: number, y: number, c: string, a = 255) => p.set(ox + x, y, c, a);
+
+  // Shoulders: hoodie with darker sides, cream zip and a collar
+  r(8, 24, 16, 1, C.hoodie);
+  r(6, 25, 20, 1, C.hoodie);
+  r(4, 26, 24, 6, C.hoodie);
+  r(4, 26, 2, 6, C.hoodieDark);
+  r(26, 26, 2, 6, C.hoodieDark);
+  r(4, 31, 24, 1, C.hoodieDark);
+  r(12, 24, 8, 2, C.hoodieDark); // collar
+  r(16, 26, 1, 6, C.wall); // zip
+  d(15, 27, C.hoodieDark);
+  d(17, 27, C.hoodieDark);
+
+  // Neck
+  r(13, 21, 6, 4, C.skinShade);
+  r(14, 21, 4, 1, C.skin);
+
+  // Ears
+  r(7, 13, 1, 4, C.skin);
+  r(24, 13, 1, 4, C.skin);
+  d(7, 14, C.skinShade);
+  d(24, 14, C.skinShade);
+
+  // Face, rounded at the chin, shaded along the jaw
+  r(8, 8, 16, 12, C.skin);
+  r(9, 20, 14, 1, C.skin);
+  r(11, 21, 10, 1, C.skin);
+  r(8, 18, 1, 2, C.skinShade);
+  r(23, 18, 1, 2, C.skinShade);
+  r(9, 20, 1, 1, C.skinShade);
+  r(22, 20, 1, 1, C.skinShade);
+  r(11, 21, 2, 1, C.skinShade);
+  r(19, 21, 2, 1, C.skinShade);
+
+  // Hair: rounded crown with three tufts, a lighter sweep, sideburns and a fringe
+  r(10, 1, 12, 1, C.hair);
+  r(8, 2, 16, 6, C.hair);
+  d(11, 0, C.hair);
+  d(15, 0, C.hair);
+  d(16, 0, C.hair);
+  d(20, 0, C.hair);
+  r(11, 2, 5, 1, C.hairLight);
+  r(10, 3, 3, 1, C.hairLight);
+  r(8, 8, 1, 5, C.hair); // sideburns
+  r(23, 8, 1, 5, C.hair);
+  r(9, 9, 4, 1, C.hair); // fringe, parted over the forehead
+  r(19, 9, 4, 1, C.hair);
+  d(9, 10, C.hair);
+  d(22, 10, C.hair);
+
+  // Emerald headband with knot tails on the right
+  r(8, 6, 16, 2, C.accent);
+  r(8, 7, 16, 1, C.hoodie);
+  r(24, 6, 2, 1, C.accent);
+  r(25, 7, 1, 2, C.hoodie);
+
+  // Brows
+  r(10, 11, 4, 1, C.hair);
+  r(18, 11, 4, 1, C.hair);
+
+  // Eyes: dark with a white catch-light; a single line while blinking
+  if (blink) {
+    r(11, 14, 3, 1, C.outline);
+    r(18, 14, 3, 1, C.outline);
+  } else {
+    r(11, 13, 3, 3, C.outline);
+    r(18, 13, 3, 3, C.outline);
+    d(12, 13, C.white);
+    d(19, 13, C.white);
+    d(13, 15, "#3a3446");
+    d(20, 15, "#3a3446");
+  }
+
+  // Nose, blush, smile
+  d(16, 16, C.skinShade);
+  d(15, 17, C.skinShade);
+  r(10, 17, 2, 1, BLUSH, 200);
+  r(20, 17, 2, 1, BLUSH, 200);
+  r(14, 19, 4, 1, MOUTH);
+  d(13, 18, MOUTH);
+  d(18, 18, MOUTH);
+
+  p.outline(ox, 0, PORTRAIT, PORTRAIT);
+}
+
+export function paintedAssets() {
+  if (painted) return painted;
+  const sheet = new Pix(TILE * SHEET_TILES, TILE);
+  drawTerrainSheet(sheet);
+  const objects = {} as Record<ObjectKind, HTMLCanvasElement>;
+  for (const kind of Object.keys(OBJECT_PAINTERS) as ObjectKind[]) {
+    const art: ObjectArt = OBJECTS[kind];
+    const pix = new Pix(art.w * TILE, (art.ph ?? art.h) * TILE);
+    OBJECT_PAINTERS[kind](pix);
+    objects[kind] = pix.toCanvas();
+  }
+  const player = new Pix(PLAYER_W * 12, PLAYER_H);
+  DIRS.forEach((dir, d) => [0, 1, 2].forEach((step) => drawWalker(player, (d * 3 + step) * PLAYER_W, dir, step, PLAYER_LOOK)));
+  const portrait = new Pix(PORTRAIT * 2, PORTRAIT);
+  drawPortrait(portrait, 0, false);
+  drawPortrait(portrait, PORTRAIT, true);
+  painted = { sheet: sheet.toCanvas(), objects, player: player.toCanvas(), portrait: portrait.toCanvas() };
+  return painted;
+}
+
 /** Draws every texture once into Phaser's texture manager. */
 export function generateTextures(scene: Phaser.Scene, npcs: { id: string; look: Look }[] = []) {
   if (scene.textures.exists("tiles")) return;
@@ -778,29 +929,7 @@ export function generateTextures(scene: Phaser.Scene, npcs: { id: string; look: 
   drawTerrainSheet(sheet);
   sheet.toTexture(scene, "tiles");
 
-  const objects: Record<ObjectKind, (p: Pix) => void> = {
-    tree: drawTree,
-    house: drawHouse,
-    university: drawUniversity,
-    sign: drawSign,
-    mailbox: drawMailbox,
-    lamp: drawLamp,
-    fountain: drawFountain,
-    "bldg-accessvision": (q) => drawTower(q, C.slate, C.slateDark, C.slateLight, "eye"),
-    "bldg-clinicalbrief": (q) => drawTower(q, "#3aa38f", "#257566", "#8fdccb", "cross"),
-    "bldg-traffic": (q) => drawTower(q, "#d9a23f", "#a8742a", "#f5d27b", "light"),
-    "bldg-os": (q) => drawTower(q, "#1c2a24", "#0a0c0b", "#34d399", "prompt"),
-    lab: drawLab,
-    computer: drawComputer,
-    arena: drawArena,
-    office: drawOffice,
-    flag: drawFlag,
-    palm: drawPalm,
-    hut: drawHut,
-    buoy: drawBuoy,
-    tripod: drawTripod,
-    mat: drawMat,
-  };
+  const objects = OBJECT_PAINTERS;
   for (const kind of Object.keys(objects) as ObjectKind[]) {
     const art: ObjectArt = OBJECTS[kind];
     const p = new Pix(art.w * TILE, (art.ph ?? art.h) * TILE);

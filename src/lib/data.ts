@@ -474,14 +474,14 @@ export const krishiOsProject = {
   title: "KRISHI.OS",
   subtitle: "Personal Developer Ecosystem",
   description:
-    "This portfolio, presented as a small operating system: a terminal-style interface, an Ask Krishi chat assistant grounded in the portfolio's own data, a command palette, a 3D knowledge graph of skills and projects, and live GitHub telemetry.",
+    "This portfolio, presented as a retro RPG: a KRISHI.OS boot leads to KRISHI.WORLD, where visitors choose an explorable pixel world (Adventure Mode) or a GBA-style Classic Portfolio. Both modes read the same data, and an Ask Krishi chat assistant is grounded in it.",
   techStack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "GSAP", "Phaser"],
   features: [
-    "Interactive terminal-style interface and command palette (Ctrl/Cmd+K)",
+    "KRISHI.OS boot sequence into the KRISHI.WORLD title screen",
+    "Adventure Mode: a Phaser 3 open world with five regions, NPC dialogue, skill crystals, project terminals and achievements",
+    "Classic Portfolio: every section server-rendered from the same shared data as the game",
     "Ask Krishi: a chat assistant (gpt-4o-mini, or local answers built from the site's data)",
-    "System Map: a rotatable 3D knowledge graph of 18 domains, projects, roles and technologies",
-    "Live GitHub telemetry for tracked repositories",
-    "KRISHI.WORLD: this pixel-art world",
+    "Keyboard, touch and reduced-motion support in both modes",
   ],
   githubUrl: "https://github.com/krishi-chheda/portfolio",
   liveUrl: "/",
@@ -559,23 +559,52 @@ export const skillCategories: SkillCategory[] = [
   { id: "infra", name: "Infrastructure & Tools", skills: ["Git", "Linux", "MySQL", "CUDA", "Jetson Nano", "Cloud technologies"] },
 ];
 
-export type MilestoneKind = "leadership" | "academic" | "project" | "professional";
+export type MilestoneKind = "leadership" | "academic" | "technical" | "professional";
 
 export interface Milestone {
   title: string;
   kind: MilestoneKind;
   date?: string; // only where a date is confirmed
   detail: string;
+  link?: { label: string; href: string }; // where to read more, on this site or the real thing
 }
 
 // Real milestones, newest first. Dates come from the confirmed career timeline (docs/PROJECT_CONTEXT.md).
 export const milestones: Milestone[] = [
-  { title: "Vice President, MDAS", kind: "leadership", date: "Jul 2026", detail: "Vice President of the Monash Data & AI Society." },
-  { title: "Media & Marketing Director, MDAS", kind: "leadership", date: "Jan 2026", detail: "Promoted to lead MDAS media and marketing." },
-  { title: "Joined MDAS", kind: "leadership", date: "Oct 2025", detail: "Started as Media & Marketing Officer." },
-  { title: "Started the Master of AI", kind: "academic", date: "Jul 2025", detail: "Monash University, Melbourne." },
-  { title: "Launched StudentHub", kind: "project", date: "Jan–May 2025", detail: "A deployed portal for students settling in Melbourne." },
-  { title: "IT Intern, Mysahayak", kind: "professional", date: "Jan–May 2025", detail: "Flutter features, Python backend services and QA in Agile sprints." },
-  { title: "Built Traffic AI", kind: "project", date: "Oct–Dec 2024", detail: "Density-based traffic signal scheduling on an NVIDIA Jetson Nano." },
-  { title: "AccessVision under load", kind: "project", detail: impactLog[0] ? `${impactLog[0].value} ${impactLog[0].label}.` : "Load-tested grounded VQA." },
+  { title: "Vice President, MDAS", kind: "leadership", date: "Jul 2026", detail: "Vice President of the Monash Data & AI Society.", link: { label: "Quest Log", href: "#experience" } },
+  { title: "Media & Marketing Director, MDAS", kind: "leadership", date: "Jan 2026", detail: "Promoted to lead MDAS media and marketing.", link: { label: "Quest Log", href: "#experience" } },
+  { title: "Joined MDAS", kind: "leadership", date: "Oct 2025", detail: "Started as Media & Marketing Officer.", link: { label: "Quest Log", href: "#experience" } },
+  { title: "Started the Master of AI", kind: "academic", date: "Jul 2025", detail: "Monash University, Melbourne.", link: { label: "Education Journal", href: "#education" } },
+  { title: "Launched StudentHub", kind: "technical", date: "Jan–May 2025", detail: "A deployed portal for students settling in Melbourne.", link: { label: "Live site", href: "https://mystudenthub.vercel.app" } },
+  { title: "IT Intern, Mysahayak", kind: "professional", date: "Jan–May 2025", detail: "Flutter features, Python backend services and QA in Agile sprints.", link: { label: "Quest Log", href: "#experience" } },
+  { title: "Built Traffic AI", kind: "technical", date: "Oct–Dec 2024", detail: "Density-based traffic signal scheduling on an NVIDIA Jetson Nano.", link: { label: "Project file", href: "/classic/projects/traffic-ai" } },
+  {
+    title: "AccessVision under load",
+    kind: "technical",
+    detail: impactLog[0] ? `${impactLog[0].value} ${impactLog[0].label}.` : "Load-tested grounded VQA.",
+    link: { label: "Project file", href: "/classic/projects/accessible-vision" },
+  },
 ];
+
+// ---------- Quest Log extras (owner-confirmed structure; no new claims) ----------
+
+export type QuestKind = "employment" | "leadership" | "volunteering" | "event";
+export const questKinds: Record<string, QuestKind> = {
+  "mdas-vp": "leadership",
+  "mosaic-coordinator": "volunteering",
+  "mysahayak-intern": "employment",
+  "sacredheart-volunteer": "volunteering",
+};
+// Confirmed MDAS progression (same dates as the milestones above), newest first.
+export const roleHistory: Record<string, { role: string; period: string }[]> = {
+  "mdas-vp": [
+    { role: "Vice President", period: "Jul 2026 – Present" },
+    { role: "Media & Marketing Director", period: "Jan – May 2026" },
+    { role: "Media & Marketing Officer", period: "Oct 2025 – Jan 2026" },
+  ],
+};
+/**
+ * Responsibility lines that are safe to publish: anything with a figure or a superlative is dropped, because those
+ * claims (300+ students, 30%/20%, "largest", 50+ per shift) are unverified (KOS-06).
+ */
+export const responsibilities = (e: Experience) => e.description.filter((line) => !/\d|largest/i.test(line));

@@ -16,6 +16,7 @@ interface Events {
   "open-menu": void; // scene -> UI: Escape was pressed in the world
   terminal: string; // scene -> UI: a project HQ's doors were used (project id)
   region: { id: string; name: string }; // scene -> UI: the map the player is now in
+  moved: void; // scene -> UI: the player took a step (the HUD fades its controls hint)
   travel: string; // UI -> scene: fast travel to a visited region (map id)
   pad: "down" | "up" | "left" | "right" | null; // UI -> scene: on-screen D-pad held direction (null = released)
   "pad-a": void; // UI -> scene: on-screen A button (interact)

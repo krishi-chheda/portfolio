@@ -8,8 +8,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://krishi-portfolio.vercel.app"), // resolves the pages' relative canonicals
   title: "Krishi Chheda | AI Engineer & Product Builder",
-  description: "AI Engineer and Product Builder at Monash University. Creator of AccessVision, ClinicalBrief, StudentHub, and Traffic AI. Explore projects, experience, and chat directly with my AI assistant.",
+  description: "AI Engineer and Product Builder at Monash University. Creator of AccessVision, ClinicalBrief, StudentHub, and Traffic AI. Explore my portfolio as a retro RPG, or browse the classic portfolio and chat with my AI assistant.",
   keywords: [
     "Krishi Chheda",
     "AI Engineer",
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Krishi Chheda" }],
   openGraph: {
     title: "Krishi Chheda | AI Engineer & Product Builder",
-    description: "AI Engineer and Product Builder at Monash University. Creator of AccessVision, ClinicalBrief, StudentHub, and Traffic AI. Explore projects, experience, and chat directly with my AI assistant.",
+    description: "AI Engineer and Product Builder at Monash University. Creator of AccessVision, ClinicalBrief, StudentHub, and Traffic AI. Explore my portfolio as a retro RPG, or browse the classic portfolio and chat with my AI assistant.",
     url: "https://krishi-portfolio.vercel.app",
     siteName: "Krishi Chheda Portfolio",
     locale: "en_AU",
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Krishi Chheda | AI Engineer & Product Builder",
-    description: "AI Engineer and Product Builder at Monash University. Creator of AccessVision, ClinicalBrief, StudentHub, and Traffic AI. Explore projects, experience, and chat directly with my AI assistant.",
+    description: "AI Engineer and Product Builder at Monash University. Creator of AccessVision, ClinicalBrief, StudentHub, and Traffic AI. Explore my portfolio as a retro RPG, or browse the classic portfolio and chat with my AI assistant.",
     images: ["https://krishi-portfolio.vercel.app/assets/og-image.png"],
   },
   robots: {

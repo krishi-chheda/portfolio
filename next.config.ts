@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async redirects() {
+    // /readme documented the retired KRISHI.OS terminal site; the Classic Portfolio replaces it.
+    return [{ source: "/readme", destination: "/classic", permanent: true }];
+  },
 };
 
 export default nextConfig;

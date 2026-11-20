@@ -6,7 +6,7 @@ import BootScreen from "./BootScreen";
 import { usePresence, type PresenceMotion } from "@/hooks/usePresence";
 
 // Lets entrance animations wait until the boot screen has cleared, instead of playing hidden behind it.
-// Defaults to true so pages without a boot screen (/readme, /now) never wait.
+// Defaults to true so pages without a boot screen (/classic, /now, /world) never wait.
 const BootContext = createContext(true);
 export const useBooted = () => useContext(BootContext);
 
@@ -17,14 +17,38 @@ const BOOT_PRESENCE: PresenceMotion = {
   exitDuration: 0.35,
 };
 
+const BOOTED_KEY = "krishi-os:booted";
+
 interface BootWrapperProps {
   children: ReactNode;
 }
 
 export default function BootWrapper({ children }: BootWrapperProps) {
   const [hasBooted, setHasBooted] = useState(false);
+  const [skipped, setSkipped] = useState(false); // already booted this session: drop the boot with no exit animation
   const { mounted: bootMounted, ref: bootRef } = usePresence<HTMLDivElement>(!hasBooted, BOOT_PRESENCE);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // The boot plays once per browser session; coming back to the main menu goes straight to the title screen
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(BOOTED_KEY)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSkipped(true);
+        setHasBooted(true);
+      }
+    } catch {
+      // no session storage: boot every time
+    }
+  }, []);
+  const finishBoot = () => {
+    try {
+      sessionStorage.setItem(BOOTED_KEY, "1");
+    } catch {
+      // not remembered
+    }
+    setHasBooted(true);
+  };
 
   // Lock scrolling and hide scrollbars during the boot sequence
   useEffect(() => {
@@ -57,10 +81,10 @@ export default function BootWrapper({ children }: BootWrapperProps) {
 
   return (
     <BootContext.Provider value={hasBooted}>
-      {bootMounted && (
+      {bootMounted && !skipped && (
         // Wrapper carries the z-50 layer itself: its fading opacity would otherwise trap BootScreen's z-index.
         <div ref={bootRef} className="fixed inset-0 z-50">
-          <BootScreen onComplete={() => setHasBooted(true)} />
+          <BootScreen onComplete={finishBoot} />
         </div>
       )}
 

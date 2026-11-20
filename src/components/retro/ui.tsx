@@ -5,16 +5,8 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import type { ProjectDetail } from "@/lib/portfolio";
 
-export const PIXEL = "font-[family-name:var(--font-pixel)]";
-export const LABEL = "text-sm uppercase tracking-widest text-[#6e5643]";
-export const CHIP = "border-2 border-[#46382b] bg-white px-1.5 text-sm";
-export const BUTTON =
-  "border-2 border-[#46382b] bg-white px-3 py-1 hover:bg-[#f5c65b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285943]";
-export const LINK = "border-2 border-[#46382b] bg-white px-3 py-1 text-base hover:bg-[#f5c65b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#285943]";
-/** A static panel in the shared frame (cream body, brown border + drop shadow). */
-export const PANEL = "border-4 border-[#46382b] bg-[#f5e8c8] text-[#2b2420] shadow-[6px_6px_0_#46382b]";
-/** The forest-green title bar used by every window. */
-export const TITLE_BAR = "flex items-center justify-between gap-3 border-b-4 border-[#46382b] bg-[#285943] px-4 py-2 text-[#f5e8c8]";
+import { BUTTON, CHIP, LINK, PANEL, PIXEL, TITLE_BAR } from "./styles";
+export { BUTTON, CARD, CHIP, LABEL, LINK, MUTED, PANEL, PIXEL, TITLE_BAR } from "./styles";
 
 /** Window key handler for as long as the component is mounted (held-key repeats are ignored). */
 export function useKeys(handler: (e: KeyboardEvent) => void) {
@@ -60,6 +52,7 @@ export function Window({
   footerHint,
   onClose,
   closeLabel = "Close",
+  fixed = false,
   children,
 }: {
   titleId: string;
@@ -69,12 +62,13 @@ export function Window({
   footerHint?: string;
   onClose: () => void;
   closeLabel?: string;
+  fixed?: boolean; // true on scrolling pages (Classic Mode); the game overlays sit inside a fixed stage already
   children: ReactNode;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => closeRef.current?.focus({ preventScroll: true }), []);
   return (
-    <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+    <div className={`${fixed ? "fixed" : "absolute"} inset-0 z-40 flex items-center justify-center bg-black/40 p-3 sm:p-6`} role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <div className={`${PIXEL} ${PANEL} pointer-events-auto flex max-h-full w-full ${width} flex-col overflow-hidden`}>
         <div className={TITLE_BAR}>
           <h2 id={titleId} className="min-w-0 truncate text-xl tracking-[0.15em]">
@@ -84,7 +78,7 @@ export function Window({
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
         <div className="flex items-center justify-between gap-3 border-t-4 border-[#46382b] px-4 py-2 text-sm">
-          {footerHint && <span className="hidden text-[#6e5643] sm:inline">{footerHint}</span>}
+          {footerHint && <span className="hidden text-[#5a4434] sm:inline">{footerHint}</span>}
           <button ref={closeRef} type="button" onClick={onClose} className={`ml-auto ${BUTTON}`}>
             {closeLabel}
           </button>
@@ -131,9 +125,9 @@ export function ProjectBody({ project, liveLabelInternal = "Open the site" }: { 
         <p className="text-3xl">{project.title}</p>
         <p className="text-base text-[#285943]">
           {project.subtitle}
-          {project.status && <span className="text-[#6e5643]"> · {project.status}</span>}
+          {project.status && <span className="text-[#5a4434]"> · {project.status}</span>}
         </p>
-        {project.role && <p className="text-sm text-[#6e5643]">Role: {project.role}</p>}
+        {project.role && <p className="text-sm text-[#5a4434]">Role: {project.role}</p>}
         <p className={prose}>{project.description}</p>
       </header>
 
@@ -169,7 +163,7 @@ export function ProjectBody({ project, liveLabelInternal = "Open the site" }: { 
               <li key={step.label} className="flex items-center gap-2">
                 <div className="max-w-[14rem] border-2 border-[#46382b] bg-white p-2 shadow-[3px_3px_0_#46382b]">
                   <p className="text-base">{step.label}</p>
-                  <p className="mt-1 text-sm leading-snug text-[#6e5643]">{step.description}</p>
+                  <p className="mt-1 text-sm leading-snug text-[#5a4434]">{step.description}</p>
                 </div>
                 {i < project.flow.length - 1 && (
                   <span aria-hidden="true" className="text-[#285943]">
@@ -183,7 +177,7 @@ export function ProjectBody({ project, liveLabelInternal = "Open the site" }: { 
       )}
 
       {project.features.length > 0 && (
-        <Section title={project.flow.length > 0 ? "Key decisions" : "Key features"}>
+        <Section title={project.featuresTitle}>
           <Bullets items={project.features} />
         </Section>
       )}
@@ -220,7 +214,7 @@ export function ProjectBody({ project, liveLabelInternal = "Open the site" }: { 
               {external(project.liveUrl) ? "Live demo ↗" : liveLabelInternal}
             </a>
           )}
-          {!project.githubUrl && !project.liveUrl && <span className="text-[#6e5643]">No public repository or demo for this project.</span>}
+          {!project.githubUrl && !project.liveUrl && <span className="text-[#5a4434]">No public repository or demo for this project.</span>}
         </div>
       </Section>
     </div>

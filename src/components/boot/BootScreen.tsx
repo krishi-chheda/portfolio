@@ -1,15 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { SYSTEM_VERSION, bootLinesData } from "@/lib/data";
 import { scrambleText } from "@/lib/motion";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
-import { Cartridge } from "@/components/world/Cartridge";
-
-// Remembers the visitor's pick so the choice is only offered once (switching later: navbar / palette / in-game button)
-const ENTRY_KEY = "krishi-world:entry";
 
 interface BootScreenProps {
   onComplete: () => void;
@@ -45,37 +40,11 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
     onCompleteRef.current = onComplete;
   });
 
-  // First visit (no saved pick): the boot ends on a choice between KRISHI.WORLD and the classic portfolio
-  const router = useRouter();
-  const [choosing, setChoosing] = useState(false);
-  const askRef = useRef(false);
-  useEffect(() => {
-    try {
-      askRef.current = !localStorage.getItem(ENTRY_KEY);
-    } catch {
-      askRef.current = false; // storage blocked: never trap anyone on a choice screen
-    }
-  }, []);
-  const finish = useCallback(() => {
-    if (askRef.current) setChoosing(true);
-    else onCompleteRef.current();
-  }, []);
-  const choose = useCallback(
-    (world: boolean) => {
-      try {
-        localStorage.setItem(ENTRY_KEY, world ? "world" : "classic");
-      } catch {
-        // not remembered; the choice still applies now
-      }
-      askRef.current = false;
-      if (world) router.push("/world");
-      else onCompleteRef.current();
-    },
-    [router]
-  );
-  const skip = useCallback(() => choose(false), [choose]);
+  // The boot always hands over to the KRISHI.WORLD title screen (the mode choice lives there now)
+  const finish = useCallback(() => onCompleteRef.current(), []);
+  const skip = finish;
 
-  // Reduced motion: there's no animation to wait for, so go straight to the choice (or the site)
+  // Reduced motion: there's no animation to wait for, so go straight to the title screen
   useEffect(() => {
     if (prefersReducedMotion) finish();
   }, [prefersReducedMotion, finish]);
@@ -86,7 +55,7 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
     setBootTime(new Date().toISOString().replace("T", " ").substring(0, 19));
   }, []);
 
-  // Loading never exceeds 2 seconds; Escape skips straight to the classic portfolio
+  // Loading never exceeds 2 seconds; Escape skips
   useEffect(() => {
     const safetyTimeout = setTimeout(finish, 2000);
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -204,23 +173,22 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
     };
   }, [prefersReducedMotion, finish]);
 
-  const choice = choosing && <EntryChoice onChoose={choose} />;
 
   if (prefersReducedMotion) {
     return (
       <div
-        onClick={choosing ? undefined : skip}
+        onClick={skip}
         className="fixed inset-0 z-50 bg-bg flex items-center justify-center font-mono cursor-pointer px-6"
       >
-        {choice || <div className="text-center text-ink-soft text-xs">LOADING SYSTEM PROFILE...</div>}
+        <div className="text-center text-ink-soft text-xs">LOADING SYSTEM PROFILE...</div>
       </div>
     );
   }
 
   return (
     <div
-      onClick={choosing ? undefined : skip}
-      className={`fixed inset-0 z-50 bg-bg overflow-hidden flex flex-col text-ink-soft font-mono select-none ${choosing ? "" : "cursor-pointer"}`}
+      onClick={skip}
+      className="fixed inset-0 z-50 bg-bg overflow-hidden flex flex-col text-ink-soft font-mono select-none cursor-pointer"
     >
       <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
 
@@ -236,8 +204,7 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
 
       {/* Readout, under the wordmark (which the canvas draws at 42% height) */}
       <div className="relative flex-1">
-        {choice && <div className="absolute inset-x-0 top-[56%] mx-auto w-full max-w-2xl px-6">{choice}</div>}
-        <div className={`absolute inset-x-0 top-[56%] mx-auto w-full max-w-md px-6 text-xs uppercase tracking-[0.2em] ${choosing ? "invisible" : ""}`}>
+        <div className={`absolute inset-x-0 top-[56%] mx-auto w-full max-w-md px-6 text-xs uppercase tracking-[0.2em] `}>
           <p ref={taglineRef} className="mb-5 text-center text-accent opacity-0">
             AI Engineer &amp; Product Builder
           </p>
@@ -259,34 +226,7 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
           <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
           <span className="animate-pulse">Connecting to KRISHI.OS</span>
         </div>
-        <div className="text-ink-faint text-[11px] md:text-xs">{choosing ? "ESC: Classic portfolio" : "Press ESC or Tap to Skip"}</div>
-      </div>
-    </div>
-  );
-}
-
-/** The two ways in. Shown once, at the end of the first boot. */
-function EntryChoice({ onChoose }: { onChoose: (world: boolean) => void }) {
-  const firstRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => firstRef.current?.focus(), []);
-  const card =
-    "group flex-1 border border-rule bg-bg/90 p-4 text-left transition-colors duration-150 hover:border-accent focus-visible:border-accent focus-visible:outline-none cursor-pointer";
-  return (
-    <div role="group" aria-label="Choose how to explore" className="space-y-3">
-      <p className="text-center text-[11px] uppercase tracking-[0.2em] text-ink-faint">Choose your experience</p>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <button ref={firstRef} type="button" onClick={() => onChoose(true)} className={`${card} flex items-center gap-4`}>
-          {/* The game is a cartridge you launch on KRISHI.OS; /world plays the insert */}
-          <Cartridge className="shrink-0 text-[8px] transition-[translate] duration-150 group-hover:-translate-y-1" />
-          <span>
-            <span className="block text-sm font-bold uppercase tracking-[0.18em] text-accent">▶ Enter the world</span>
-            <span className="mt-1 block text-xs leading-relaxed text-ink-soft">Explore my journey through an interactive pixel-art adventure.</span>
-          </span>
-        </button>
-        <button type="button" onClick={() => onChoose(false)} className={card}>
-          <span className="block text-sm font-bold uppercase tracking-[0.18em] text-ink group-hover:text-accent">View classic portfolio</span>
-          <span className="mt-1 block text-xs leading-relaxed text-ink-soft">Explore my projects, experience and skills the traditional way.</span>
-        </button>
+        <div className="text-ink-faint text-[11px] md:text-xs">Press ESC or Tap to Skip</div>
       </div>
     </div>
   );

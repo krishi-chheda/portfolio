@@ -1,25 +1,8 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
+import { FEATURED } from "@/lib/portfolio";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://krishi-portfolio.vercel.app";
-  return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/readme`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/now`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-  ];
+  const page = (path: string, priority: number, changeFrequency: "weekly" | "monthly") => ({ url: `${baseUrl}${path}`, lastModified: new Date(), changeFrequency, priority });
+  return [page("", 1.0, "monthly"), page("/classic", 0.9, "monthly"), page("/world", 0.8, "monthly"), page("/now", 0.6, "weekly"), ...FEATURED.map((p) => page(`/classic/projects/${p.id}`, 0.8, "monthly"))];
 }

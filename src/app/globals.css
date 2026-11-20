@@ -103,6 +103,87 @@ body.command-palette-open footer {
   color: #ffffff;
 }
 
+/* KRISHI.WORLD title screen ambience: transform/opacity only (compositor-friendly), all off under reduced motion */
+@keyframes kw-cloud {
+  from { transform: translateX(-60vw); }
+  to { transform: translateX(160vw); }
+}
+@keyframes kw-light {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.85; }
+}
+/* crosses in the first 40% of the cycle, then stays off-screen: an occasional flyover, not a loop */
+@keyframes kw-bird {
+  0% { transform: translate(-10vw, 0); }
+  20% { transform: translate(55vw, -3vh); }
+  40%, 100% { transform: translate(120vw, 1vh); }
+}
+@keyframes kw-flap {
+  to { background-position: -24px 0; }
+}
+@keyframes kw-petal {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10%, 80% { opacity: 0.9; }
+  100% { transform: translate(55vw, 30vh) rotate(360deg); opacity: 0; }
+}
+@keyframes kw-bracket {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(var(--dx), var(--dy)); }
+}
+@keyframes kw-blink {
+  50% { opacity: 0; }
+}
+
+/* Adventure Mode: the location sign slides down, holds, and slides back up */
+@keyframes kw-banner {
+  0% { transform: translateY(-140%); }
+  12%, 85% { transform: translateY(0); }
+  100% { transform: translateY(-140%); opacity: 0; }
+}
+
+/* Classic Mode: achievement unlock (stepped pop, staggered by --i), diagram flow chase, section reveal */
+@keyframes kw-unlock {
+  0% { opacity: 0; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes kw-shine {
+  0%, 100% { filter: brightness(1); }
+  40% { filter: brightness(1.6); }
+}
+@keyframes kw-flow {
+  0%, 100% { opacity: 0.35; }
+  30% { opacity: 1; }
+}
+@keyframes kw-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+.kw-unlock[data-state="armed"] .kw-unlock-item {
+  opacity: 0;
+}
+.kw-unlock[data-state="on"] .kw-unlock-item {
+  animation: kw-unlock 0.45s steps(4, jump-end) both;
+  animation-delay: calc(var(--i, 0) * 110ms);
+}
+.kw-unlock[data-state="on"] .kw-unlock-item .kw-trophy {
+  animation: kw-shine 0.6s steps(3) both;
+  animation-delay: calc(var(--i, 0) * 110ms + 300ms);
+}
+.kw-flow-arrow {
+  animation: kw-flow 1.6s steps(2) infinite;
+  animation-delay: calc(var(--i, 0) * 0.3s);
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .kw-reveal {
+      animation: kw-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+
 /* Respect OS-level reduced-motion preference for CSS keyframe utilities
    (animate-pulse/spin/bounce/blink). GSAP animations are gated separately
    with gsap.matchMedia (see src/lib/motion.ts MOTION_OK). */
@@ -110,7 +191,17 @@ body.command-palette-open footer {
   .animate-pulse,
   .animate-spin,
   .animate-bounce,
-  .animate-blink {
+  .animate-blink,
+  .kw-anim,
+  .kw-flow-arrow,
+  .kw-unlock-item,
+  .kw-trophy {
     animation: none !important;
+  }
+  .kw-unlock .kw-unlock-item {
+    opacity: 1 !important;
+  }
+  .kw-ambient {
+    display: none;
   }
 }

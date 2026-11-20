@@ -194,8 +194,8 @@ interface Intent {
 // Ordered from most to least specific; the first match wins.
 const INTENTS: Intent[] = [
   {
-    terms: ["readme", "krishi.os", "this portfolio", "this site", "this website", "navigate", "manual", "command palette"],
-    reply: () => `KRISHI.OS is Krishi's portfolio, presented as a small operating system: projects, career, leadership and current work are sections you can open from the navigation or the command palette (Ctrl/Cmd+K). The README explains how everything fits together.
+    terms: ["readme", "krishi.os", "this portfolio", "this site", "this website", "navigate", "manual", "krishi.world", "adventure mode", "classic portfolio"],
+    reply: () => `This site is Krishi's portfolio as a retro RPG called KRISHI.WORLD. From the title screen you can play Adventure Mode, an explorable pixel world with his projects, skills and story, or open the Classic Portfolio, which has the same content on one page.
 
 ${followUps(["What are Krishi's featured projects?", "What is Krishi building now?", "How can I contact Krishi?"])}`,
     command: COMMANDS.readme,

@@ -1,77 +1,38 @@
-# KRISHI.OS — Operating System Reference Manual
+# KRISHI.WORLD
 
-## NAME
-    KRISHI.OS - Interactive operating-system inspired engineering portfolio for Krishi Chheda.
+The portfolio of Krishi Chheda, AI Engineer & Product Builder, built as a retro GBA-style RPG.
 
-## SYNOPSIS
-    cat README.md
-    man krishi
+## How it works
+A short KRISHI.OS boot leads to the KRISHI.WORLD title screen, where you pick a mode:
 
-## DESCRIPTION
-    KRISHI.OS is a simulated terminal environment showcasing my AI/ML work, projects, and career history in a dynamic, high-agency console workspace rather than a flat scrolling page.
+- **Adventure Mode** (`/world`): an explorable pixel world (Phaser 3) with five regions. Meet characters, collect skill crystals, walk into project HQs to read their files, and unlock achievements. Keyboard, touch and reduced-motion support; a Text Guide reads everything without playing.
+- **Classic Portfolio** (`/classic`): the same content on one retro page: Trainer Profile, Education Journal, Skilldex, Project Archive, Quest Log, Achievement Journal, and Resume & Contact.
 
-## MISSION
-    This portfolio exists because traditional linear resumes fail to represent the reality of building systems. 
-    A static website shows screenshot outcomes, but software is alive—it is a structure of states, loops, and behaviors. 
-    I built this system to let you probe, run CLI commands, and query my digital twin assistant directly.
+Both modes read the same data (`src/lib/data.ts`, `src/lib/portfolio.ts`), share one visual style, and link to each other without losing game progress.
 
-## SYSTEM MODULES
-    * Projects (cat projects/overview.md)
-      Detailed architectural specs and achievements for core builds:
-      - AccessVision: https://github.com/krishi-chheda/AccessVision (demo: https://access-vision-xi.vercel.app)
-      - ClinicalBrief: https://github.com/krishi-chheda/clinicalbrief (demo: https://clinicalbrief.vercel.app)
-      - StudentHub: https://github.com/krishi-chheda/student-hub (live: https://mystudenthub.vercel.app)
-      - Traffic AI: no public repository
-    
-    * Additional Open Source Work (cat open-source.md)
-      Secondary codebases and utilities:
-      - AuraLens AI: https://github.com/krishi-chheda/AuraLens-AI
-      - F1 Telemetry AI Suite: https://github.com/krishi-chheda/f1-telemetry-ai-dashboard
-      - Blood Pressure Prediction API: https://github.com/krishi-chheda/fastapi_backend
-      - Video Splitter Pro: https://github.com/krishi-chheda/video-splitter
+**Ask Krishi** is a chat assistant on the Classic page (OpenAI gpt-4o-mini when `OPENAI_API_KEY` is set, otherwise local answers built from the site's data).
 
-    * Career (git log --career)
-      Interactive experience git log displaying technical internships, volunteering history, and coursework pipelines.
-      
-    * Leadership (cat leadership.md)
-      My journey directing campus initiatives, managing brand engagement, and student hackathons at MDAS and MOSAIC.
-      
-    * Currently Building (tail -f currently-building.log)
-      Continuous feed tracking active feature pushes and sprint logs.
-      
-    * System Map (open system-map)
-      A rotatable 3D knowledge graph of 18 nodes (domains, projects, roles, shared tech) built from the site data.
-      Drag or use arrow keys to rotate; hover, focus or click a node to trace its connections in the inspector.
-      
-    * Ask Krishi (./ask-krishi)
-      A chat assistant (OpenAI gpt-4o-mini when OPENAI_API_KEY is set, otherwise a local keyword fallback),
-      prompted with the portfolio's own project and career data.
+## Featured projects
+- ClinicalBrief: https://github.com/krishi-chheda/clinicalbrief (demo: https://clinicalbrief.vercel.app)
+- AccessVision: https://github.com/krishi-chheda/AccessVision (demo: https://access-vision-xi.vercel.app)
+- Traffic AI: no public repository
+- KRISHI.OS / KRISHI.WORLD: this repository
 
-## TECH STACK
-    - Next.js 16 (App Router)
-    - React 19
-    - TypeScript
-    - Tailwind CSS v4
-    - GSAP 3 (all motion: entrances, presence, decode text, ticker)
+More: StudentHub (https://mystudenthub.vercel.app), AuraLens AI, F1 Telemetry AI Suite, Blood Pressure Prediction API, Video Splitter Pro.
 
-## LOCAL DEVELOPMENT
-    npm install
-    npm run dev           # http://localhost:3000
-    npm run lint
-    npm run build
-    npm run check:chat    # Ask Krishi routing checks (needs the dev server running)
+## Tech stack
+Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, GSAP 3, Phaser 3. All game art is drawn procedurally in code; there are no image assets.
 
-    Optional server-only env vars (.env.local):
-    - OPENAI_API_KEY   enables the gpt-4o-mini assistant (otherwise local answers from site data)
-    - GITHUB_TOKEN     raises the GitHub API rate limit for the telemetry panels
+## Local development
+```
+npm install
+npm run dev           # http://localhost:3000
+npm run lint
+npm run build
+npm run check:chat    # Ask Krishi routing checks (needs the dev server running)
+python scripts/worldgen.py   # regenerate the game maps
+```
+Optional server-only env var (`.env.local`): `OPENAI_API_KEY` enables the gpt-4o-mini assistant.
 
-## CURRENT STATUS
-    - STATUS: ONLINE
-    - ROLE: AI / ML / Software Graduate Engineer
-    - LOCATION: Melbourne, Australia
-    - GRADUATION: July 2027
-    - AVAILABILITY: Open to AI Engineering, Machine Learning Engineering, Software Engineering
-      and Technology Consulting opportunities.
-
----
-See you in the terminal.
+## Status
+Melbourne, Australia · Master of AI at Monash University, graduating July 2027 · Open to AI Engineering, Machine Learning Engineering, Software Engineering and Technology Consulting opportunities.

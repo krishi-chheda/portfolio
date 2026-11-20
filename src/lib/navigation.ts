@@ -1,5 +1,3 @@
-import { scrollBehavior } from "@/lib/motion";
-
 export interface NavigationSection {
   section_id: string;
   scroll_target: string;
@@ -95,46 +93,3 @@ export const navigationRegistry: NavigationSection[] = [
     ]
   }
 ];
-
-// `navigate` is the caller's router.push, used for commands that leave the page (README)
-export const executeNavigationCommand = (cmdText: string, navigate: (href: string) => void) => {
-  const normalized = cmdText.trim().toLowerCase();
-  const match = navigationRegistry.find((s) =>
-    s.command_aliases.some((alias) => normalized.includes(alias.toLowerCase()))
-  );
-
-  if (match) {
-    // 0. Handle page navigation if match is readme
-    if (match.section_id === "readme") {
-      navigate("/readme");
-      return;
-    }
-
-    // 1. Dispatch custom event for project selection if applicable
-    if (
-      match.section_id === "accessible-vision" ||
-      match.section_id === "clinicalbrief" ||
-      match.section_id === "studenthub" ||
-      match.section_id === "traffic-ai"
-    ) {
-      window.dispatchEvent(new CustomEvent("select-project", { detail: { id: match.section_id } }));
-    }
-
-    // 2. Scroll to the scroll target
-    const element = document.getElementById(match.scroll_target);
-    if (element) {
-      element.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
-
-      // 3. Highlight the core terminal block inside this section
-      const terminal =
-        element.querySelector(".terminal-highlight") || element;
-
-      if (terminal) {
-        terminal.classList.add("terminal-highlight-active");
-        setTimeout(() => {
-          terminal.classList.remove("terminal-highlight-active");
-        }, 2500);
-      }
-    }
-  }
-};

@@ -1,260 +1,149 @@
-# KRISHI.OS — Project Context
+# KRISHI.WORLD — Project Context
 
-Engineering memory for future sessions. Keep it short and current. Last updated: 2026-10-12 (Phases 0–6 and 8–9 done, plus the redesign).
+Engineering memory for future sessions. Keep it short and current. Last updated: 2026-11-20 (KRISHI.WORLD 2.0: title screen, Classic Mode, cybertech site retired).
 
 ## Purpose
-KRISHI.OS is the interactive portfolio of Krishi Chheda (AI Engineer & Product Builder, Master of AI at Monash, graduating July 2027), presented as a personal operating system. Audience: recruiters, engineers, collaborators.
+The interactive portfolio of Krishi Chheda (AI Engineer & Product Builder, Master of AI at Monash, graduating July 2027), presented as a retro GBA-style RPG. Audience: recruiters, engineers, collaborators.
+Flow: a KRISHI.OS boot (once per session) → the **KRISHI.WORLD title screen** → **Adventure Mode** (`/world`, an explorable Phaser world) or **Classic Portfolio** (`/classic`, one retro page). Both modes read the same data and look like the same game.
 Principle: *featured projects tell the story, everything else supports it.*
 
-## Approved flagship projects (exactly four)
+## Featured projects
 | id (data.ts) | Title | Repo | Demo |
 |---|---|---|---|
-| `accessible-vision` | AccessVision | github.com/krishi-chheda/AccessVision | access-vision-xi.vercel.app |
 | `clinicalbrief` | ClinicalBrief | github.com/krishi-chheda/clinicalbrief | clinicalbrief.vercel.app |
-| `studenthub` | StudentHub | github.com/krishi-chheda/student-hub | mystudenthub.vercel.app |
+| `accessible-vision` | AccessVision | github.com/krishi-chheda/AccessVision | access-vision-xi.vercel.app |
 | `traffic-ai` | Traffic AI | none public | none |
+| `krishi-os` | KRISHI.OS (this site) | github.com/krishi-chheda/portfolio | / |
+
+`FEATURED` in `src/lib/portfolio.ts` is the single list (owner decision 2026-11-19: exactly these four, in both modes). StudentHub and the supporting repos (AuraLens-AI, f1-telemetry-ai-dashboard, fastapi_backend, video-splitter) appear as `MORE_PROJECTS` in Classic's "More from the archive" and in Ask Krishi.
 
 **Evidence rule:** every published claim must trace to a repo, README or owner confirmation.
 - **AccessVision:** metrics from the repo README benchmark (50 Locust users: p95 8,920→2,406 ms (73%), success 11.2%→100%, detection 1,450→176 ms) and project_showcase.md (~4MB→~150KB).
 - **ClinicalBrief:** scoped to the current repo: FHIR R4 ingestion, provenance, rule-based note extraction, a human review queue, a grounded local-LLM copilot, FHIR export, Supabase Postgres + RLS. Research prototype on synthetic data. No Whisper, GPT-4o or audio.
-- **StudentHub:** stack from package.json and the tree: Next 14, Supabase, Tailwind, Eventbrite, Foursquare, ABS data.
+- **StudentHub:** Next 14, Supabase, Tailwind, Eventbrite, Foursquare, ABS data.
 - **Traffic AI:** only "approximately 42% reduction in waiting time" plus the stack.
-- **`impactLog`** in data.ts holds the four verified hero metrics.
+- **`impactLog`** in data.ts holds the verified metrics.
+- **Never used (unverified, KOS-06):** "300+ students across 5+ events", "40% digital interaction", "largest data society", the Mysahayak 30%/20% figures, Sacred Heart's 50+ interactions per shift. `experienceData` `highlight` and description lines contain these, so both modes show only role, organisation, period, location and skills.
 
-**Owner-confirmed dates:**
+**Owner-confirmed facts:**
 - MDAS: Media & Marketing Officer Oct 2025 – Jan 2026; Director Jan – May 2026; Vice President Jul 2026 – present.
-- Traffic AI: Oct – Dec 2024.
-- Mysahayak (IT Intern): Jan – May 2025.
-- StudentHub: Jan – May 2025.
-- Master of AI @ Monash: started Jul 2025.
-
-**Supporting repos** (Ask Krishi and README only, never flagship cards): AuraLens-AI, f1-telemetry-ai-dashboard, fastapi_backend (BP prediction), video-splitter.
+- Traffic AI: Oct – Dec 2024. Mysahayak (IT Intern): Jan – May 2025. StudentHub: Jan – May 2025. Master of AI @ Monash: started Jul 2025.
+- Electronics & Telecommunication background; skills list (incl. Dart, Linux, MySQL, CUDA, confirmed 2026-11-20); hobbies (`ownerProfile`).
+- Resume: no PDF; LinkedIn stands in (`contact.resume = null`). Certifications: none named, so none shown (`certifications = []`; add entries and both modes pick them up).
 
 ## Stack
-- **Core:** Next.js 16.3.8 (App Router, Turbopack; upgraded from 16.2.9 for the image-optimizer/cache advisories), React 19.2.4, TypeScript 5 strict, Tailwind v4.
-- **Motion and UI:** gsap 3.15.0 (core only, the only animation library), lucide-react, clsx + tailwind-merge.
-- **Delivery:** deploys on Vercel; git remote `krishi-chheda/portfolio`.
+- **Core:** Next.js 16.3.8 (App Router, Turbopack), React 19.2.4, TypeScript 5 strict, Tailwind v4.
+- **Motion and game:** gsap 3.15.0 (core only), phaser 3.90.0 (pinned, last Phaser 3; `import * as Phaser from "phaser"`).
+- **Delivery:** Vercel; git remote `krishi-chheda/portfolio`.
 - **Next.js docs:** per `AGENTS.md`, read `node_modules/next/dist/docs/` before writing Next-specific code.
 
-## Design system (redesign, 2026-10-12)
-- **Origin:** the layout is a near-replica of zacplischka.dev's structure (owner request), with KRISHI.OS's own emerald palette, content and features. Never copy text from that site.
-- **Tokens** (in `globals.css` `@theme`, used as Tailwind classes):
-  - Backgrounds: `bg-bg` #0a0c0b, `bg-bg-2`, `bg-bg-3`
-  - Text: `text-ink` (primary), `text-ink-soft` (body), `text-ink-faint` (labels)
-  - Lines: `border-rule` (hairlines)
-  - Accents: `accent` #34d399 (the only accent), `accent-2` (hover), `gold` (secondary highlights)
-  - Every text token passes WCAG AA on every background.
-- **Rules:**
-  - All-monospace (Geist Mono only).
-  - Flat panels with no rounded corners, shadows or gradients (`rounded-full` only for pills and dots).
-  - A fixed `.page-frame` with accent corner ticks.
-  - No old Tailwind palette classes (slate, cyan, …).
-- **`SectionHeader`** (`src/components/ui/SectionHeader.tsx`) renders `§ 0N TITLE · command` as the section's `<h2>`. Section order and numbers: 01 Projects, 02 Career, 03 Leadership, 04 Currently Building, 05 System Map, 06 Contact.
+## Visual system (one universe)
+- **Palette** (`src/lib/retro.ts` `PALETTE`): forest #285943, grass #78B85A, cream #F5E8C8, brown #46382B, sky #7BC9DF, gold #F5C65B, ink #2B2420.
+- **Font:** Pixelify Sans, defined once in `src/lib/pixelFont.ts` (preloaded; `--font-pixel`, class constant `PIXEL`).
+- **Frame:** every panel uses `PANEL` (cream body, 4px brown border, brown drop shadow) with a `TITLE_BAR` (forest green). Chips are white with brown borders; selection is gold with a ▶ cursor. The game's dialogue box (GBA teal frame) is the only other style. Don't add a second panel style.
+- **Class strings** live in `src/components/retro/styles.ts` (plain module so server components can import them). `src/components/retro/ui.tsx` (client) re-exports them plus `useKeys`, `Gem`, `Trophy`, `Window` (modal; `fixed` prop on scrolling pages), `Section`, `Bullets`, `ProjectBody`.
+- **Shared art:** `src/game/textures.ts` draws all game art procedurally; `paintedAssets()` exposes it as canvases, so React can show real game art (`WorldView`: a live crop of a map with water and a walking player; `ObjectSprite`: one object such as a project HQ). Gem colours per skill category: `CATEGORY_GEMS`; project → HQ building: `PROJECT_BUILDING`.
+- **Skilldex:** no proficiency ratings; gem colour only tells categories apart.
 
 ## Architecture
 ```
-src/app/layout.tsx          Server. Metadata, OG/Twitter, canonical, JSON-LD Person, Geist Mono, .page-frame
-src/app/page.tsx            Server. <BootWrapper> wraps Navbar + Hero + 6 sections + Footer + ChatBubble
-src/app/readme|now/layout.tsx  Server. Per-route metadata + canonical (pages themselves are client)
-src/app/robots.ts, sitemap.ts  sitemap lists /, /readme, /now
-src/app/not-found.tsx       Server wrapper (title) around src/components/NotFoundView.tsx ("command not found" 404, GSAP loaded on demand)
-src/app/api/chat/route.ts   POST. gpt-4o-mini (temp 0.2) if OPENAI_API_KEY, else local answers built from data.ts.
-                            Third-person assistant, facts-only prompt, command allow-list, per-IP rate limit 10/min (per instance)
-src/app/api/github/route.ts GET. Repos from data.ts githubUrls + latest commit; Next data cache 15 min; 503/stale on failure
-src/components/sections/*   Hero, Projects, Experience (#career), Leadership, CurrentlyBuilding, SystemMap, Contact
-src/components/Navbar.tsx   Top bar: section links (active via IntersectionObserver), ⌘K, UTC clock, mobile menu
-src/lib/data.ts             Single content source (projects, impactLog, experience, aiKnowledgeBase, boot lines,
-                            CONTACT_EMAIL, SYSTEM_VERSION — the only copies of the email and the UI version string)
-src/lib/topology.ts         System Map nodes/edges (derived from data.ts) + fixed 3D positions
-src/lib/navigation.ts       Command alias registry (Ask Krishi / palette) → scroll, select-project, README
-src/lib/motion.ts, github.ts  Motion constants; shared GitHub telemetry types/helpers
-src/hooks/useTerminalReveal.ts, useGitHubTelemetry.ts, useChat.ts, useReducedMotion.ts, ...
+src/app/layout.tsx       Server. metadataBase, OG/Twitter, JSON-LD Person, Geist Mono base font
+src/app/page.tsx         Server. <BootWrapper><TitleScreen/></BootWrapper>
+src/app/classic/page.tsx Server. RetroShell + ClassicMenu + sections + Skilldex + ProjectArchive + AskKrishi
+src/app/world/page.tsx   Server. Metadata; renders WorldGame (client), which import()s Phaser on demand
+src/app/now/page.tsx     Server. Retro /now page (metadata in now/layout.tsx)
+src/app/not-found.tsx    Server wrapper (title) around NotFoundView (retro 404 with route buttons)
+src/app/api/chat/route.ts  POST. gpt-4o-mini (temp 0.2) if OPENAI_API_KEY, else local answers from data.ts.
+                         Third-person, facts-only prompt, command allow-list, per-IP rate limit 10/min
+src/app/sitemap.ts       /, /classic, /world, /now
+next.config.ts           /readme → /classic (308; the old OS manual was retired)
+
+src/lib/data.ts          Single content source. 2.0 exports: profile, contact, education, certifications,
+                         skillCategories, milestones (plus projectsData, experienceData, ownerProfile, ...)
+src/lib/portfolio.ts     ProjectDetail, FEATURED, PROJECT_DETAILS, MORE_PROJECTS, projectsUsing(skill). No React/Phaser
+src/lib/retro.ts         PALETTE, RARITY_COLORS, CATEGORY_GEMS, PROJECT_BUILDING
+src/lib/navigation.ts    Chat command alias registry (AskKrishi maps its targets to Classic sections)
+
+src/components/boot/     BootScreen (particle vortex), BootWrapper (sessionStorage krishi-os:booted skips it)
+src/components/title/TitleScreen.tsx   Mode select
+src/components/classic/  Sections.tsx (server: Profile, Education, QuestLog, AchievementJournal, Contact,
+                         RetroSection), ClassicMenu, Skilldex, ProjectArchive, AskKrishi (client)
+src/components/retro/    styles.ts, ui.tsx, WorldView.tsx, RetroShell.tsx (top bar with universal nav)
+src/components/world/    WorldGame (host + HUD), Overlays (all game panels), Cartridge (intro + PlayerSprite)
+src/game/                Plain Phaser + TS, no React (see KRISHI.WORLD engine below)
 ```
-- **Events:** `open-ai-chat` opens the chat; `select-project` {id} is handled by Projects.
-- **Deep links:** `/#section` from any page or a shared URL scrolls there once boot clears (BootWrapper; boot locks scrolling, so the browser's own hash jump is lost). `/?chat=1` opens Ask Krishi after boot and strips the param (the README tile uses it).
-- **Navigation:** in-app page changes go through `router.push` (`executeNavigationCommand(cmd, router.push)`), never `window.location` (Next 16.3 lint rule).
-- **Section ids:** `hero`, `projects`, `career`, `leadership`, `currently-building`, `system-map`, `contact`.
+- **Shared data rule:** both modes consume the same sources and never duplicate descriptions. The game's project terminals are `FEATURED` plus an attribute id (`content.ts` `TERMINALS`); Classic's project windows render the same `ProjectBody`.
+- **Universal navigation:**
+  - Classic, /now and 404 (`RetroShell`): ▶ Adventure, Resume ↗ (LinkedIn), Contact, Main Menu.
+  - Adventure HUD: Menu, Classic Portfolio, ⏻ Main Menu. Esc menu: … Classic Portfolio, Resume ↗, Contact (mailto), Main Menu. Leaving plays the CRT power-off, then `router.push`.
+- **Progress never lost by switching:** the game state lives in localStorage (`krishi-world:progress:v1`, `:position:v1`, `:settings:v1`) and Classic never writes it. `krishi-world:entry` = last mode (badged "LAST PLAYED" and pre-selected on the title screen). `krishi-world:classic-section` = last Classic section, restored on the next visit unless the URL has a hash.
+- **Boot:** plays once per browser session; returning to `/` in the same session goes straight to the title screen.
 
-## System Map (Phase 5)
-- **Content:** 18 nodes (7 domains, 4 projects, 2 roles, 5 shared tech) and 29 edges. Tech links are computed from `techStack`.
-- **Positions:** fixed 3D, no physics, nothing random at runtime.
-- **Integrity:** `topology.ts` throws on duplicate node ids or edges to missing nodes, so `npm run build` (and the dev overlay) fails instead of silently dropping them.
-- **View changes:** dragging past 4px, arrow keys and "reset view" are the ONLY things that change the view.
-- **Highlighting:** hover, focus, click and the legend only change highlighting (opacity and colour). Verified in the browser: selecting a node moves zero nodes.
-- **Mobile:** below 640px only the highlighted node's neighbours, or just the projects, are labelled. Labels for nodes in the right 40% flip to the node's left side to stay inside the panel.
+## Title screen
+- Logo "KRISHI.WORLD", tagline "Explore the mind. Discover the builder.", two equal cards (owner's exact copy): ADVENTURE MODE / ENTER THE WORLD (live Origin Valley crop) and CLASSIC PORTFOLIO / VIEW PORTFOLIO (mini trainer profile from real data and art).
+- ←/→ or A/D (and ↑/↓) move the selection, Enter starts, hover/focus select; `sfx` on move and start. Keys wait for the boot (`useBooted`).
+- Background: the whole Origin Valley map, dimmed.
 
-## Motion system (GSAP only; framer-motion removed)
-- **Constants** (`src/lib/motion.ts`): ease `power3.out`, durations 0.15 / 0.3 / 0.5s, rise 10–16px. Also `scrambleText(el, duration)`, the terminal decode effect, which returns `{ tween, restore }`. Always call `restore()` on cleanup.
-- **`usePresence(open, MOTION)`** (`src/hooks`) is the GSAP replacement for AnimatePresence: it keeps an element mounted until its exit tween ends. MOTION must be a module-level constant. Used by the boot screen, command palette and chat.
-- **Boot screen** (`src/components/boot/BootScreen.tsx`): a canvas "particle vortex". Particles sampled from the KRISHI.OS wordmark spiral in from the edges (~1.2s) while the readout mounts the real `bootLinesData` modules, the tagline decodes, then BootWrapper's exit collapses the screen to a CRT line. Capped at 2s by a safety timeout; click/Escape skip; static text under reduced motion. The old terminal boot (TerminalOutput, BootLine, useBootSequence) was deleted.
-- **Boot gating:** `useBooted()` makes entrances wait for the boot screen.
-- **Hero:** a post-boot timeline. The prompt types; the name, title and impact figures decode from glyphs while rising; details and impact cells cascade.
-- **`useTerminalReveal()`:** once per section on scroll.
-  - The SectionHeader title decodes (`data-reveal="title"`) and the command types.
-  - The panel rises while a single emerald scan line sweeps it and then removes itself.
-  - `[data-reveal="item"]` children cascade.
-- **Career:** reveal is driven by its own scroll listener.
-- **`Ticker`** (`src/components/ui/Ticker.tsx`, between the Hero and Projects): an infinite marquee of projects, verified metrics and stack, all from data.ts.
-  - It eases to a stop on hover and pauses off-screen.
-  - It's static under reduced motion and `aria-hidden`, since it repeats information found elsewhere.
-- **Navbar scroll-progress line:** a direct readout of scroll position, not a tween.
-- **Accessibility rules:**
-  - All GSAP code runs inside `gsap.matchMedia("(prefers-reduced-motion: no-preference)")`.
-  - Use opacity, never autoAlpha.
-  - The only infinite loop is the ticker.
-- **Bundle:** the root 404 imports GSAP dynamically. A static import there was shipping a second GSAP and Navbar chunk alongside every page. The homepage is ~259 KB gzipped JS, down from 294 KB.
-- **Tailwind v4 gotcha:** `scale-*`/`translate-*` use the separate `scale`/`translate` CSS properties, so write `transition-[...,scale]` or `transition-[...,translate]`, not `transform`.
-- **Browser-pane caveat:** a hidden pane throttles rAF, so animations stall until a frame is forced (GSAP lag smoothing then advances only ~33ms per frame; the boot needs a resized viewport, since a hidden pane reports innerWidth 0). Never `await requestAnimationFrame` in pane scripts.
-- **Windows caveat:** `pkill` in Git Bash doesn't stop `next start`. Run servers as tracked background tasks or stop them by PID, or stale servers will serve old builds.
+## Classic Mode (`/classic`)
+- Sections, in order: Trainer Profile, Education Journal, Skilldex, Project Archive, Quest Log, Achievement Journal, Resume & Contact. All static content is server-rendered (in the HTML; works with JS off); the game engine is never loaded.
+- **Menu:** sticky ▶ list on desktop (lg), sticky chip row on smaller screens (the header scrolls away on phones so the chips stick at the top). Active section via IntersectionObserver.
+- **Skilldex:** numbered entries per category; picking one shows "Used in" (projects whose tech stack matches, `projectsUsing`) or "Part of Krishi's toolkit".
+- **Project Archive:** four cards with their HQ building; each opens a fixed `Window` with the full `ProjectBody` (Esc closes).
+- **Quest Log:** ACTIVE QUEST when the period includes "Present".
+- **Ask Krishi:** floating dialogue-style chat, same `/api/chat` and `useChat`; suggested commands become "▶ Go to <section>" links.
+- **V2 polish (2026-11-20):**
+  - Profile: animated `PlayerAvatar` (game sprite idling), "Open to" and contact links up top, Professional / Personal cards.
+  - Skilldex: each entry shows a factual description of the technology (`SKILL_DESCRIPTIONS`), practical applications (projects whose stack uses it, via the explicit `SKILL_TECH` table, plus experience skills), and technologies used alongside. Below lg the entry opens under the tapped category.
+  - Project files: `/classic/projects/[id]` (static, `dynamicParams = false`). Overview, problem/solution, stats and links always visible; tabs (`ProjectTabs`, ←/→) for Architecture (flow diagram), Tech, Features, My Role (only when data has role/why/challenge/lessons/next; KRISHI.OS has none), Screens. All panels SSR'd; tabs hide them only after hydration.
+  - Screenshots are real captures of the live deployments (`public/projects`, Nov 2026). Traffic AI has none (no public repo or demo). Re-capture with headless Chrome over CDP from a production build (the dev badge shows otherwise).
+  - Quest Log: sorted by start date, typed (`questKinds`: employment / leadership / volunteering; "event" exists but has no entries), expandable `<details>`, MDAS `roleHistory`, and `responsibilities()` which drops any line with a figure or "largest" (KOS-06).
+  - Achievements: categories academic / professional / technical / leadership, each with a link; `UnlockOnView` plays a stepped pop the first time the list scrolls into view (skipped if already visible, without JS, or under reduced motion).
+  - Sections rise in with CSS scroll-driven animation where supported (`.kw-reveal`); muted text darkened to #5a4434; shared `CARD` hover.
+- **Layout gotcha:** the page grid uses `grid-cols-[minmax(0,1fr)]` and the menu's `<aside>` is `contents` below lg; otherwise the scrolling chip row widens the page (horizontal overflow) or can't stay sticky.
 
-## KRISHI.WORLD (GBA-style game, in progress since 2026-11-19)
-An explorable top-down pixel-art world at `/world`, added alongside the portfolio (not replacing it). Brief: five regions (Origin Valley, Innovation Forest, Project Metropolis, Leadership Frontier, Adventure Coast), "KRISHI ATTRIBUTES" collectibles, project terminals, a journal, achievements and a world map, built in 5 sprints. No Pokémon names, sprites or maps; all art is original.
-- **Status:** Sprint 1 done (route, Phaser container, player, 4-direction walking, camera, collision, first map), plus an art pass to match the owner's reference images.
-  - Sprint 2 done:
-    - Origin Valley has 4 NPCs (guide, neighbour, professor, gardener), a signpost, mailboxes and doors to inspect.
-    - A GBA dialogue box, and the first KRISHI ATTRIBUTE ("AI Explorer").
-    - A Discovery Journal (I key or HUD button), with progress saved in localStorage.
-  - Sprint 3 done:
-    - Project Metropolis (second map, reached by Origin Valley's east road; warps both ways with a camera fade).
-    - Four project HQs whose doors open a project terminal. Reading each terminal for the first time awards an attribute.
-    - A profile card (P key or HUD button) linking LinkedIn and email only (owner's choice: no resume file).
-    - The boot-screen entry choice, plus a `▶ krishi.world` navbar link.
-  - Sprint 4 done:
-    - All five regions, connected: Innovation Forest (north of Origin), Adventure Coast (south of Origin), Leadership Frontier (east of Metropolis).
-    - 17 attributes.
-    - 8 achievements (J), with an unlock toast.
-    - An island world map (M) with fog over unvisited regions and fast travel to visited ones.
-    - A GBA start menu on Esc (the HUD is now just "Menu" and "← Portfolio").
-  - Sprint 5 done:
-    - Touch controls: a D-pad plus an A button, shown only on coarse pointers.
-    - Original synthesised sound effects and an optional music loop.
-    - Settings in the Esc menu (Sound / Music / Motion).
-    - Resume where you left off.
-    - A Text Guide (a play-free, accessible way to read everything).
-    - Leadership Frontier plaza dressing.
-    - The render loop sleeps behind open panels.
-  - All five sprints of the brief are done. The game ships about 357 KB gzipped on demand (Phaser + game code); the portfolio pages load none of it.
-- **Maps are generated:** `python scripts/worldgen.py` rewrites all five `src/game/maps/*.ts`.
-  - It validates overlaps, door access, warps, and a reachability search from each spawn to every character, crystal, sign and door.
-  - Spots listed in the script must match coordinates in `content.ts`.
-  - Edit the script and regenerate rather than hand-editing a map's layout.
-- **Topology** (warps; mirrored by `ROUTES` on the world map): Forest ↕ Origin (road cols 19–20) ↕ Coast; Origin ↔ Metropolis ↔ Frontier (rows 14–15).
-- **Region content sources:**
-  - **Forest:** `SKILL_GROUPS`, built from `ownerProfile.skills` and filtered to that list, so they can't invent a skill. Related projects are computed from tech stacks.
-  - **Frontier:** `experienceData` role, organisation, period and skills only. The `highlight` and description claims are still unverified (KOS-06), so they're never used.
-  - **Coast:** `ownerProfile.hobbies`, plus AuraLens from `additionalProjectsData`.
-- **Progress:** localStorage `krishi-world:progress:v1` = `{ attributes, regions, terminals }` (older saves are migrated by `read()`). Achievements are derived from it, never stored. `WorldGame.bump()` records a fact and toasts newly completed achievements.
-- **Owner decisions (2026-11-19):**
-  - Project Metropolis has exactly 4 buildings: ClinicalBrief, AccessVision, Traffic AI and KRISHI.OS. StudentHub stays a flagship on the classic site only.
-  - Profile links: LinkedIn and email only.
-  - Brief facts confirmed and stored in `data.ts` `ownerProfile` (the game reads all of it; since 2026-11-19 Ask Krishi reads background, skills and hobbies):
-    - Electronics & Telecommunication background
-    - skills list
-    - hobbies
-    - ClinicalBrief's document pipeline, narrative visualisation, knowledge graph and Pydantic
-    - Traffic AI's four-lane analysis
-  - No certifications were named, so none are shown.
-- **One UI theme in the game:** every panel (discovery, journal, terminal, profile) uses the shared `Window` in `Overlays.tsx`: cream body, dark-brown border and shadow, forest-green title bar, Pixelify Sans, and white chips with brown borders. Only the dialogue box differs (GBA teal frame, the classic speech-box convention). Don't introduce a second panel style (an emerald/monospace terminal was tried and dropped for clashing).
-- **Maps and warps:**
-  - `MapDef` has `id` and `warps` (step onto a tile and you land on another map's spawn and facing).
-  - WorldScene `init()` takes `{ mapId, spawn, facing }`; a warp calls `scene.restart()`. Per-map content lives in `content.ts` `MAP_CONTENT`.
-  - `borderTrees(w, h, gaps)` leaves exits.
-  - The scene calls `disableGlobalCapture()` while an overlay is open, so arrow keys and Space can scroll panels.
-- **Entry choice:** the first visit (no `krishi-world:entry` in localStorage) ends the boot on "Enter the world" or "View classic portfolio".
-  - The pick is saved and never asked again. Escape or a background tap picks classic. If storage is blocked, there's no choice screen.
-  - Returning "world" visitors are not auto-redirected (a deliberate choice: never trap anyone); the navbar link and ⌘K `krishi.world` switch over.
-- **Art direction** (owner's references, 2026-11-19): Pokémon Emerald-era GBA look. That means dotted grass, bushy 2×2 scalloped trees, two-tier tiled-roof houses, soft auto-tiled path, sand and water edges, chibi sprites with a 1px dark outline, a rounded white dialogue box with a teal double border and a pixel font, a YES/NO menu, a "trainer card"-style profile card, and an island world map (5 regions as islands joined by bridges). Original art only: match the style, never copy sprites, tiles, names or maps.
-- **Engine:** `phaser` 3.90.0, the last Phaser 3 release (pinned; Phaser 4 exists). Import it as `import * as Phaser from "phaser"`: the ESM build has no default export even though the types suggest one.
-- **Loading:** `src/app/world/page.tsx` (server, metadata) renders `src/components/world/WorldGame.tsx` (client), which `import()`s `src/game/createGame.ts` in an effect. Phaser is one ~310 KB gzipped chunk that no page preloads; the portfolio's bundles are unchanged.
-- **Code layout:** `src/game/` is plain Phaser + TypeScript, with no React.
-  - `textures.ts` draws all art into a pixel buffer at boot (no asset files): the terrain sheet, object sprites (`OBJECTS`: tree 2×2, house 5×4, university 8×5, sign, mailbox, with door tiles) and the 4-direction player.
-    - Path, sand and water are auto-tiled. Each has 16 variants indexed by a N/E/S/W "same terrain" mask, so edges and corners round off.
-    - Water has two frames that the scene swaps every 600ms.
-    - `Pix.outline()` gives sprites the GBA dark outline.
-  - `maps/*.ts` hold a map as `terrain` (one character per 16px tile: `.` grass, `,` grass 2, `=` path, `:` sand, `~` water, `*` flowers, `^` shrubs, `F` fence) plus `objects` (multi-tile sprites by top-left tile; `borderTrees()` rings the edge).
-    - Chosen over Tiled JSON: no editor needed, easy to review.
-    - `buildMap()` in `maps/legend.ts` resolves the auto-tile masks and collision, and throws on ragged rows, unknown characters or overlapping objects.
-    - Origin Valley's layout was generated by a script that also checks every door opens onto a path. Hand edits are fine; `buildMap` still validates them.
-  - `WorldScene.ts` handles movement.
-- **Movement:** tile-by-tile like the GBA games. The player always stands on a tile, a step is a 220ms tween, and collision is `solid[y][x]` (water, fences and every object footprint).
-- **Depth:** objects are images anchored at the bottom of their footprint with depth = that edge, and the player's depth is their feet. So the player stands in front of things below them and behind things above. Interactions later use "the tile I'm facing". The camera follows at the largest whole-number zoom that shows about 18×12 tiles (minimum 2×), clamped to the map.
-- **Escape hatches:** "← Back to portfolio" is always visible; there's a load-failure fallback link; and there's a ⌘K palette command `krishi.world`. There's no entry choice screen yet.
-- **Testing in the hidden browser pane:** Phaser runs on rAF, which the pane freezes. In dev, `window.__krishiWorld` exposes the game. Drive it with `game.step(t, 16)` plus a real `await setTimeout(16)` between steps, because the tween manager times itself with the real clock, so synchronous stepping never advances tweens. Dispatch `KeyboardEvent`s with `keyCode` set.
-- **Sprint 2 modules:**
-  - `src/game/content.ts`: NPCs (position, facing, Look, pages), signs and door text keyed by tile, attributes, crystal placements and `RARITY_COLORS`. Built from `data.ts` imports; flavour lines never state facts about Krishi.
-  - `src/game/bus.ts`: a typed EventTarget, the only scene↔React link (`dialogue`, `discover`, `open-journal`, `ui-open`, `ui-closed`). It has no Phaser import, so React stays light.
-  - `src/game/progress.ts`: localStorage `krishi-world:progress:v1`, `{ attributes: string[] }`. Every access is try/catch'd.
-  - `src/components/world/Overlays.tsx`: DialogueBox, DiscoveryCard and Journal. Uses the Pixelify Sans font via `next/font` in `world/page.tsx`, so it only loads on `/world`.
-- **Interaction model:**
-  - E or Enter interacts with the faced tile: `interactions: Map<"x,y", fn>` in WorldScene. NPCs and crystals are solid.
-  - Opening any overlay locks the scene (`lock()` resets keys). React emits `ui-closed`, and the scene unlocks and calls `resetKeys()`, so the key that closed the overlay can't re-trigger an interaction.
-  - Dialogue: E, Enter or Space finishes the line, then advances; Escape closes; a tap advances. The typewriter is skipped under reduced motion; screen readers get the full line through an `sr-only` live region.
-  - NPCs glance around every 2–4s (off under reduced motion) and turn to face the player when spoken to.
-- **Sprint 5 modules:**
-  - `src/game/settings.ts`: localStorage `krishi-world:settings:v1` (`sound`, default on; `music`, default off; `reducedMotion`) and `krishi-world:position:v1` (`mapId`, `x`, `y`, `facing`, saved after every step). `reduceMotion()` = the OS setting or the in-game toggle.
-  - `src/game/audio.ts`: Web Audio synthesis only (square/triangle tones), no files. `sfx(name)` and `syncMusic()`. Audio starts only after a user gesture: WorldGame calls `syncMusic()` on the first keydown or pointerdown.
-- **Resume:** WorldScene `init()` uses the saved position on first boot. `create()` falls back to the map spawn if that tile is now blocked or the map id is unknown.
-- **Touch:**
-  - `TouchControls` emits `pad` (held direction, or null) and `pad-a`. The scene merges `padDir` into `heldDirection()`.
-  - It's hidden on fine pointers via `[@media(pointer:coarse)]:flex`, and while any overlay is open (tapping the dialogue box advances it).
-- **Motion toggle** applies live via `settings-changed`: crystal bob tweens pause and resume, and the NPC glance timer checks `this.reduceMotion`. The dialogue typewriter reads it as a prop.
-- **Render sleep:** `lock()` puts `game.loop` to sleep 300ms later if still locked (a crystal's fade finishes first). `ui-closed` and `travel` wake it. Warps lock without sleeping.
-- **OS ↔ game bridge (2026-11-20; owner chose to keep the classic site's cybertech look):** the story is "KRISHI.OS is the computer, KRISHI.WORLD is a cartridge you launch on it".
-  - `src/components/world/Cartridge.tsx` holds `Cartridge` (an em-sized grey cart with a KRISHI.WORLD label and the `PlayerSprite` SVG) and `CartridgeIntro`.
-  - `/world` always opens with `CartridgeIntro`: the cart drops in, pushes into the console slot, clicks, the LED turns red→green, and a white flash reveals the game.
-    - It doubles as the loading screen: the reveal waits for Phaser.
-    - Any key or tap skips it; reduced motion skips it entirely.
-  - Leaving is "⏻ Exit to KRISHI.OS" (HUD link and Esc menu): a CRT power-off (GSAP clip-path collapse plus brightness), then `/`, which boots the OS again.
-    - The HUD exit is a real `<Link>`; modified clicks keep their default behaviour.
-  - The boot choice's "Enter the world" card shows a mini `Cartridge`; the navbar `krishi.world` link has a cartridge icon.
-  - **Font:** `src/lib/pixelFont.ts` is the single Pixelify Sans definition, with `preload: false`. Checked on a production build: returning visitors and `/readme` download only Geist Mono, and the pixel font loads on a first visit only once the cartridge choice is shown. (In dev, Turbopack loads the font CSS everywhere; ignore that.)
-- **Content rule:** game content must come from `data.ts` (via structured data files), never typed into scenes. That includes the Sprint 4 regions (see "Region content sources"). Facts in the brief that `data.ts` doesn't have are pending owner confirmation (see Open items).
+## KRISHI.WORLD engine (Adventure Mode)
+- Five regions (Origin Valley, Innovation Forest, Project Metropolis, Leadership Frontier, Adventure Coast), 17 KRISHI ATTRIBUTES, 8 achievements, journal, world map with fast travel, project terminals, text guide, touch controls, synthesised audio, settings, resume position. Original art only (GBA Emerald-era style; never copy sprites, tiles, names or maps).
+- **Maps are generated:** `python scripts/worldgen.py` rewrites `src/game/maps/*.ts` and validates overlaps, doors, warps and reachability. Edit the script, not the maps. Spots in the script must match `content.ts`.
+- **Topology:** Forest ↕ Origin (cols 19–20) ↕ Coast; Origin ↔ Metropolis ↔ Frontier (rows 14–15).
+- **Region content:** Forest from `ownerProfile.skills` (`SKILL_GROUPS`); Frontier from `experienceData` role/organisation/period/skills only; Coast from `ownerProfile.hobbies` plus AuraLens. Game text must come from data.ts; flavour lines never state facts about Krishi.
+- **Code:** `textures.ts` (all art), `maps/legend.ts` `buildMap()` (auto-tiles, collision, validation), `WorldScene.ts` (tile-by-tile movement, 220ms steps, depth by feet), `content.ts` (NPCs, signs, attributes, crystals, terminals), `bus.ts` (typed EventTarget, the only scene↔React link), `progress.ts`, `settings.ts`, `audio.ts`.
+- **Interaction:** E/Enter interacts with the faced tile; overlays lock the scene and `ui-closed` unlocks it with `resetKeys()`. The render loop sleeps 300ms after locking.
+- **Cartridge intro** on every `/world` load doubles as the loading screen; any key/tap skips; reduced motion skips it.
+- **Load failure:** WorldGame shows a link to `/classic`.
+- **Game-feel polish (2026-11-20):** a "!" bubble (`fx-prompt`) over whatever the player faces and can use (`refreshPrompt`, bob computed per frame, not tweened); stepping onto tall grass or flowers rustles (`stepEffects`: leaf/petal pixels plus `sfx("rustle")`, filtered noise); walking into something plays `sfx("bump")` (450ms cooldown); two soft cloud shadows drift over every map. Effects are skipped under reduced motion (sounds still play when SFX is on). HUD uses the pixel font, adds an attribute counter (opens the Journal), shows a GBA-style location sign for 2.8s on each region load (after the cartridge intro), and fades the controls hint after the first step (`moved` bus event).
+- **Bundle:** Phaser is one ~310 KB gzipped chunk loaded only on `/world`.
+
+## Testing notes
+- **Hidden browser pane:** rAF and GSAP are frozen, so screenshots can show tweens mid-way (the title screen looks dimmed). Drive the game via `window.__krishiWorld` (dev only) with `game.step(t, 16)` plus a real `await setTimeout(16)`; dispatch `KeyboardEvent`s with `keyCode`. Resize the viewport first (a hidden pane reports innerWidth 0).
+- **Windows:** `next start` survives task stops and `pkill`; stop it by port (`Get-NetTCPConnection -LocalPort <p>` → `Stop-Process`). Use a different port from the dev server.
+- **Tailwind v4:** `scale-*`/`translate-*` are separate CSS properties; write `transition-[...,translate]`.
+- **React compiler lint:** don't call ref-touching functions from curried handlers built during render; don't assign `window.location.href` (use `location.assign`).
 
 ## Env vars (names only)
 - `OPENAI_API_KEY`: server-only, optional.
-- `GITHUB_TOKEN`: server-only, optional; raises GitHub's limit from 60 to 5000 requests/h.
 
 ## Decisions already made
-- Exactly four featured projects.
-- README stays out of the primary nav. It's reachable from the palette, Ask Krishi, the hero pill and the footer.
-- Selecting a System Map node never moves, pans, zooms or re-lays-out anything. There's no auto-rotation or "tour".
-- The homepage shell stays a Server Component for SEO.
-- Telemetry: never invent commits, stars or timestamps. Omit data instead.
-- Ask Krishi: no RAG, web search, vector DB or provider change without approval. Third-person voice (the owner can revert to first person).
-- Contact form: mailto only, no backend.
+- Exactly four featured projects in both modes.
+- The cybertech site (Navbar, sections, System Map, command palette, GitHub telemetry, /readme) was retired on 2026-11-20 (owner: "Replace it, keep Ask Krishi").
+- Classic stays fully usable without the game (and without JavaScript for reading).
+- Ask Krishi: no RAG, web search, vector DB or provider change without approval. Third-person voice.
+- Contact: mailto and LinkedIn only, no backend, no resume file.
 - Never commit or push without an explicit request.
 
 ## Open items
-- **KRISHI.WORLD content gaps (owner to confirm before Sprints 2-4):** the brief names facts not in data.ts:
-  - an Electronics & Telecommunication engineering background
-  - PyTorch, TensorFlow, SQL, Docker, Git, cloud, LLMs/AI agents as skills
-  - ClinicalBrief "document processing pipeline / narrative visualisation / knowledge graph / Pydantic"
-  - Traffic AI "four-lane"
-  - hobbies: photography, yoga, aerial yoga, scuba, swimming, travel (data.ts lists Formula 1, fitness & lifting, startups, applied ML, agentic AI)
-  - certifications
-  - a resume file
-  - KRISHI.OS as a project (it would be a fifth "project", and StudentHub is missing from the brief's list)
-- **KRISHI.WORLD entry screen:** how the "Enter the world / Classic portfolio" choice coexists with the boot screen is undecided.
-- **ASCII portrait:** blocked until there's an authorised source photo.
-- **Bundle size:** done; framer-motion was removed and the homepage went from 294 KB to 259 KB gzipped JS.
-- **LCP:** content stays at opacity 0 until the boot screen clears (about 2s, by design from the brief), which delays LCP. That's a product trade-off.
-- **`/now`:** still says "Last updated: June 2026"; its personal content (hobbies, reading) is unverified.
-- **Ask Krishi** is single-turn. The live gpt-4o-mini path is untested locally (no key). Both upstream fetches (OpenAI, GitHub) time out after 10s.
-- **Ask Krishi knows the owner-confirmed profile:**
-  - **LLM path:** facts = `aiKnowledgeBase` + `ownerConfirmed` (background, skills, hobbies).
-  - **Local answers:** the skills intent lists `ownerProfile.skills` plus project tech. The hobbies intent lists `ownerProfile.hobbies` plus the existing interests ("photography" no longer routes to the AuraLens card). The education intent adds the background.
-  - The skills intent sits before "building" because "deep learning" contains "learning".
-- **Ask Krishi fallback routing:** project + topic word (architecture / challenge / trade-offs / why built / what's next) answers from that project's data.ts field; natural shortcuts (copilot, p95, voice, lane, supabase…) pin both; "which project uses X" answers from techStack. Every suggested follow-up must be answerable: `check:chat` walks them all and fails on the generic reply.
-- **Awaiting owner:** consolidating Leadership roles, career commits, README open-source list and palette commands into data.ts (wording differs, so it changes visible copy); dead code (GridBackground.tsx, useTypingEffect.ts, .animate-blink, unused public/*.svg); `apple-design-skill` gitlink without .gitmodules; whether to link /now or drop it.
-- **Unverified personal claims:** "300+ students across 5+ events", "40% digital interaction", "largest data society", the Mysahayak 30%/20% figures, and Sacred Heart's 50+ interactions per shift.
+- **`/now`:** still says "Last updated: June 2026"; its Formula 1, photography and reading lines predate owner confirmation.
+- **Ask Krishi** is single-turn; the live gpt-4o-mini path is untested locally (no key). The chat's command registry still uses the old site's section names (mapped in AskKrishi).
+- **LCP:** the boot holds the title screen for up to ~2s on the first visit each session (product trade-off).
+- **ASCII portrait / photo:** none; the trainer profile uses the game's player sprite.
+- **Leftovers to review:** `globals.css` still holds the old dark theme tokens and `.page-frame` (the layout's base); unused `public/*.svg`; `apple-design-skill` gitlink without .gitmodules.
 
 ## Verification commands
 ```
 npx tsc --noEmit     # passes
-npm run lint         # passes (0 problems)
-npm run build        # passes; all pages static except the two API routes
-npm run check:chat   # 37 routing cases + empty-message and rate-limit checks + a walk of every suggested follow-up (fallback mode, needs the dev server)
+npx eslint .         # passes
+npx next build       # passes; all pages static except /api/chat
+npm run check:chat   # routing cases, empty message, rate limit, every suggested follow-up (needs the dev server)
 npm run dev          # .claude/launch.json "dev" on :3000
 ```
-No automated UI tests. Browser checks are manual via the preview tools.
-- **Horizontal overflow** (verified 2026-10-12): `/`, `/readme`, `/now` and the 404 have no page-level or inner horizontal scroll at 320–1920px, including the mobile menu, palette, chat and boot screen. Sweep method: load each page in an offscreen same-origin iframe at each width and flag elements or text nodes past the viewport that no `overflow` ancestor clips. Past offenders: the hero impact value (now scales `text-base`→`text-3xl`) and the Projects file tabs (now wrap).
+No automated UI tests; browser checks are manual via the preview tools.
+- **Verified 2026-11-20 (prod build):** `/`, `/classic`, `/now`, `/world` 200; `/readme` 308 → `/classic`; unknown paths 404 (retro page). Classic HTML contains every section and no unverified claim. No horizontal overflow: `/classic` at 375, 640, 768, 1024 and 1280px; `/`, `/now` and the 404 at 375px. Round trip Adventure → Classic → Adventure keeps progress and position.

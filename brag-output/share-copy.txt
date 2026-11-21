@@ -1,1 +1,0 @@
-My portfolio is an operating system. Boot it, open the terminal, insert the cartridge, and the whole desktop pixelates into a game. KRISHI.OS is the classic site; KRISHI.WORLD is the same work as a pixel-art adventure. krishi-portfolio.vercel.app

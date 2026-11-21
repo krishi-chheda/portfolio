@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { sfx } from "@/game/audio";
+import gsap from "gsap";
+import { WORLD } from "@/lib/motion";
+import { useEntrance } from "@/hooks/useEntrance";
 
 /**
  * GBA summary-screen pages for a project file: ◀ ▶ (or ←/→ on the tab row) flips pages. Panels are server-rendered
@@ -18,15 +21,30 @@ export default function ProjectTabs({ tabs }: { tabs: { id: string; label: strin
     if (fromHash >= 0) setActive(fromHash);
   }, [tabs]);
 
+  const dir = useRef(1); // +1 flipped forward, -1 back
   const go = (i: number, focus = false) => {
     const next = (i + tabs.length) % tabs.length;
+    dir.current = i < active ? -1 : 1;
     if (next !== active) sfx("select");
     setActive(next);
     if (focus) refs.current[next]?.focus();
   };
 
+  const rootRef = useEntrance<HTMLDivElement>(
+    (root) => {
+      if (!ready) return;
+      const panel = root.querySelector("[role=tabpanel]:not([hidden])");
+      if (!panel) return;
+      gsap
+        .timeline({ defaults: { clearProps: "transform,opacity,visibility" } })
+        .from(panel, { autoAlpha: 0, x: 18 * dir.current, duration: WORLD.dur.standard - 0.04, ease: WORLD.easeSoft })
+        .from([...panel.children].slice(0, 5), { autoAlpha: 0, y: 8, duration: WORLD.dur.quick, ease: WORLD.easeSoft, stagger: WORLD.stagger }, 0.06);
+    },
+    [active, ready],
+  );
+
   return (
-    <div className="border-4 border-[#46382b] bg-[#f5e8c8] shadow-[6px_6px_0_#46382b]">
+    <div ref={rootRef} className="border-4 border-[#46382b] bg-[#f5e8c8] shadow-[6px_6px_0_#46382b]">
       <div className="flex items-stretch border-b-4 border-[#46382b] bg-[#285943]">
         <button type="button" onClick={() => go(active - 1)} aria-label="Previous page" className="shrink-0 px-3 text-[#f5e8c8] hover:text-[#f5c65b]">
           ◀

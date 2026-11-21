@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { additionalProjectsData, aiKnowledgeBase, currentProcesses, experienceData, ownerProfile, projectsData, CONTACT_EMAIL } from "@/lib/data";
 
 const MAX_MESSAGE_LENGTH = 500;
+const MAX_BODY_BYTES = 8 * 1024; // a 500-character question fits many times over; anything bigger is refused unread
 
 // Navigation commands the assistant may suggest. Each must match an alias in src/lib/navigation.ts;
 // anything else the model emits is dropped.
@@ -29,9 +30,44 @@ function rateLimited(ip: string): boolean {
   const now = Date.now();
   const recent = (hits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
   recent.push(now);
-  if (hits.size > 5000) hits.clear(); // bound memory
+  if (hits.size > 5000) {
+    // Bound memory by dropping only stale entries, so a flood of new addresses can't wipe everyone's counters
+    for (const [key, times] of hits) if (!times.some((t) => now - t < RATE_WINDOW_MS)) hits.delete(key);
+    if (hits.size > 5000) hits.delete(hits.keys().next().value as string);
+  }
   hits.set(ip, recent);
   return recent.length > RATE_LIMIT;
+}
+
+// The client's address as set by the hosting proxy. On Vercel both headers are written by the platform (client
+// values are not passed through); prefer x-real-ip, which is a single address.
+function clientIp(req: Request): string {
+  return req.headers.get("x-real-ip")?.trim() || req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+}
+
+/** Reads the JSON body, refusing anything over MAX_BODY_BYTES (declared or actual) before parsing it. */
+async function readBody(req: Request): Promise<{ message?: unknown } | "too-large" | null> {
+  const declared = Number(req.headers.get("content-length") ?? 0);
+  if (declared > MAX_BODY_BYTES) return "too-large";
+  const reader = req.body?.getReader();
+  if (!reader) return null;
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > MAX_BODY_BYTES) {
+      await reader.cancel();
+      return "too-large";
+    }
+    chunks.push(value);
+  }
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  } catch {
+    return null;
+  }
 }
 
 // Whole-word / phrase match, so "github" doesn't match "hub" and "world" doesn't match "rl".
@@ -384,12 +420,14 @@ async function llmReply(message: string): Promise<string> {
 
 export async function POST(req: Request) {
   try {
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
-    if (rateLimited(ip)) {
+    if (rateLimited(clientIp(req))) {
       return NextResponse.json({ error: "Too many questions in a short time. Please wait a minute and try again" }, { status: 429 });
     }
 
-    const body = await req.json().catch(() => null);
+    const body = await readBody(req);
+    if (body === "too-large") {
+      return NextResponse.json({ error: "Request is too large" }, { status: 413 });
+    }
     const message = typeof body?.message === "string" ? body.message.trim() : "";
     if (!message) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });

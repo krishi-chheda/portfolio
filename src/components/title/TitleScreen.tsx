@@ -10,6 +10,9 @@ import { CATEGORY_GEMS, PROJECT_BUILDING } from "@/lib/retro";
 import { sfx } from "@/game/audio";
 import { getSettings, setSettings } from "@/game/settings";
 import { useBooted } from "@/components/boot/BootWrapper";
+import gsap from "gsap";
+import { WORLD } from "@/lib/motion";
+import { useEntrance } from "@/hooks/useEntrance";
 
 const ENTRY_KEY = "krishi-world:entry"; // last mode chosen ("world" | "classic"); kept from the earlier boot choice
 
@@ -224,6 +227,22 @@ function SoundToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
 export default function TitleScreen() {
   const router = useRouter();
   const booted = useBooted();
+  // Hero first, once the boot hands over: the logo drops in with the signature overshoot, then the tagline, the
+  // two cards (staggered, from the same direction), and the footer last. Under 0.9s in total.
+  const mainRef = useEntrance<HTMLElement>(
+    (main) => {
+      if (!booted) return;
+      const t = (q: string) => main.querySelectorAll(q);
+      gsap
+        .timeline({ defaults: { clearProps: "transform,opacity,visibility" } })
+        .from(t("header > p:first-child"), { autoAlpha: 0, y: -8, duration: WORLD.dur.standard, ease: WORLD.easeSoft })
+        .from(t("header h1"), { autoAlpha: 0, y: -36, scale: 0.92, duration: WORLD.dur.slow, ease: "back.out(1.6)" }, 0.05)
+        .from(t("header > p:last-child"), { autoAlpha: 0, y: 10, duration: WORLD.dur.standard, ease: WORLD.easeSoft }, 0.28)
+        .from(t('[aria-label="Choose a mode"] > div'), { autoAlpha: 0, y: 28, scale: 0.96, duration: WORLD.dur.slow, ease: WORLD.ease, stagger: 0.1 }, 0.32)
+        .from(t("footer"), { autoAlpha: 0, y: 8, duration: WORLD.dur.standard, ease: WORLD.easeSoft }, 0.62);
+    },
+    [booted],
+  );
   const [selected, setSelected] = useState<Mode>("world");
   const [last, setLast] = useState<Mode | null>(null);
   const [sound, setSound] = useState(true);
@@ -279,7 +298,7 @@ export default function TitleScreen() {
   });
 
   return (
-    <main className={`${PIXEL} relative min-h-screen overflow-hidden bg-[#1c4031] text-[#f5e8c8]`}>
+    <main ref={mainRef} className={`${PIXEL} relative min-h-screen overflow-hidden bg-[#1c4031] text-[#f5e8c8]`}>
       {/* The whole world as the backdrop: clearer than before, darkened toward the edges so the cards stay on top */}
       <div aria-hidden="true" className="absolute inset-0">
         <WorldView crop={BG_CROP} walkRow={14} label="" className="h-full w-full object-cover opacity-90 saturate-[1.1]" />

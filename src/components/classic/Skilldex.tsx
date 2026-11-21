@@ -5,6 +5,9 @@ import { CHIP, Gem, LABEL, MUTED } from "@/components/retro/ui";
 import { skillCategories } from "@/lib/data";
 import { skillProfile } from "@/lib/portfolio";
 import { CATEGORY_GEMS } from "@/lib/retro";
+import gsap from "gsap";
+import { WORLD } from "@/lib/motion";
+import { useEntrance } from "@/hooks/useEntrance";
 
 const ENTRIES = skillCategories.flatMap((c, ci) => c.skills.map((name) => ({ name, category: c.name, gem: CATEGORY_GEMS[ci % CATEGORY_GEMS.length] })));
 const number = (name: string) => String(ENTRIES.findIndex((e) => e.name === name) + 1).padStart(3, "0");
@@ -39,8 +42,18 @@ export default function Skilldex() {
     buttons.current[ENTRIES[i].name]?.focus();
   };
 
+  const detailRef = useEntrance<HTMLElement>(
+    (aside) => {
+      gsap
+        .timeline({ defaults: { clearProps: "transform,opacity,visibility" } })
+        .from(aside.querySelector("svg"), { scale: 0.4, rotation: -30, duration: WORLD.dur.standard + 0.05, ease: "back.out(2)" })
+        .from(aside.querySelectorAll(":scope > div:last-child > div"), { autoAlpha: 0, y: 8, duration: WORLD.dur.quick + 0.05, ease: WORLD.easeSoft, stagger: WORLD.stagger }, 0.05);
+    },
+    [picked, wide],
+  );
   const detail = (
       <aside
+        ref={detailRef}
         id="skilldex-entry"
         aria-live="polite"
         className="h-fit border-4 border-[#46382b] bg-white shadow-[4px_4px_0_#46382b] lg:sticky lg:top-24"

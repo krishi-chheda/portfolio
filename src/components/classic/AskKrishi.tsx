@@ -4,6 +4,9 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BUTTON, PIXEL, TITLE_BAR, useKeys } from "@/components/retro/ui";
 import { useChat } from "@/hooks/useChat";
 import { navigationRegistry } from "@/lib/navigation";
+import gsap from "gsap";
+import { WORLD } from "@/lib/motion";
+import { useEntrance } from "@/hooks/useEntrance";
 
 // http(s) URLs (trailing punctuation excluded) and email addresses.
 const LINK_RE = /https?:\/\/[^\s<>"]*[^\s<>".,;:!?)]|[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
@@ -48,6 +51,20 @@ export default function AskKrishi() {
     "Hi! I'm Krishi's assistant. Ask about his projects, his Master of AI at Monash, his leadership roles, or how to reach him.",
   );
   const logRef = useRef<HTMLDivElement>(null);
+  // Panel grows from the launcher (bottom-right) with the signature overshoot
+  const panelRef = useEntrance<HTMLElement>(
+    (el) => {
+      if (!open) return;
+      gsap.from(el, { autoAlpha: 0, scale: 0.88, y: 14, transformOrigin: "100% 100%", duration: WORLD.dur.standard, ease: WORLD.ease, clearProps: "transform,opacity,visibility" });
+    },
+    [open],
+  );
+  // The newest message rises into place (speaker-side origin)
+  useEntrance<HTMLDivElement>(() => {
+    const last = logRef.current?.lastElementChild;
+    if (!open || !last) return;
+    gsap.from(last, { autoAlpha: 0, y: 10, duration: WORLD.dur.quick + 0.05, ease: WORLD.easeSoft, clearProps: "transform,opacity,visibility" });
+  }, [messages.length, loading, open]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -69,6 +86,7 @@ export default function AskKrishi() {
     <div className={`${PIXEL} fixed right-3 bottom-3 z-30 flex flex-col items-end gap-3 sm:right-6 sm:bottom-6`}>
       {open && (
         <section
+          ref={panelRef}
           aria-label="Ask Krishi"
           className="flex h-[min(32rem,calc(100dvh-6rem))] w-[min(24rem,calc(100vw-1.5rem))] flex-col border-4 border-[#46382b] bg-[#f5e8c8] text-[#2b2420] shadow-[6px_6px_0_#46382b]"
         >

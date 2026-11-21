@@ -3,7 +3,10 @@
 // The KRISHI.WORLD retro UI kit, shared by Adventure Mode overlays and Classic Mode: one frame, one set of
 // labels, chips, buttons and icons, so both modes look like the same game. No Phaser imports.
 import { useEffect, useRef, type ReactNode } from "react";
+import gsap from "gsap";
 import type { ProjectDetail } from "@/lib/portfolio";
+import { WORLD } from "@/lib/motion";
+import { useEntrance } from "@/hooks/useEntrance";
 
 import { BUTTON, CHIP, LINK, PANEL, PIXEL, TITLE_BAR } from "./styles";
 export { BUTTON, CARD, CHIP, LABEL, LINK, MUTED, PANEL, PIXEL, TITLE_BAR } from "./styles";
@@ -67,8 +70,18 @@ export function Window({
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => closeRef.current?.focus({ preventScroll: true }), []);
+  // Heavy element: backdrop fades, the panel pops up (signature overshoot), then the first content blocks cascade in
+  const rootRef = useEntrance<HTMLDivElement>((root) => {
+    const panel = root.firstElementChild;
+    const blocks = [...(root.querySelector("[data-window-body] > *")?.children ?? [])].slice(0, 6);
+    gsap
+      .timeline()
+      .from(root, { backgroundColor: "rgba(0,0,0,0)", duration: WORLD.dur.quick, ease: "power1.out", clearProps: "backgroundColor" })
+      .from(panel, { autoAlpha: 0, y: WORLD.rise + 6, scale: 0.95, duration: WORLD.dur.standard, ease: WORLD.ease, clearProps: "transform,opacity,visibility" }, 0)
+      .from(blocks, { autoAlpha: 0, y: 8, duration: WORLD.dur.quick + 0.05, ease: WORLD.easeSoft, stagger: WORLD.stagger, clearProps: "transform,opacity,visibility" }, 0.1);
+  });
   return (
-    <div className={`${fixed ? "fixed" : "absolute"} inset-0 z-40 flex items-center justify-center bg-black/40 p-3 sm:p-6`} role="dialog" aria-modal="true" aria-labelledby={titleId}>
+    <div ref={rootRef} className={`${fixed ? "fixed" : "absolute"} inset-0 z-40 flex items-center justify-center bg-black/40 p-3 sm:p-6`} role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <div className={`${PIXEL} ${PANEL} pointer-events-auto flex max-h-full w-full ${width} flex-col overflow-hidden`}>
         <div className={TITLE_BAR}>
           <h2 id={titleId} className="min-w-0 truncate text-xl tracking-[0.15em]">
@@ -76,7 +89,9 @@ export function Window({
           </h2>
           {meta && <span className="shrink-0 text-sm">{meta}</span>}
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+        <div data-window-body className="min-h-0 flex-1 overflow-y-auto">
+          {children}
+        </div>
         <div className="flex items-center justify-between gap-3 border-t-4 border-[#46382b] px-4 py-2 text-sm">
           {footerHint && <span className="hidden text-[#5a4434] sm:inline">{footerHint}</span>}
           <button ref={closeRef} type="button" onClick={onClose} className={`ml-auto ${BUTTON}`}>

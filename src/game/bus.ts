@@ -15,7 +15,8 @@ interface Events {
   "open-achievements": void; // scene -> UI: the J key was pressed
   "open-menu": void; // scene -> UI: Escape was pressed in the world
   terminal: string; // scene -> UI: a project HQ's doors were used (project id)
-  region: { id: string; name: string }; // scene -> UI: the map the player is now in
+  region: { id: string; name: string; parent?: string }; // scene -> UI: the map the player is now in (parent: the region an interior belongs to)
+  exhibit: { project: string; section: import("./content").ExhibitSection }; // scene -> UI: an HQ exhibit was inspected
   moved: void; // scene -> UI: the player took a step (the HUD fades its controls hint)
   travel: string; // UI -> scene: fast travel to a visited region (map id)
   pad: "down" | "up" | "left" | "right" | null; // UI -> scene: on-screen D-pad held direction (null = released)

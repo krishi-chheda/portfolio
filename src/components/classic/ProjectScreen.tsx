@@ -1,69 +1,14 @@
 // A project file as a GBA-style summary screen: an overview that's always visible (HQ building, stats, links,
 // problem and solution), then flippable pages for architecture, tech, features, role and real screenshots.
 // Server component; every word comes from the shared ProjectDetail (src/lib/portfolio.ts).
-import type { CSSProperties, ReactNode } from "react";
-import Image from "next/image";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import ProjectTabs from "@/components/classic/ProjectTabs";
-import { CARD, CHIP, LABEL, LINK, MUTED, PANEL, TITLE_BAR } from "@/components/retro/styles";
-import { Gem } from "@/components/retro/ui";
+import { CHIP, LABEL, LINK, MUTED, PANEL, TITLE_BAR } from "@/components/retro/styles";
+import { ArchitectureSection, Block, FeaturesSection, RoleSection, ScreensSection, TechSection, hasRole } from "@/components/retro/ProjectParts";
 import { ObjectSprite, PlayerAvatar } from "@/components/retro/WorldView";
-import { skillCategories } from "@/lib/data";
 import { FEATURED, type ProjectDetail } from "@/lib/portfolio";
-import { CATEGORY_GEMS, PROJECT_BUILDING } from "@/lib/retro";
-
-const NEUTRAL_GEM = ["#ffffff", "#cfc4a8", "#8f8466"] as const;
-const gemFor = (tech: string) => {
-  const i = skillCategories.findIndex((c) => c.skills.some((s) => s.toLowerCase() === tech.toLowerCase()));
-  return i >= 0 ? CATEGORY_GEMS[i % CATEGORY_GEMS.length] : NEUTRAL_GEM;
-};
-
-function Bullets({ items }: { items: string[] }) {
-  return (
-    <ul className="space-y-2 text-lg leading-snug">
-      {items.map((item) => (
-        <li key={item} className="flex gap-2.5">
-          <span aria-hidden="true" className="mt-1 text-sm text-[#285943]">
-            ◆
-          </span>
-          <span>{item}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function Block({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="space-y-2">
-      <h3 className="text-base tracking-[0.15em] text-[#285943]">▶ {title.toUpperCase()}</h3>
-      {children}
-    </div>
-  );
-}
-
-/** The pipeline as pixel boxes joined by arrows that light up in sequence (left→right on desktop, top→down on phones). */
-function FlowDiagram({ flow }: { flow: ProjectDetail["flow"] }) {
-  return (
-    <ol className="flex flex-col items-stretch gap-1 lg:flex-row" aria-label="Architecture, step by step">
-      {flow.map((step, i) => (
-        <li key={step.label} className="flex flex-col items-stretch gap-1 lg:min-w-0 lg:flex-1 lg:flex-row">
-          <div className="relative flex-1 border-2 border-[#46382b] bg-white p-3 pt-4 shadow-[3px_3px_0_#46382b]">
-            <span className="absolute -top-3 left-2 border-2 border-[#46382b] bg-[#f5c65b] px-1.5 text-xs tracking-widest">{String(i + 1).padStart(2, "0")}</span>
-            <p className="text-lg leading-tight">{step.label}</p>
-            <p className={`mt-1 text-sm leading-snug ${MUTED}`}>{step.description}</p>
-          </div>
-          {i < flow.length - 1 && (
-            <span aria-hidden="true" className="kw-flow-arrow self-center px-1 text-xl text-[#285943]" style={{ "--i": i } as CSSProperties}>
-              <span className="lg:hidden">▼</span>
-              <span className="hidden lg:inline">▶</span>
-            </span>
-          )}
-        </li>
-      ))}
-    </ol>
-  );
-}
+import { PROJECT_BUILDING } from "@/lib/retro";
 
 export default function ProjectScreen({ project: p }: { project: ProjectDetail }) {
   const index = FEATURED.findIndex((f) => f.id === p.id);
@@ -72,135 +17,13 @@ export default function ProjectScreen({ project: p }: { project: ProjectDetail }
   const no = String(index + 1).padStart(3, "0");
   const liveExternal = p.liveUrl?.startsWith("http");
 
-  const tabs: { id: string; label: string; content: ReactNode }[] = [];
-  tabs.push({
-    id: "architecture",
-    label: "ARCHITECTURE",
-    content: (
-      <div className="space-y-6">
-        {p.flow.length ? <FlowDiagram flow={p.flow} /> : <p className={MUTED}>No architecture diagram for this project.</p>}
-        {p.architectureNote && (
-          <Block title="How it fits together">
-            <p className="text-lg leading-relaxed">{p.architectureNote}</p>
-          </Block>
-        )}
-        {p.tradeOffs && (
-          <Block title="Trade-offs">
-            <p className="text-lg leading-relaxed">{p.tradeOffs}</p>
-          </Block>
-        )}
-      </div>
-    ),
-  });
-  tabs.push({
-    id: "tech",
-    label: "TECH",
-    content: (
-      <div className="space-y-4">
-        <p className={`text-base ${MUTED}`}>
-          {p.techStack.length} technologies. Gem colours match the Skilldex categories.
-        </p>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {p.techStack.map((t) => (
-            <li key={t} className={`${CARD} flex items-center gap-2.5 px-3 py-2.5 text-base`}>
-              <Gem colors={gemFor(t)} size={20} />
-              <span className="min-w-0 leading-tight">{t}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    ),
-  });
-  tabs.push({
-    id: "features",
-    label: "FEATURES",
-    content: (
-      <div className="space-y-6">
-        {p.features.length > 0 && (
-          <Block title={p.featuresTitle}>
-            <Bullets items={p.features} />
-          </Block>
-        )}
-        {p.extras.length > 0 && (
-          <Block title="Also inside">
-            <Bullets items={p.extras} />
-          </Block>
-        )}
-        {p.achievements.length > 0 && (
-          <Block title="Outcomes">
-            <Bullets items={p.achievements} />
-          </Block>
-        )}
-      </div>
-    ),
-  });
-  if (p.role || p.whyBuilt || p.challenge || p.lessons.length || p.next) {
-    tabs.push({
-      id: "role",
-      label: "MY ROLE",
-      content: (
-        <div className="space-y-6">
-          {p.role && (
-            <Block title="Role">
-              <p className="text-xl leading-snug">{p.role}</p>
-            </Block>
-          )}
-          {p.whyBuilt && (
-            <Block title="Why I built it">
-              <p className="text-lg leading-relaxed">{p.whyBuilt}</p>
-            </Block>
-          )}
-          {p.challenge && (
-            <Block title="Hardest problem">
-              <p className="text-lg leading-relaxed">{p.challenge}</p>
-            </Block>
-          )}
-          {p.lessons.length > 0 && (
-            <Block title="Lessons">
-              <Bullets items={p.lessons} />
-            </Block>
-          )}
-          {p.next && (
-            <Block title="What's next">
-              <p className="text-lg leading-relaxed">{p.next}</p>
-            </Block>
-          )}
-        </div>
-      ),
-    });
-  }
-  tabs.push({
-    id: "screens",
-    label: "SCREENS",
-    content: p.screenshots.length ? (
-      <ul className="grid gap-6 md:grid-cols-2">
-        {p.screenshots.map((s) => {
-          const tall = s.height > s.width;
-          return (
-            <li key={s.src} className={tall ? "md:row-span-2" : ""}>
-              <figure className={`border-4 border-[#46382b] bg-[#2b2420] p-2 shadow-[4px_4px_0_#46382b] ${tall ? "mx-auto max-w-[300px]" : ""}`}>
-                <a href={s.src} target="_blank" rel="noopener noreferrer" className="block" aria-label={`Open full-size screenshot: ${s.alt}`}>
-                  <Image
-                    src={s.src}
-                    alt={s.alt}
-                    width={s.width}
-                    height={s.height}
-                    sizes={tall ? "(min-width: 768px) 280px, 70vw" : "(min-width: 1024px) 540px, (min-width: 768px) 45vw, 90vw"}
-                    className="h-auto w-full"
-                  />
-                </a>
-                <figcaption className="mt-2 text-sm tracking-wide text-[#f5e8c8]">{s.caption}</figcaption>
-              </figure>
-            </li>
-          );
-        })}
-      </ul>
-    ) : (
-      <p className="text-lg leading-snug">
-        No screenshots: {p.title} has no public repository or live demo to capture.
-      </p>
-    ),
-  });
+  const tabs: { id: string; label: string; content: ReactNode }[] = [
+    { id: "architecture", label: "ARCHITECTURE", content: <ArchitectureSection p={p} /> },
+    { id: "tech", label: "TECH", content: <TechSection p={p} /> },
+    { id: "features", label: "FEATURES", content: <FeaturesSection p={p} /> },
+    ...(hasRole(p) ? [{ id: "role", label: "MY ROLE", content: <RoleSection p={p} /> }] : []),
+    { id: "screens", label: "SCREENS", content: <ScreensSection p={p} /> },
+  ];
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 lg:py-10">

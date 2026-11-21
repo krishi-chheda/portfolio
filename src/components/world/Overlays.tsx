@@ -1,21 +1,29 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import { WORLD } from "@/lib/motion";
+import { useEntrance } from "@/hooks/useEntrance";
 import {
   ACHIEVEMENTS,
   ATTRIBUTES,
+  EXHIBIT_TITLE,
   MAP_CONTENT,
   RARITY_COLORS,
   REGIONS,
   ROUTES,
   TERMINALS,
   type Attribute,
+  type ExhibitSection,
   type ProgressSnapshot,
   type Rarity,
 } from "@/game/content";
 import { emit } from "@/game/bus";
 import { BUTTON, CHIP, Gem, LABEL, LINK, PIXEL, ProjectBody, Trophy, Window, useKeys } from "@/components/retro/ui";
 import { sfx } from "@/game/audio";
+import { PortraitAvatar } from "@/components/retro/WorldView";
+import { ArchitectureSection, FeaturesSection, OverviewSection, RoleSection, TechSection, hasRole } from "@/components/retro/ProjectParts";
+import TvViewer from "@/components/retro/TvViewer";
 import type { Settings } from "@/game/settings";
 import { CONTACT_EMAIL, LINKEDIN_URL, aiKnowledgeBase, currentProcesses, ownerProfile } from "@/lib/data";
 import type { Dialogue } from "@/game/bus";
@@ -69,8 +77,12 @@ export function DialogueBox({ dialogue, reduced, onClose }: { dialogue: Dialogue
     } else if (e.key === "Escape") onClose();
   });
 
+  const boxRef = useEntrance<HTMLDivElement>((el) => {
+    gsap.from(el.firstElementChild, { autoAlpha: 0, y: 28, duration: WORLD.dur.standard - 0.04, ease: WORLD.easeSoft, clearProps: "transform,opacity,visibility" });
+  });
+
   return (
-    <div className="pointer-events-auto absolute inset-x-0 bottom-0 flex justify-center p-3 sm:p-5">
+    <div ref={boxRef} className="pointer-events-auto absolute inset-x-0 bottom-0 flex justify-center p-3 sm:p-5">
       <button
         type="button"
         onClick={advance}
@@ -139,13 +151,50 @@ export function DiscoveryCard({ id, onClose }: { id: string; onClose: () => void
       onClose();
     }
   });
+  const gemRef = useEntrance<HTMLDivElement>((row) => {
+    const gem = row.querySelector("[data-gem]");
+    const sparks = row.querySelectorAll("[data-spark]");
+    const name = row.querySelector("[data-name]");
+    gsap
+      .timeline({ delay: 0.12 })
+      .from(gem, { scale: 0, rotation: -40, duration: WORLD.dur.slow, ease: "back.out(2.2)", clearProps: "transform" })
+      .fromTo(
+        sparks,
+        { x: 0, y: 0, scale: 1, autoAlpha: 1 },
+        {
+          x: (i) => Math.cos((i / sparks.length) * Math.PI * 2) * 30,
+          y: (i) => Math.sin((i / sparks.length) * Math.PI * 2) * 30,
+          scale: 0.4,
+          autoAlpha: 0,
+          duration: WORLD.dur.slow,
+          ease: "power2.out",
+        },
+        0.12,
+      )
+      .from(name, { autoAlpha: 0, x: -10, duration: WORLD.dur.standard, ease: WORLD.easeSoft, clearProps: "transform,opacity,visibility" }, 0.1);
+  });
   if (!attribute) return null;
   return (
     <Window titleId="discovery-title" title="NEW ATTRIBUTE!" width="max-w-md" footerHint="Saved to your Discovery Journal (I)" onClose={onClose} closeLabel="OK">
       <div className="p-5">
-        <div className="flex items-center gap-3" aria-live="polite">
-          <CrystalIcon rarity={attribute.rarity} size={36} />
-          <p className="text-3xl">{attribute.name}</p>
+        <div ref={gemRef} className="flex items-center gap-3" aria-live="polite">
+          <span className="relative inline-flex">
+            <span data-gem className="inline-flex">
+              <CrystalIcon rarity={attribute.rarity} size={36} />
+            </span>
+            {Array.from({ length: 8 }, (_, i) => (
+              <span
+                key={i}
+                data-spark
+                aria-hidden="true"
+                className="pointer-events-none invisible absolute top-1/2 left-1/2 -mt-[3px] -ml-[3px] h-1.5 w-1.5"
+                style={{ background: RARITY_COLORS[attribute.rarity][i % 2 ? 1 : 0] }}
+              />
+            ))}
+          </span>
+          <p data-name className="text-3xl">
+            {attribute.name}
+          </p>
         </div>
         <div className="mt-4">
           <AttributeDetails attribute={attribute} />
@@ -246,14 +295,20 @@ export function ProfileCard({ found, onClose }: { found: Set<string>; onClose: (
   return (
     <Window titleId="profile-title" title="PROFILE CARD" meta="KRISHI.WORLD" width="max-w-2xl" footerHint="P or Esc to close" onClose={onClose}>
       <div className="space-y-5 p-5">
-        <dl className="space-y-2">
-          {rows.map(([label, value]) => (
-            <div key={label} className="flex flex-col border-b-2 border-[#46382b]/25 pb-1 sm:flex-row sm:gap-3">
-              <dt className={`w-32 shrink-0 ${LABEL}`}>{label}</dt>
-              <dd className="text-lg leading-snug">{value}</dd>
-            </div>
-          ))}
-        </dl>
+        <div className="grid items-start gap-5 sm:grid-cols-[auto_1fr]">
+          {/* Same portrait as Classic Mode's trainer profile */}
+          <div className="mx-auto flex h-36 w-36 items-end justify-center overflow-hidden rounded-full border-4 border-[#285943] bg-[radial-gradient(circle_at_50%_30%,#d4f0f8_0%,#a6d985_55%,#5e9e48_100%)] shadow-[4px_4px_0_#46382b,inset_0_-6px_0_rgba(31,29,36,0.12)]">
+            <PortraitAvatar scale={4.4} className="translate-y-1" label="Krishi's trainer portrait" />
+          </div>
+          <dl className="space-y-2">
+            {rows.map(([label, value]) => (
+              <div key={label} className="flex flex-col border-b-2 border-[#46382b]/25 pb-1 sm:flex-row sm:gap-3">
+                <dt className={`w-28 shrink-0 ${LABEL}`}>{label}</dt>
+                <dd className="text-lg leading-snug">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
 
         <div>
           <p className={LABEL}>
@@ -334,8 +389,16 @@ export function PauseMenu({
     else if (item.id === "sound" || item.id === "music" || item.id === "reducedMotion") onToggle(item.id);
     else onChoose(item.id);
   };
+  // Slides in from the right edge it lives on, items cascade (micro stagger)
+  const menuRef = useEntrance<HTMLDivElement>((root) => {
+    const list = root.querySelector("ul");
+    gsap
+      .timeline()
+      .from(list, { autoAlpha: 0, x: 28, duration: WORLD.dur.standard - 0.04, ease: WORLD.easeSoft, clearProps: "transform,opacity,visibility" })
+      .from(list?.children ?? [], { autoAlpha: 0, x: 10, duration: WORLD.dur.quick, ease: WORLD.easeSoft, stagger: 0.025, clearProps: "transform,opacity,visibility" }, 0.06);
+  });
   return (
-    <div className="absolute inset-0 bg-black/20" role="dialog" aria-modal="true" aria-label="Menu" onClick={onClose}>
+    <div ref={menuRef} className="absolute inset-0 bg-black/20" role="dialog" aria-modal="true" aria-label="Menu" onClick={onClose}>
       <ul
         onClick={(e) => e.stopPropagation()}
         className={`${PIXEL} pointer-events-auto absolute top-16 right-4 max-h-[calc(100%-5rem)] w-60 overflow-y-auto border-4 border-[#46382b] bg-[#f5e8c8] py-2 text-lg text-[#2b2420] shadow-[6px_6px_0_#46382b]`}
@@ -375,7 +438,7 @@ export function TextGuide({ found, onOpenTerminal, onClose }: { found: Set<strin
   return (
     <Window titleId="guide-title" title="TEXT GUIDE" meta="EVERY REGION" width="max-w-3xl" footerHint="Esc to close" onClose={onClose}>
       <div className="space-y-6 p-5">
-        <p className="text-base text-[#6e5643]">Everything the world says, without walking. Opening a project terminal here works just like visiting its building.</p>
+        <p className="text-base text-[#6e5643]">Everything the world says, without walking. Opening a project file here works just like reading the desk PC inside its HQ.</p>
         {REGIONS.map((r) => {
           const c = MAP_CONTENT[r.id];
           if (!c) return null;
@@ -597,16 +660,53 @@ export function AchievementList({ progress, onClose }: { progress: ProgressSnaps
 
 /** Small non-blocking banner when an achievement unlocks. */
 export function AchievementToast({ name }: { name: string }) {
+  const ref = useEntrance<HTMLDivElement>((el) => {
+    gsap
+      .timeline()
+      .from(el, { autoAlpha: 0, y: -28, scale: 0.9, duration: WORLD.dur.standard + 0.05, ease: "back.out(1.7)" })
+      .from(el.querySelector("[data-trophy]"), { rotation: -25, scale: 0.5, duration: 0.6, ease: "elastic.out(1, 0.45)" }, 0.12)
+      .to(el, { autoAlpha: 0, y: -16, duration: WORLD.dur.quick + 0.05, ease: WORLD.exit }, 3.25);
+  });
   return (
     <div
+      ref={ref}
       role="status"
       className={`${PIXEL} pointer-events-none absolute top-16 left-1/2 flex -translate-x-1/2 items-center gap-2 border-4 border-[#46382b] bg-[#f5e8c8] px-4 py-2 text-[#2b2420] shadow-[4px_4px_0_#46382b]`}
     >
-      <Trophy done />
+      <span data-trophy className="inline-flex">
+        <Trophy done />
+      </span>
       <span>
         <span className="block text-xs uppercase tracking-widest text-[#285943]">Achievement unlocked</span>
         <span className="text-lg">{name}</span>
       </span>
     </div>
+  );
+}
+
+// ---------- HQ exhibits ----------
+
+/** One part of a project file, opened from a piece of furniture inside its HQ. */
+export function ExhibitWindow({ project, section, onClose }: { project: string; section: ExhibitSection; onClose: () => void }) {
+  useKeys((e) => {
+    if (e.key === "Escape") onClose();
+  });
+  const p = TERMINALS[project];
+  if (!p) return null;
+  return (
+    <Window titleId="exhibit-title" title={EXHIBIT_TITLE[section]} meta={p.title.toUpperCase()} width="max-w-4xl" footerHint={section === "screens" ? "← → change channel · Esc to close" : "Esc to close · the desk PC has the full project file"} onClose={onClose}>
+      <div className="space-y-6 p-5 sm:p-6">
+        {section === "overview" && (
+          <>
+            <OverviewSection p={p} />
+            {hasRole(p) && <RoleSection p={p} />}
+          </>
+        )}
+        {section === "architecture" && <ArchitectureSection p={p} wide="never" />}
+        {section === "tech" && <TechSection p={p} />}
+        {section === "outcomes" && <FeaturesSection p={p} />}
+        {section === "screens" && <TvViewer shots={p.screenshots} title={p.title} />}
+      </div>
+    </Window>
   );
 }

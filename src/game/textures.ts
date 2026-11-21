@@ -150,8 +150,13 @@ export const T = {
   SAND: 24, // + mask
   WATER: 40, // + mask, frame A
   WATER_B: 56, // + mask, frame B
+  FLOOR: 72, // HQ interiors: wood planks
+  WALL: 73, // interior wall face
+  BEAM: 74, // dark wood trim (side and bottom walls, seen from above)
+  RUG: 75,
+  DOORMAT: 76,
 } as const;
-const SHEET_TILES = 72;
+const SHEET_TILES = 77;
 
 function grassTile(p: Pix, ox: number, seed: number, dense: boolean) {
   p.rect(ox, 0, TILE, TILE, C.grass);
@@ -271,7 +276,46 @@ function dockTile(p: Pix, ox: number) {
   p.rect(ox + 14, 0, 1, TILE, C.woodDark);
 }
 
+// ---------- HQ interior tiles ----------
+function floorTile(p: Pix, ox: number) {
+  for (let y = 0; y < TILE; y++)
+    for (let x = 0; x < TILE; x++) {
+      const row = Math.floor(y / 4);
+      const seam = y % 4 === 3 || (x + row * 6) % 16 === 0;
+      p.set(ox + x, y, seam ? "#a3743f" : noise(x, y, 41) < 0.06 ? "#d8ac72" : row % 2 ? "#c99a5f" : "#c39257");
+    }
+}
+function wallTile(p: Pix, ox: number) {
+  for (let y = 0; y < TILE; y++)
+    for (let x = 0; x < TILE; x++) p.set(ox + x, y, x % 8 === 0 ? C.wallShade : noise(x, y, 43) < 0.03 ? "#efe0bd" : C.wall);
+  p.rect(ox, 12, TILE, 3, C.woodLight); // wainscot rail
+  p.rect(ox, 15, TILE, 1, C.woodDark); // skirting
+}
+function beamTile(p: Pix, ox: number) {
+  p.rect(ox, 0, TILE, TILE, C.woodDark);
+  for (let x = 0; x < TILE; x += 4) p.rect(ox + x, 0, 1, TILE, "#5a3a1e");
+  p.rect(ox, 0, TILE, 1, C.wood);
+}
+function rugTile(p: Pix, ox: number) {
+  p.rect(ox, 0, TILE, TILE, "#285943");
+  for (let y = 0; y < TILE; y++)
+    for (let x = 0; x < TILE; x++) if ((x + y) % 8 === 0 || (x - y + 16) % 8 === 0) p.set(ox + x, y, "#33704f");
+  p.set(ox + 8, 8, C.gold);
+  p.set(ox + 0, 0, C.gold);
+}
+function doormatTile(p: Pix, ox: number) {
+  floorTile(p, ox);
+  p.rect(ox + 1, 2, 14, 12, "#7a5636");
+  for (let x = 2; x < 15; x += 2) p.rect(ox + x, 3, 1, 10, "#8f6a45");
+  p.rect(ox + 1, 2, 14, 1, "#9c7a52");
+}
+
 function drawTerrainSheet(p: Pix) {
+  floorTile(p, T.FLOOR * TILE);
+  wallTile(p, T.WALL * TILE);
+  beamTile(p, T.BEAM * TILE);
+  rugTile(p, T.RUG * TILE);
+  doormatTile(p, T.DOORMAT * TILE);
   grassTile(p, T.GRASS * TILE, 1, false);
   grassTile(p, T.GRASS_2 * TILE, 2, true);
   flowerTile(p, T.FLOWER * TILE);
@@ -319,6 +363,14 @@ export const OBJECTS = {
   buoy: { w: 1, h: 1 },
   tripod: { w: 1, h: 1, ph: 2 },
   mat: { w: 1, h: 1 },
+  // HQ interiors: each piece of furniture is an exhibit of the project file
+  whiteboard: { w: 4, h: 2 },
+  pinboard: { w: 3, h: 2 },
+  tvwall: { w: 4, h: 2 },
+  desk: { w: 4, h: 2, ph: 3 },
+  bookshelf: { w: 2, h: 2, ph: 3 },
+  cabinet: { w: 2, h: 2, ph: 3 },
+  plant: { w: 1, h: 1, ph: 2 },
 } satisfies Record<string, ObjectArt>;
 export type ObjectKind = keyof typeof OBJECTS;
 
@@ -701,7 +753,7 @@ export const PLAYER_LOOK: Look = { hair: C.hair, hairLight: C.hairLight, top: C.
 function drawWalker(p: Pix, ox: number, dir: Dir, step: number, l: Look) {
   const side = dir === "left" || dir === "right";
   const flip = (x: number) => (dir === "left" ? ox + 15 - x : ox + x);
-  const s = (x: number, y: number, c: string) => p.set(flip(x), y, c);
+  const s = (x: number, y: number, c: string, a = 255) => p.set(flip(x), y, c, a);
   const r = (x: number, y: number, w: number, h: number, c: string) => {
     for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) s(x + i, y + j, c);
   };
@@ -724,6 +776,7 @@ function drawWalker(p: Pix, ox: number, dir: Dir, step: number, l: Look) {
   r(4, 12, 9, 6, l.top);
   r(4, 16, 9, 2, l.topDark);
   if (!side) {
+    if (dir === "down") r(6, 12, 5, 1, l.topDark); // collar, as on the trainer-card portrait
     r(8, 13, 1, 4, l.trim); // zip / coat seam
     const swing = step === 1 ? 1 : step === 2 ? -1 : 0;
     r(3, 12 + swing, 1, 4, l.topDark);
@@ -745,20 +798,44 @@ function drawWalker(p: Pix, ox: number, dir: Dir, step: number, l: Look) {
   s(11, 0, l.hair);
   r(5, 1, 3, 1, l.hairLight);
   if (l.band) r(3, 4, 11, 1, l.band);
+  // Matches the trainer-card portrait: knot tails on the headband, a fringe, a smile and a little blush
   if (dir === "up") {
     r(3, 5, 11, 6, l.hair);
     r(5, 6, 2, 2, l.hairLight);
-    if (l.band) s(8, 4, l.topDark); // headband knot
+    if (l.band) {
+      s(8, 4, l.topDark); // headband knot
+      s(8, 5, l.band);
+      s(8, 6, l.topDark);
+    }
   } else if (side) {
-    r(3, 5, 4, 4, l.hair); // back of the head
-    r(11, 7, 1, 2, C.outline); // eye
-    s(13, 8, C.skinShade);
+    r(3, 5, 3, 6, l.hair); // hair down the back of the head to the nape
+    s(6, 5, l.hair);
+    s(4, 6, l.hairLight);
+    r(6, 6, 1, 2, C.skinShade); // ear, between the hair and the face
+    if (l.band) {
+      s(2, 4, l.band); // knot tails trailing behind
+      s(2, 5, l.band);
+      s(2, 6, l.topDark);
+    }
+    r(11, 6, 1, 2, C.outline); // eye
+    s(13, 7, C.skinShade); // nose
+    s(11, 8, BLUSH);
+    s(12, 9, MOUTH);
   } else {
-    r(3, 5, 1, 3, l.hair);
+    r(3, 5, 1, 3, l.hair); // sideburns
     r(13, 5, 1, 3, l.hair);
-    r(5, 7, 1, 2, C.outline);
-    r(11, 7, 1, 2, C.outline);
-    s(8, 10, C.skinShade);
+    r(4, 5, 2, 1, l.hair); // fringe
+    r(11, 5, 2, 1, l.hair);
+    r(5, 6, 1, 2, C.outline); // eyes
+    r(11, 6, 1, 2, C.outline);
+    s(4, 8, BLUSH);
+    s(12, 8, BLUSH);
+    r(7, 9, 3, 1, MOUTH); // smile
+    if (l.band) {
+      s(14, 4, l.band); // knot tails on the right, like the portrait
+      s(14, 5, l.band);
+      s(14, 6, l.topDark);
+    }
   }
   p.outline(ox, 0, PLAYER_W, PLAYER_H);
   // Soft ground shadow, added after the outline so it isn't outlined
@@ -775,6 +852,139 @@ function drawCrystal(p: Pix, [light, mid, dark]: [string, string, string]) {
   p.set(6, 3, C.white);
   p.set(5, 4, C.white);
   p.outline(0, 0, 16, 16);
+}
+
+// ---------- HQ interior furniture ----------
+function drawWhiteboard(p: Pix) {
+  p.rect(1, 2, 62, 26, "#8a8f99"); // frame
+  p.rect(3, 4, 58, 22, C.white);
+  // a little flow diagram in marker: boxes joined by arrows
+  const boxes: [number, string][] = [[6, "#2fae7c"], [22, "#5b7fae"], [38, "#e0564a"]];
+  for (const [x, c] of boxes) {
+    p.rect(x, 9, 12, 8, c);
+    p.rect(x + 1, 10, 10, 6, C.white);
+    p.rect(x + 3, 12, 6, 1, c);
+    p.rect(x + 3, 14, 4, 1, c);
+  }
+  p.rect(18, 12, 4, 1, "#1f1d24");
+  p.set(21, 11, "#1f1d24");
+  p.set(21, 13, "#1f1d24");
+  p.rect(34, 12, 4, 1, "#1f1d24");
+  p.set(37, 11, "#1f1d24");
+  p.set(37, 13, "#1f1d24");
+  p.rect(52, 9, 6, 1, "#5b7fae");
+  p.rect(52, 12, 5, 1, "#5b7fae");
+  p.rect(52, 15, 6, 1, "#5b7fae");
+  p.rect(6, 20, 30, 1, "#9aa0a8");
+  p.rect(6, 22, 20, 1, "#9aa0a8");
+  p.rect(4, 28, 56, 2, "#6c717b"); // marker tray
+  p.rect(10, 27, 4, 1, C.red);
+  p.rect(16, 27, 4, 1, "#2fae7c");
+  p.outline(0, 0, 64, 32);
+}
+function drawPinboard(p: Pix) {
+  p.rect(1, 3, 46, 24, C.woodDark);
+  p.rect(3, 5, 42, 20, "#c9945a"); // cork
+  for (let y = 5; y < 25; y++) for (let x = 3; x < 45; x++) if (noise(x, y, 51) < 0.12) p.set(x, y, "#b07e46");
+  const notes: [number, number, string][] = [[6, 7, "#fff1c4"], [18, 9, C.white], [30, 7, "#c9eab0"], [10, 16, "#d4f0f8"], [26, 17, "#f7c6d9"]];
+  for (const [x, y, c] of notes) {
+    p.rect(x, y, 10, 7, c);
+    p.rect(x + 2, y + 2, 6, 1, "#9aa0a8");
+    p.rect(x + 2, y + 4, 4, 1, "#9aa0a8");
+    p.set(x + 5, y, C.red); // pin
+  }
+  p.outline(0, 0, 48, 32);
+}
+function drawTvWall(p: Pix) {
+  p.rect(2, 3, 60, 25, "#2a2d35"); // bezel
+  p.rect(4, 5, 56, 21, "#0f1c24");
+  // a "screenshot": app window with a title bar, hero text and cards
+  p.rect(7, 7, 50, 17, "#d4f0f8");
+  p.rect(7, 7, 50, 3, "#285943");
+  p.rect(9, 8, 2, 1, C.red);
+  p.rect(12, 8, 2, 1, C.gold);
+  p.rect(11, 12, 22, 2, "#1f1d24");
+  p.rect(11, 15, 16, 1, "#5b7fae");
+  p.rect(36, 12, 9, 9, C.white);
+  p.rect(47, 12, 8, 9, C.white);
+  p.rect(37, 13, 7, 3, "#2fae7c");
+  p.rect(48, 13, 6, 3, C.gold);
+  p.rect(4, 5, 56, 1, "#3c4550"); // glare
+  p.rect(28, 28, 8, 2, "#2a2d35");
+  p.outline(0, 0, 64, 32);
+}
+function drawDesk(p: Pix) {
+  // monitor and keyboard on a wooden desk (sprite is 3 tiles tall; the desk fills the bottom two)
+  p.rect(20, 2, 24, 17, "#3a3f4a");
+  p.rect(22, 4, 20, 13, "#0a0c0b");
+  p.rect(24, 6, 8, 1, "#34d399");
+  p.rect(24, 8, 14, 1, "#34d399");
+  p.rect(24, 10, 10, 1, "#7bc9df");
+  p.rect(24, 12, 4, 1, "#34d399");
+  p.set(29, 12, "#f5e8c8");
+  p.rect(30, 19, 4, 3, "#3a3f4a");
+  p.rect(2, 22, 60, 6, C.woodLight); // desk top
+  p.rect(2, 22, 60, 1, "#d9a56a");
+  p.rect(18, 23, 22, 2, "#d8d4cc"); // keyboard
+  p.rect(44, 23, 4, 3, "#d8d4cc"); // mouse
+  p.rect(6, 21, 6, 2, C.white); // papers
+  p.rect(2, 28, 60, 18, C.wood);
+  p.rect(2, 28, 60, 2, C.woodDark);
+  p.rect(6, 32, 20, 10, C.woodLight); // drawers
+  p.rect(14, 36, 4, 1, C.woodDark);
+  p.rect(38, 32, 20, 10, C.woodLight);
+  p.rect(46, 36, 4, 1, C.woodDark);
+  p.outline(0, 0, 64, 48);
+}
+function drawBookshelf(p: Pix) {
+  p.rect(1, 1, 30, 46, C.woodDark);
+  p.rect(3, 3, 26, 42, "#5a3a1e");
+  const spines = ["#e0564a", "#5b7fae", "#2fae7c", C.gold, "#b48be8", "#7bc9df", "#d9773f"];
+  for (const y of [4, 18, 32]) {
+    let x = 4;
+    let i = y;
+    while (x < 27) {
+      const w = 2 + (i % 3 === 0 ? 1 : 0);
+      const h = 10 + (i % 4);
+      p.rect(x, y + 13 - h, w, h, spines[i % spines.length]);
+      p.rect(x, y + 13 - h, w, 1, C.white, 120);
+      x += w + (i % 5 === 0 ? 1 : 0);
+      i += 3;
+    }
+    p.rect(3, y + 13, 26, 1, C.woodLight); // shelf
+  }
+  p.outline(0, 0, 32, 48);
+}
+function drawCabinet(p: Pix) {
+  p.rect(1, 1, 30, 46, C.wood);
+  p.rect(3, 3, 26, 40, "#bfe6f2"); // glass
+  p.rect(3, 22, 26, 1, C.woodLight); // shelf
+  const trophy = (x: number, y: number) => {
+    p.rect(x, y, 6, 4, C.gold);
+    p.rect(x + 1, y + 4, 4, 1, C.gold);
+    p.rect(x + 2, y + 5, 2, 2, "#c9902e");
+    p.rect(x + 1, y + 7, 4, 1, "#c9902e");
+    p.set(x + 1, y + 1, "#fff1c4");
+  };
+  trophy(6, 12);
+  trophy(18, 12);
+  trophy(12, 31);
+  p.rect(5, 38, 6, 2, "#b48be8"); // a medal box and a plaque
+  p.rect(21, 37, 5, 3, "#d9773f");
+  p.rect(3, 3, 26, 1, C.white, 160);
+  p.rect(4, 4, 1, 10, C.white, 130);
+  p.rect(1, 43, 30, 4, C.woodDark);
+  p.outline(0, 0, 32, 48);
+}
+function drawPlant(p: Pix) {
+  p.rect(4, 22, 8, 8, "#d9773f");
+  p.rect(3, 21, 10, 2, "#a8542a");
+  const leaves: [number, number, number][] = [[8, 10, 5], [4, 14, 4], [12, 14, 4], [8, 6, 3]];
+  for (const [x, y, r] of leaves) p.disc(x, y, r, C.leaf);
+  p.disc(7, 9, 2, C.leafLight);
+  p.disc(12, 13, 1.5, C.leafLight);
+  p.rect(7, 17, 2, 5, C.leafDark);
+  p.outline(0, 0, 16, 32);
 }
 
 const OBJECT_PAINTERS: Record<ObjectKind, (p: Pix) => void> = {
@@ -799,6 +1009,13 @@ const OBJECT_PAINTERS: Record<ObjectKind, (p: Pix) => void> = {
   buoy: drawBuoy,
   tripod: drawTripod,
   mat: drawMat,
+  whiteboard: drawWhiteboard,
+  pinboard: drawPinboard,
+  tvwall: drawTvWall,
+  desk: drawDesk,
+  bookshelf: drawBookshelf,
+  cabinet: drawCabinet,
+  plant: drawPlant,
 };
 
 /**
@@ -811,7 +1028,7 @@ let painted: { sheet: HTMLCanvasElement; objects: Record<ObjectKind, HTMLCanvasE
 // as the walking sprite, drawn bigger so the face reads. Frame 0 eyes open, frame 1 blinking.
 export const PORTRAIT = 32;
 const MOUTH = "#a8604a";
-const BLUSH = "#f0a890";
+const BLUSH = "#f0ad94"; // blush already blended over skin (Pix.set writes alpha, it does not blend)
 
 function drawPortrait(p: Pix, ox: number, blink: boolean) {
   const r = (x: number, y: number, w: number, h: number, c: string, a = 255) => p.rect(ox + x, y, w, h, c, a);
@@ -892,8 +1109,8 @@ function drawPortrait(p: Pix, ox: number, blink: boolean) {
   // Nose, blush, smile
   d(16, 16, C.skinShade);
   d(15, 17, C.skinShade);
-  r(10, 17, 2, 1, BLUSH, 200);
-  r(20, 17, 2, 1, BLUSH, 200);
+  r(10, 17, 2, 1, BLUSH);
+  r(20, 17, 2, 1, BLUSH);
   r(14, 19, 4, 1, MOUTH);
   d(13, 18, MOUTH);
   d(18, 18, MOUTH);

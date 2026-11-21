@@ -39,10 +39,15 @@ export interface Screenshot {
 }
 const CAPTURED = "Live site, captured Nov 2026";
 const SCREENSHOTS: Record<string, Screenshot[]> = {
-  clinicalbrief: [{ src: "/projects/clinicalbrief.png", alt: "ClinicalBrief landing page: 'The reviewed record for clinical notes'", caption: CAPTURED, width: 1280, height: 800 }],
+  clinicalbrief: [
+    { src: "/projects/clinicalbrief.png", alt: "ClinicalBrief landing page: 'The reviewed record for clinical notes'", caption: `${CAPTURED} (home)`, width: 1280, height: 800 },
+    { src: "/projects/clinicalbrief-security.png", alt: "ClinicalBrief security page: authentication, roles and authorization", caption: `${CAPTURED} (security)`, width: 1280, height: 800 },
+    { src: "/projects/clinicalbrief-roadmap.png", alt: "ClinicalBrief roadmap page: phases done, next and planned", caption: `${CAPTURED} (roadmap)`, width: 1280, height: 800 },
+    { src: "/projects/clinicalbrief-data.png", alt: "ClinicalBrief data page: synthetic Synthea patients only", caption: `${CAPTURED} (data)`, width: 1280, height: 800 },
+  ],
   "accessible-vision": [
     { src: "/projects/accessvision.png", alt: "AccessVision web app with the camera panel, Analyze Scene button and Scene Narration card", caption: `${CAPTURED} (desktop)`, width: 1280, height: 800 },
-    { src: "/projects/accessvision-mobile.png", alt: "AccessVision on a phone-sized screen", caption: `${CAPTURED} (phone)`, width: 390, height: 844 },
+    { src: "/projects/accessvision-narrow.png", alt: "AccessVision in a narrow, phone-like window: camera panel, Analyze Scene, Scene Narration", caption: `${CAPTURED} (narrow window)`, width: 600, height: 1000 },
   ],
   "krishi-os": [
     { src: "/projects/krishios-title.png", alt: "KRISHI.WORLD title screen with Adventure Mode and Classic Portfolio cards", caption: "Title screen", width: 1280, height: 800 },

@@ -6,7 +6,8 @@ import { projectMetropolis } from "./maps/projectMetropolis";
 import { innovationForest } from "./maps/innovationForest";
 import { leadershipFrontier } from "./maps/leadershipFrontier";
 import { adventureCoast } from "./maps/adventureCoast";
-import { ALL_NPCS, ATTRIBUTES, DOOR_TERMINAL, DOOR_TEXT, MAP_CONTENT } from "./content";
+import { INTERIORS, INTERIOR_SPAWN } from "./maps/interiors";
+import { ALL_NPCS, ATTRIBUTES, DOOR_TERMINAL, DOOR_TEXT, EXHIBITS, MAP_CONTENT, interiorId } from "./content";
 import { emit, on, type Dialogue } from "./bus";
 import { reduceMotion, savePosition, savedPosition } from "./settings";
 import { sfx } from "./audio";
@@ -24,7 +25,9 @@ const MAPS: Record<string, MapDef> = {
   forest: innovationForest,
   frontier: leadershipFrontier,
   coast: adventureCoast,
+  ...Object.fromEntries(INTERIORS.map((m) => [m.id, m])),
 };
+const isInterior = (id: string) => id.startsWith("hq-");
 const FADE_MS = 200;
 
 type KeyName = "up" | "down" | "left" | "right" | "w" | "a" | "s" | "d" | "e" | "enter" | "journal" | "profile" | "map" | "achievements" | "menu";
@@ -67,6 +70,7 @@ export class WorldScene extends Phaser.Scene {
   private tiles: number[][] = []; // terrain tile ids, to know what the player is stepping on
   private prompt!: Phaser.GameObjects.Image; // "!" bubble over whatever the player faces and can use
   private lastBump = 0;
+  private mapSize = { w: 0, h: 0 }; // pixels
 
   constructor() {
     super("world");
@@ -193,12 +197,14 @@ export class WorldScene extends Phaser.Scene {
     ];
 
     const cam = this.cameras.main;
+    this.mapSize = { w: map.widthInPixels, h: map.heightInPixels };
+    cam.setBackgroundColor(isInterior(this.def.id) ? "#1f1d24" : "#1c4031");
     cam.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     cam.setRoundPixels(true);
     cam.startFollow(this.player, true);
     if (!this.reduceMotion) cam.fadeIn(FADE_MS);
     this.fitZoom();
-    emit("region", { id: this.def.id, name: this.def.name });
+    emit("region", { id: this.def.id, name: this.def.name, ...(isInterior(this.def.id) ? { parent: "metropolis" } : {}) });
     this.savePosition();
     this.scale.on(Phaser.Scale.Events.RESIZE, this.fitZoom, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -292,10 +298,26 @@ export class WorldScene extends Phaser.Scene {
       const pages = DOOR_TEXT[kind];
       if (terminal)
         this.interactions.set(`${door.x},${door.y}`, () => {
-          this.lock();
-          emit("terminal", terminal);
+          // step inside the HQ: a room whose furniture is the project file
+          this.warp({ x: door.x, y: door.y, to: interiorId(terminal), spawn: INTERIOR_SPAWN, facing: "up" });
         });
       else if (pages) this.interactions.set(`${door.x},${door.y}`, () => say({ pages }));
+    }
+
+    // HQ interiors: every footprint tile of an exhibit opens its part of the project file
+    if (isInterior(this.def.id)) {
+      const project = this.def.id.slice(3);
+      for (const obj of this.def.objects) {
+        const what = EXHIBITS[obj.kind];
+        if (!what) continue;
+        const { w, h } = OBJECTS[obj.kind];
+        const open = () => {
+          this.lock();
+          if (what === "terminal") emit("terminal", project);
+          else emit("exhibit", { project, section: what });
+        };
+        for (let dy = 0; dy < h; dy++) for (let dx = 0; dx < w; dx++) this.interactions.set(`${obj.x + dx},${obj.y + dy}`, open);
+      }
     }
 
     // Characters: solid, glance around now and then, and turn to face you when you talk to them
@@ -473,6 +495,12 @@ export class WorldScene extends Phaser.Scene {
   private fitZoom() {
     const { width, height } = this.scale.gameSize;
     const zoom = Math.max(2, Math.floor(Math.min(width / (VIEW_TILES.w * TILE), height / (VIEW_TILES.h * TILE))));
-    this.cameras.main.setZoom(zoom);
+    const cam = this.cameras.main;
+    cam.setZoom(zoom);
+    // A map smaller than the view (an HQ room) sits centred instead of pinned to the top-left
+    const vw = width / zoom;
+    const vh = height / zoom;
+    const { w, h } = this.mapSize;
+    if (w && h) cam.setBounds(w < vw ? (w - vw) / 2 : 0, h < vh ? (h - vh) / 2 : 0, Math.max(w, vw), Math.max(h, vh));
   }
 }

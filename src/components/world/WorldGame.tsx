@@ -10,7 +10,7 @@ import { emit, on, type Dialogue } from "@/game/bus";
 import { record, snapshot } from "@/game/progress";
 import { getSettings, reduceMotion, setSettings, type Settings } from "@/game/settings";
 import { sfx, stopMusic, syncMusic } from "@/game/audio";
-import { ACHIEVEMENTS, ATTRIBUTES, REGIONS, TERMINALS, type ProgressSnapshot } from "@/game/content";
+import { ACHIEVEMENTS, ATTRIBUTES, REGIONS, TERMINALS, type ExhibitSection, type ProgressSnapshot } from "@/game/content";
 import { PIXEL } from "@/components/retro/styles";
 import { contact } from "@/lib/data";
 import {
@@ -18,6 +18,7 @@ import {
   AchievementToast,
   DialogueBox,
   DiscoveryCard,
+  ExhibitWindow,
   Journal,
   PauseMenu,
   ProfileCard,
@@ -38,6 +39,7 @@ type Overlay =
   | { kind: "map" }
   | { kind: "achievements" }
   | { kind: "guide" }
+  | { kind: "exhibit"; project: string; section: ExhibitSection }
   | null;
 
 const EMPTY: ProgressSnapshot = { attributes: [], regions: [], terminals: [] };
@@ -60,7 +62,7 @@ export default function WorldGame() {
   const exiting = useRef(false);
   const [progress, setProgress] = useState<ProgressSnapshot>(EMPTY);
   const progressRef = useRef<ProgressSnapshot>(EMPTY);
-  const [region, setRegion] = useState({ id: "origin", name: "Origin Valley" });
+  const [region, setRegion] = useState<{ id: string; name: string; parent?: string }>({ id: "origin", name: "Origin Valley" });
   const [toasts, setToasts] = useState<string[]>([]);
   const [settings, setSettingsState] = useState<Settings>({ sound: true, music: false, reducedMotion: false });
   const [banner, setBanner] = useState<{ name: string; blurb: string; at: number } | null>(null); // "you've arrived" sign
@@ -149,8 +151,13 @@ export default function WorldGame() {
       on("terminal", (id) => setOverlay({ kind: "terminal", id })),
       on("region", (r) => {
         setRegion(r);
-        setBanner({ name: r.name, blurb: REGIONS.find((x) => x.id === r.id)?.blurb ?? "", at: Date.now() });
-        bumpRef.current("regions", r.id);
+        const blurb = r.parent ? "Every exhibit is part of the project file" : (REGIONS.find((x) => x.id === r.id)?.blurb ?? "");
+        setBanner({ name: r.name, blurb, at: Date.now() });
+        bumpRef.current("regions", r.parent ?? r.id); // an HQ interior counts as its region
+      }),
+      on("exhibit", ({ project, section }) => {
+        sfx("open");
+        setOverlay({ kind: "exhibit", project, section });
       }),
       on("moved", () => setWalked(true)),
       on("open-map", () => setOverlay({ kind: "map" })),
@@ -305,9 +312,10 @@ export default function WorldGame() {
       {overlay?.kind === "journal" && <Journal found={found} onClose={close} />}
       {overlay?.kind === "terminal" && <ProjectTerminal id={overlay.id} onClose={() => closeTerminal(overlay.id)} />}
       {overlay?.kind === "profile" && <ProfileCard found={found} onClose={close} />}
+      {overlay?.kind === "exhibit" && <ExhibitWindow project={overlay.project} section={overlay.section} onClose={close} />}
       {overlay?.kind === "menu" && <PauseMenu settings={settings} onChoose={choose} onToggle={toggle} onClose={close} />}
       {overlay?.kind === "guide" && <TextGuide found={found} onOpenTerminal={(id) => setOverlay({ kind: "terminal", id })} onClose={close} />}
-      {overlay?.kind === "map" && <WorldMap visited={progress.regions} current={region.id} onTravel={travel} onClose={close} />}
+      {overlay?.kind === "map" && <WorldMap visited={progress.regions} current={region.parent ?? region.id} onTravel={travel} onClose={close} />}
       {overlay?.kind === "achievements" && <AchievementList progress={progress} onClose={close} />}
       {toasts[0] && <AchievementToast key={toasts[0] + toasts.length} name={toasts[0]} />}
 

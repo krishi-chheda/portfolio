@@ -47,3 +47,17 @@ export function scrambleText(el: HTMLElement, duration = 0.6) {
 
 /** "smooth" unless the visitor asked for reduced motion (then scroll jumps instantly). */
 export const scrollBehavior = (): ScrollBehavior => (window.matchMedia(MOTION_OK).matches ? "smooth" : "instant");
+
+/**
+ * KRISHI.WORLD motion identity (Playful archetype, a GBA game): one signature entrance ease with a ~10% overshoot,
+ * a soft decelerate for things that travel, an accelerate for exits, three durations and one entrance pattern
+ * ("pop": rise a few px + scale up from 0.95). Entrances run longer than exits. Staggers stay under ~0.4s total.
+ */
+export const WORLD = {
+  ease: "back.out(1.4)",
+  easeSoft: "power3.out",
+  exit: "power2.in",
+  dur: { quick: 0.15, standard: 0.28, slow: 0.45 },
+  rise: 12,
+  stagger: 0.04,
+} as const;

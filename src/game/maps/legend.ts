@@ -25,13 +25,27 @@ export interface MapDef {
 }
 
 // Terrain characters. Path, sand and water are auto-tiled from their neighbours.
-const PLAIN: Record<string, number> = { ".": T.GRASS, ",": T.GRASS_2, "*": T.FLOWER, "^": T.TALL, F: T.FENCE, p: T.PAVE, d: T.DOCK };
+const PLAIN: Record<string, number> = {
+  ".": T.GRASS,
+  ",": T.GRASS_2,
+  "*": T.FLOWER,
+  "^": T.TALL,
+  F: T.FENCE,
+  p: T.PAVE,
+  d: T.DOCK,
+  // HQ interiors
+  _: T.FLOOR,
+  W: T.WALL,
+  B: T.BEAM,
+  r: T.RUG,
+  m: T.DOORMAT,
+};
 const EDGED: Record<string, number> = { "=": T.PATH, ":": T.SAND, "~": T.WATER };
 // Which neighbouring characters count as "same terrain" (sand blends into water; water draws its own shore)
 // (a road also runs flush into pavement)
 // (docks sit on water and sand without drawing a shore against them)
 const JOINS: Record<string, string> = { "=": "=pd", ":": ":~d", "~": "~d" };
-const BLOCKING = new Set(["~", "F"]);
+const BLOCKING = new Set(["~", "F", "W", "B"]);
 
 /** A ring of 2x2 trees around the map edge, minus any tree placed at a `gaps` position (exits). */
 export function borderTrees(width: number, height: number, gaps: { x: number; y: number }[] = []): MapObject[] {

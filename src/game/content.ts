@@ -175,8 +175,8 @@ export const METRO_NPCS: Npc[] = [
     look: { hair: "#1f1d24", hairLight: "#3a3a48", top: "#3a3f4a", topDark: "#23262e", trim: "#f5c65b", pants: "#2c3a5a", band: "#7bc9df" },
     pages: [
       "Welcome to Project Metropolis! Every HQ in this plaza is one of Krishi's projects.",
-      "Walk up to a building's doors and press E to open its terminal.",
-      "Reading a terminal for the first time adds an attribute to your journal.",
+      "Walk up to a building's doors and press E to step inside: every exhibit in there is part of the project.",
+      "Reading the full project file on the desk PC for the first time adds an attribute to your journal.",
     ],
   },
   {
@@ -564,3 +564,23 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "world-explorer", name: "World Explorer", description: "Visit all five regions.", done: (p) => REGIONS.every((r) => p.regions.includes(r.id)) },
   { id: "completionist", name: "Completionist", description: "Discover every attribute.", done: (p) => ATTRIBUTES.every((a) => p.attributes.includes(a.id)) },
 ];
+
+// ---------- HQ interiors ----------
+// Inside each project HQ, every piece of furniture is one part of the same project file (src/lib/portfolio.ts).
+export type ExhibitSection = "overview" | "architecture" | "tech" | "outcomes" | "screens";
+export const EXHIBITS: Partial<Record<ObjectKind, ExhibitSection | "terminal">> = {
+  pinboard: "overview",
+  whiteboard: "architecture",
+  bookshelf: "tech",
+  cabinet: "outcomes",
+  tvwall: "screens",
+  desk: "terminal", // the full project file (and the attribute, on a first read)
+};
+export const EXHIBIT_TITLE: Record<ExhibitSection, string> = {
+  overview: "PINBOARD · OVERVIEW & ROLE",
+  architecture: "WHITEBOARD · ARCHITECTURE",
+  tech: "BOOKSHELF · TECH STACK",
+  outcomes: "TROPHY CABINET · FEATURES & OUTCOMES",
+  screens: "TV WALL · SCREENS",
+};
+export const interiorId = (project: string) => `hq-${project}`;

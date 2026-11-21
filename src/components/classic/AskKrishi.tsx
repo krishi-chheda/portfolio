@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BUTTON, PIXEL, TITLE_BAR, useKeys } from "@/components/retro/ui";
 import { useChat } from "@/hooks/useChat";
 import { navigationRegistry } from "@/lib/navigation";
+import { PROJECT_DETAILS } from "@/lib/portfolio";
 import gsap from "gsap";
 import { WORLD } from "@/lib/motion";
 import { useEntrance } from "@/hooks/useEntrance";
@@ -28,17 +29,22 @@ function linkify(text: string): ReactNode[] {
   return parts;
 }
 
-// The chat API still answers with the old site's section targets; point them at Classic Mode's sections.
-const SECTION: Record<string, { id: string; label: string }> = {
-  projects: { id: "projects", label: "Project Archive" },
-  "currently-building": { id: "projects", label: "Project Archive" },
-  leadership: { id: "experience", label: "Quest Log" },
-  career: { id: "experience", label: "Quest Log" },
-  contact: { id: "contact", label: "Contact" },
+// The chat API still answers with the old site's section targets; point them at Classic Mode. Featured projects
+// open their own project file; StudentHub has no page, so it (and other project answers) goes to the archive.
+const SECTION: Record<string, { href: string; label: string }> = {
+  projects: { href: "/classic#projects", label: "Project Archive" },
+  "currently-building": { href: "/classic#projects", label: "Project Archive" },
+  leadership: { href: "/classic#experience", label: "Quest Log" },
+  career: { href: "/classic#experience", label: "Quest Log" },
+  contact: { href: "/classic#contact", label: "Contact" },
+  "system-map": { href: "/classic#skilldex", label: "Skilldex" },
 };
 const target = (command?: string) => {
   const hit = command && navigationRegistry.find((n) => n.command_aliases.includes(command));
-  return hit ? SECTION[hit.scroll_target] : undefined;
+  if (!hit) return undefined;
+  const project = PROJECT_DETAILS[hit.section_id];
+  if (project) return { href: `/classic/projects/${project.id}`, label: `${project.title} project file` };
+  return SECTION[hit.scroll_target];
 };
 
 const SUGGESTIONS = ["What is ClinicalBrief?", "What does Krishi study?", "How do I contact him?"];
@@ -104,7 +110,7 @@ export default function AskKrishi() {
                   <p className="text-xs tracking-widest text-[#5a4434]">{m.role === "user" ? "YOU" : "KRISHI.BOT"}</p>
                   <p className="whitespace-pre-wrap">{linkify(m.content)}</p>
                   {go && (
-                    <a href={`/classic#${go.id}`} className="mt-1 inline-block text-sm text-[#285943] underline">
+                    <a href={go.href} className="mt-1 inline-block text-sm text-[#285943] underline">
                       ▶ Go to {go.label}
                     </a>
                   )}

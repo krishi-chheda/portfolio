@@ -55,7 +55,21 @@ const cases = [
   ["Does Krishi know PyTorch?", R.map, "PyTorch"],
   ["What are his deep learning skills?", R.map, "TensorFlow"],
   ["What did Krishi study before AI?", R.career, "Electronics and Telecommunication Engineering"],
+  // K2-01: experience answers must never publish the unverified KOS-06 claims (checked for every reply below)
+  ["What is his work experience?", R.career, "Mysahayak"],
+  ["What are his leadership roles?", R.lead, "Vice President"],
+  ["What did Krishi do at Mysahayak?", R.career, "IT Intern"],
+  ["What does Krishi do at MDAS?", R.lead, "MDAS"],
+  ["Tell me about Sacred Heart", R.career, "Sacred Heart"],
+  // K2-02: the four featured projects (FEATURED), and no contact form that doesn't exist
+  ["What are Krishi's featured projects?", R.none, "KRISHI.OS", "StudentHub"],
+  ["How can I contact Krishi?", R.contact, "LinkedIn", "contact form"],
 ];
+
+// KOS-06: unverified claims that must never appear in any reply ("300+", "30%", "20%", "50+", "40%", "largest").
+// Bounded so real project metrics like "73%" or "100%" don't match.
+const KOS06 = [/(^|[^\d])300\+/, /(^|[^\d.])(20|30|40)%/, /(^|[^\d])50\+/, /largest/i];
+const kosHit = (reply = "") => KOS06.find((re) => re.test(reply));
 
 let failed = 0;
 for (const [i, [q, cmd, include, exclude]] of cases.entries()) {
@@ -70,6 +84,7 @@ for (const [i, [q, cmd, include, exclude]] of cases.entries()) {
   if (data.suggestedCommand !== cmd) problems.push(`command "${data.suggestedCommand}" != "${cmd}"`);
   if (include && !data.reply?.includes(include)) problems.push(`reply missing "${include}"`);
   if (exclude && data.reply?.includes(exclude)) problems.push(`reply contains "${exclude}"`);
+  if (kosHit(data.reply)) problems.push(`reply contains a KOS-06 claim (${kosHit(data.reply)})`);
   if (problems.length) failed++;
   console.log(`${problems.length ? "FAIL" : "ok  "} ${q}${problems.length ? `  -> ${problems.join("; ")}` : ""}`);
 }
@@ -93,6 +108,7 @@ const seen = new Set();
 const queue = [...new Set(cases.map(([q]) => q))];
 let client = 0;
 let generic = 0;
+let kos = 0;
 while (queue.length && seen.size < 150) {
   const q = queue.shift();
   if (seen.has(q)) continue;
@@ -108,10 +124,16 @@ while (queue.length && seen.size < 150) {
     generic++;
     console.log(`FAIL suggested follow-up gets the generic reply: "${q}"`);
   }
+  if (kosHit(reply)) {
+    kos++;
+    console.log(`FAIL follow-up reply contains a KOS-06 claim: "${q}"`);
+  }
   for (const [, next] of reply.matchAll(/^- "(.+)"$/gm)) if (!seen.has(next)) queue.push(next);
 }
 if (generic) failed++;
+if (kos) failed++;
 console.log(`${generic ? "FAIL" : "ok  "} follow-ups -> ${seen.size} questions walked, ${generic} generic`);
+console.log(`${kos ? "FAIL" : "ok  "} KOS-06 -> ${kos} walked replies contain an unverified claim`);
 
 console.log(failed ? `\n${failed} check(s) failed` : "\nall checks passed");
 process.exit(failed ? 1 : 0);

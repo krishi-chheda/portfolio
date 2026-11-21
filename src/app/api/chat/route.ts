@@ -1,5 +1,20 @@
 import { NextResponse } from "next/server";
-import { additionalProjectsData, aiKnowledgeBase, currentProcesses, experienceData, ownerProfile, projectsData, CONTACT_EMAIL } from "@/lib/data";
+import {
+  additionalProjectsData,
+  aiKnowledgeBase,
+  currentProcesses,
+  experienceData,
+  krishiOsProject,
+  ownerProfile,
+  projectsData,
+  responsibilities,
+  CONTACT_EMAIL,
+} from "@/lib/data";
+import { FEATURED } from "@/lib/portfolio";
+
+// The four featured projects (owner decision), as "A, B, C and D"
+const FEATURED_TITLES = FEATURED.map((p) => p.title);
+const featuredList = `${FEATURED_TITLES.slice(0, -1).join(", ")} and ${FEATURED_TITLES[FEATURED_TITLES.length - 1]}`;
 
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_BODY_BYTES = 8 * 1024; // a 500-character question fits many times over; anything bigger is refused unread
@@ -147,7 +162,12 @@ ${followUps(["What are Krishi's featured projects?", "Tell me about AccessVision
 function rolesReply(ids: string[], intro: string, questions: string[]): string {
   const lines = experienceData
     .filter((e) => ids.includes(e.id))
-    .map((e) => `- ${e.organization}, ${e.period}: ${e.role}. ${e.highlight}`);
+    // Only verifiable details: role, organisation, period and at most one duty line that passes the KOS-06
+    // filter (responsibilities() drops anything with a figure or "largest"). Never the highlight.
+    .map((e) => {
+      const duty = responsibilities(e)[0];
+      return `- ${e.organization}, ${e.period}: ${e.role}.${duty ? ` ${duty}` : ""}`;
+    });
   return `${intro}\n${lines.join("\n")}\n\n${followUps(questions)}`;
 }
 
@@ -274,7 +294,7 @@ ${followUps(projectsData.filter((p) => p.liveUrl).map((p) => TOPIC_QUESTIONS.arc
 - LinkedIn: https://www.linkedin.com/in/krishi-chheda
 - GitHub: https://github.com/krishi-chheda
 
-The contact form at the bottom of the page opens a pre-filled email.
+The Contact section at the bottom of the Classic Portfolio links his email, LinkedIn and GitHub.
 
 ${followUps(["Is Krishi open to opportunities?", "What are Krishi's featured projects?", "What is Krishi building now?"])}`,
     command: COMMANDS.contact,
@@ -313,7 +333,7 @@ ${followUps(["What are Krishi's featured projects?", "What is Krishi building no
     ],
     reply: () => `Krishi's skills: ${ownerProfile.skills.join(", ")}.
 
-Across his featured projects he has used: ${allTech.join(", ")}.
+Across his projects he has used: ${allTech.join(", ")}.
 
 ${followUps(["Which project uses YOLO?", "What is ClinicalBrief's architecture?", "What is Krishi building now?"])}`,
     command: COMMANDS.systemMap,
@@ -331,7 +351,7 @@ ${followUps(["Tell me about AccessVision", "Tell me about ClinicalBrief", "What'
   {
     terms: ["project", "projects", "portfolio work", "built", "build"],
     reply: () => `Krishi's four featured projects:
-${projectsData.map((p) => `- ${p.title}: ${p.description}`).join("\n")}
+${FEATURED.map((p) => `- ${p.title}: ${p.description}`).join("\n")}
 
 ${followUps(["Tell me about AccessVision", "Tell me about ClinicalBrief", "Tell me about Traffic AI"])}`,
   },
@@ -356,7 +376,7 @@ function fallbackReply(query: string): { reply: string; command?: string } {
   const intent = INTENTS.find((i) => mentions(query, i.terms));
   if (intent) return { reply: intent.reply(), command: intent.command };
   return {
-    reply: `I can answer questions about Krishi Chheda: his projects (AccessVision, ClinicalBrief, StudentHub and Traffic AI), his Master of AI at Monash, his leadership roles, and how to reach him. If I don't have something, the best route is to email him at ${CONTACT_EMAIL}.
+    reply: `I can answer questions about Krishi Chheda: his projects (${featuredList}), his Master of AI at Monash, his leadership roles, and how to reach him. If I don't have something, the best route is to email him at ${CONTACT_EMAIL}.
 
 ${followUps(["Tell me about ClinicalBrief", "Is Krishi open to opportunities?", "What is his role at MDAS?"])}`,
   };
@@ -367,10 +387,28 @@ ${followUps(["Tell me about ClinicalBrief", "Is Krishi open to opportunities?", 
 // Everything the model may state: the portfolio knowledge base plus the owner-confirmed background, skills and hobbies
 const FACTS = {
   ...aiKnowledgeBase,
+  // Sanitised experience: the unverified KOS-06 claims (in highlight and some description lines) are never sent
+  experience: experienceData.map((e) => ({
+    id: e.id,
+    role: e.role,
+    organization: e.organization,
+    location: e.location,
+    period: e.period,
+    skills: e.skills,
+    description: responsibilities(e),
+  })),
+  featuredProjects: FEATURED_TITLES,
+  krishiOs: {
+    title: krishiOsProject.title,
+    subtitle: krishiOsProject.subtitle,
+    description: krishiOsProject.description,
+    techStack: krishiOsProject.techStack,
+    features: krishiOsProject.features,
+  },
   ownerConfirmed: { background: ownerProfile.background, skills: ownerProfile.skills, hobbies: ownerProfile.hobbies },
 };
 
-const SYSTEM_PROMPT = `You are the assistant on Krishi Chheda's portfolio website, KRISHI.OS. You answer visitors' questions about Krishi in the third person ("Krishi", "he"). You are not Krishi: never speak as him, and never make commitments or arrangements on his behalf.
+const SYSTEM_PROMPT = `You are the assistant on Krishi Chheda's portfolio website, KRISHI.WORLD. You answer visitors' questions about Krishi in the third person ("Krishi", "he"). You are not Krishi: never speak as him, and never make commitments or arrangements on his behalf.
 
 Rules:
 1. Use ONLY the facts inside <facts>. If the answer is not there, say you don't have that information and suggest emailing Krishi at ${CONTACT_EMAIL}.

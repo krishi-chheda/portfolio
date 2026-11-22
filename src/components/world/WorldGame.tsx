@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type Phaser from "phaser";
 import gsap from "gsap";
 import { CartridgeIntro } from "./Cartridge";
+import ControlsGuide from "./ControlsGuide";
 import { emit, on, type Dialogue } from "@/game/bus";
 import { record, snapshot } from "@/game/progress";
 import { getSettings, reduceMotion, setSettings, type Settings } from "@/game/settings";
@@ -66,7 +67,6 @@ export default function WorldGame() {
   const [toasts, setToasts] = useState<string[]>([]);
   const [settings, setSettingsState] = useState<Settings>({ sound: true, music: false, reducedMotion: false });
   const [banner, setBanner] = useState<{ name: string; blurb: string; at: number } | null>(null); // "you've arrived" sign
-  const [walked, setWalked] = useState(false); // fades the controls hint after the first step
   const found = new Set(progress.attributes);
 
   // Save one fact (visited region, read terminal, found attribute) and announce any achievement it completes.
@@ -159,7 +159,6 @@ export default function WorldGame() {
         sfx("open");
         setOverlay({ kind: "exhibit", project, section });
       }),
-      on("moved", () => setWalked(true)),
       on("open-map", () => setOverlay({ kind: "map" })),
       on("open-achievements", () => setOverlay({ kind: "achievements" })),
       on("open-menu", () => {
@@ -293,16 +292,8 @@ export default function WorldGame() {
         </div>
       )}
 
-      {!overlay && (
-        <p
-          className={`pointer-events-none absolute inset-x-0 bottom-4 hidden justify-center transition-opacity duration-700 md:flex ${walked ? "opacity-0" : "opacity-100"}`}
-          aria-hidden={walked}
-        >
-          <span className="border-2 border-[#46382b] bg-[#f5e8c8]/95 px-3 py-1 text-sm tracking-[0.1em] text-[#2b2420] shadow-[3px_3px_0_#46382b]">
-            WASD / ARROWS walk · E talk / inspect · Esc menu · M map
-          </span>
-        </p>
-      )}
+      {/* Always-available controls card (dismissable, reopens with ? or H); out of the way while a panel is open */}
+      <ControlsGuide hidden={!!overlay || intro || status !== "ready"} />
 
       {!overlay && status === "ready" && <TouchControls />}
       {overlay?.kind === "dialogue" && (

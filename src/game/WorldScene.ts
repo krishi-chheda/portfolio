@@ -257,7 +257,6 @@ export class WorldScene extends Phaser.Scene {
       onComplete: () => {
         this.moving = false;
         this.savePosition();
-        emit("moved");
         this.stepEffects();
         const warp = this.def.warps.find((w) => w.x === this.tile.x && w.y === this.tile.y);
         if (warp) this.warp(warp);

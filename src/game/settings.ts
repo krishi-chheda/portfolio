@@ -11,7 +11,7 @@ export interface Settings {
 
 const SETTINGS_KEY = "krishi-world:settings:v1";
 const POSITION_KEY = "krishi-world:position:v1";
-const DEFAULTS: Settings = { sound: true, music: false, reducedMotion: false };
+const DEFAULTS: Settings = { sound: true, music: true, reducedMotion: false };
 
 function load<T>(key: string): Partial<T> | null {
   try {
@@ -46,7 +46,8 @@ export function getSettings(): Settings {
 
 export function setSettings(patch: Partial<Settings>): Settings {
   current = { ...getSettings(), ...patch };
-  save(SETTINGS_KEY, current);
+  // Only what the player chose is stored, so untouched settings keep following the defaults
+  save(SETTINGS_KEY, { ...load<Settings>(SETTINGS_KEY), ...patch });
   return current;
 }
 

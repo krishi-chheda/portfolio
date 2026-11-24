@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url,
     siteName: "Krishi Chheda Portfolio",
     type: "website",
-    images: [{ url: "https://krishi-portfolio.vercel.app/assets/og-image.png", width: 1200, height: 630 }],
+    images: [{ url: "https://krishi-portfolio.vercel.app/assets/og-krishiworld.png", width: 1200, height: 630 }],
   },
 };
 

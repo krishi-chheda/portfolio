@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://krishi-portfolio.vercel.app/assets/og-image.png",
+        url: "https://krishi-portfolio.vercel.app/assets/og-krishiworld.png",
         width: 1200,
         height: 630,
         alt: "Krishi Chheda | AI Engineer & Product Builder Portfolio",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Krishi Chheda | AI Engineer & Product Builder",
     description: "AI Engineer and Product Builder at Monash University. Creator of ClinicalBrief, AccessVision, Traffic AI, and KRISHI.OS. Explore my portfolio as a retro RPG, or browse the classic portfolio and chat with my AI assistant.",
-    images: ["https://krishi-portfolio.vercel.app/assets/og-image.png"],
+    images: ["https://krishi-portfolio.vercel.app/assets/og-krishiworld.png"],
   },
   robots: {
     index: true,
@@ -76,7 +76,7 @@ export default function RootLayout({
               "name": "Krishi Chheda",
               "jobTitle": "AI Engineer & Product Builder",
               "url": "https://krishi-portfolio.vercel.app",
-              "image": "https://krishi-portfolio.vercel.app/assets/og-image.png",
+              "image": "https://krishi-portfolio.vercel.app/assets/og-krishiworld.png",
               "sameAs": [
                 "https://github.com/krishi-chheda",
                 "https://linkedin.com/in/krishi-chheda"

@@ -65,7 +65,7 @@ export default function WorldGame() {
   const progressRef = useRef<ProgressSnapshot>(EMPTY);
   const [region, setRegion] = useState<{ id: string; name: string; parent?: string }>({ id: "origin", name: "Origin Valley" });
   const [toasts, setToasts] = useState<string[]>([]);
-  const [settings, setSettingsState] = useState<Settings>({ sound: true, music: false, reducedMotion: false });
+  const [settings, setSettingsState] = useState<Settings>({ sound: true, music: true, reducedMotion: false });
   const [banner, setBanner] = useState<{ name: string; blurb: string; at: number } | null>(null); // "you've arrived" sign
   const found = new Set(progress.attributes);
 
@@ -132,10 +132,21 @@ export default function WorldGame() {
     progressRef.current = snapshot();
     setProgress(progressRef.current);
     setSettingsState(getSettings());
-    // Audio may only start after a gesture: the first key press or tap starts music if it's switched on
-    const unlockAudio = () => syncMusic();
-    window.addEventListener("keydown", unlockAudio, { once: true });
-    window.addEventListener("pointerdown", unlockAudio, { once: true });
+    // Audio may only start after a gesture: the first key press or tap starts music unless it's switched off. Not
+    // once-only: some gestures (Escape, a touch's pointerdown) don't count for the browser, so later ones retry.
+    let unlocked = false;
+    const unlockAudio = () => {
+      unlocked = true;
+      syncMusic();
+    };
+    const gestures = ["keydown", "pointerdown", "pointerup"] as const;
+    gestures.forEach((g) => window.addEventListener(g, unlockAudio));
+    // Never play on in a background tab
+    const onVisibility = () => {
+      if (document.hidden) stopMusic();
+      else if (unlocked) syncMusic();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
     const offs = [
       on("dialogue", (dialogue) => {
         sfx("open");
@@ -171,8 +182,8 @@ export default function WorldGame() {
     ];
     return () => {
       offs.forEach((off) => off());
-      window.removeEventListener("keydown", unlockAudio);
-      window.removeEventListener("pointerdown", unlockAudio);
+      gestures.forEach((g) => window.removeEventListener(g, unlockAudio));
+      document.removeEventListener("visibilitychange", onVisibility);
       stopMusic();
     };
   }, []);
@@ -265,6 +276,21 @@ export default function WorldGame() {
               <path d="M8 1 L14 7 L8 15 L2 7 Z" fill="#b48be8" stroke="#1f1d24" strokeWidth="1.2" />
             </svg>
             {found.size}/{ATTRIBUTES.length}
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              toggle("music");
+              if (e.detail) e.currentTarget.blur(); // a mouse / tap click hands the keyboard straight back to the game
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") e.stopPropagation(); // press the button, don't also talk
+            }}
+            className={HUD_BUTTON}
+            aria-label="Music"
+            aria-pressed={settings.music}
+          >
+            <span aria-hidden="true">♪ {settings.music ? "On" : "Off"}</span>
           </button>
         </div>
         <div className="flex gap-2">

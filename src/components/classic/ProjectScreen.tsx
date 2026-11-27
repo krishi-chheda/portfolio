@@ -4,7 +4,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import ProjectTabs from "@/components/classic/ProjectTabs";
-import { CHIP, LABEL, LINK, MUTED, PANEL, TITLE_BAR } from "@/components/retro/styles";
+import { CHIP, LABEL, LINK, MUTED, PANEL, PROSE, TITLE_BAR } from "@/components/retro/styles";
 import { ArchitectureSection, Block, FeaturesSection, RoleSection, ScreensSection, TechSection, hasRole } from "@/components/retro/ProjectParts";
 import { ObjectSprite, PlayerAvatar } from "@/components/retro/WorldView";
 import { FEATURED, type ProjectDetail } from "@/lib/portfolio";
@@ -49,7 +49,7 @@ export default function ProjectScreen({ project: p }: { project: ProjectDetail }
           <h1 id="project-title" className="min-w-0 text-xl tracking-[0.12em] sm:text-2xl">
             <span className="text-[#f5c65b]">No. {no}</span> {p.title.toUpperCase()}
           </h1>
-          {p.status && <span className="hidden border-2 border-[#f5e8c8] px-2 text-xs tracking-widest sm:inline">{p.status.toUpperCase()}</span>}
+          {p.status && <span className="hidden border-2 border-[#f5e8c8] px-2 text-sm tracking-widest sm:inline">{p.status.toUpperCase()}</span>}
         </div>
 
         <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
@@ -99,20 +99,20 @@ export default function ProjectScreen({ project: p }: { project: ProjectDetail }
           {/* Overview (first on phones, so the what-and-why is read before the stats) */}
           <div className="order-first min-w-0 space-y-5 lg:order-none">
             <Block title="Overview">
-              <p className="text-lg leading-relaxed">{p.description}</p>
+              <p className={`${PROSE} text-lg`}>{p.description}</p>
             </Block>
             {(p.problem || p.solution) && (
               <div className="grid gap-4 md:grid-cols-2">
                 {p.problem && (
                   <div className="relative border-4 border-[#46382b] bg-white p-4 pt-5 shadow-[3px_3px_0_#46382b]">
                     <span className="absolute -top-3.5 left-3 border-2 border-[#46382b] bg-[#e9a7a0] px-2 text-sm tracking-widest">PROBLEM</span>
-                    <p className="text-lg leading-snug">{p.problem}</p>
+                    <p className={`${PROSE} text-lg`}>{p.problem}</p>
                   </div>
                 )}
                 {p.solution && (
                   <div className="relative border-4 border-[#46382b] bg-white p-4 pt-5 shadow-[3px_3px_0_#46382b]">
                     <span className="absolute -top-3.5 left-3 border-2 border-[#46382b] bg-[#c9eab0] px-2 text-sm tracking-widest">SOLUTION</span>
-                    <p className="text-lg leading-snug">{p.solution}</p>
+                    <p className={`${PROSE} text-lg`}>{p.solution}</p>
                   </div>
                 )}
               </div>

@@ -8,7 +8,7 @@ import type { ProjectDetail } from "@/lib/portfolio";
 import { WORLD } from "@/lib/motion";
 import { useEntrance } from "@/hooks/useEntrance";
 
-import { BUTTON, CHIP, LINK, PANEL, PIXEL, TITLE_BAR } from "./styles";
+import { BUTTON, CHIP, LINK, PANEL, PIXEL, PROSE, TITLE_BAR } from "./styles";
 export { BUTTON, CARD, CHIP, LABEL, LINK, MUTED, PANEL, PIXEL, TITLE_BAR } from "./styles";
 
 /** Window key handler for as long as the component is mounted (held-key repeats are ignored). */
@@ -117,7 +117,7 @@ export function Section({ title, children }: { title: string; children: ReactNod
 
 export function Bullets({ items }: { items: string[] }) {
   return (
-    <ul className="space-y-1 text-base leading-snug">
+    <ul className={`${PROSE} space-y-1.5 text-base`}>
       {items.map((item) => (
         <li key={item} className="flex gap-2">
           <span aria-hidden="true" className="text-[#285943]">
@@ -178,7 +178,7 @@ export function ProjectBody({ project, liveLabelInternal = "Open the site" }: { 
               <li key={step.label} className="flex items-center gap-2">
                 <div className="max-w-[14rem] border-2 border-[#46382b] bg-white p-2 shadow-[3px_3px_0_#46382b]">
                   <p className="text-base">{step.label}</p>
-                  <p className="mt-1 text-sm leading-snug text-[#5a4434]">{step.description}</p>
+                  <p className={`${PROSE} mt-1 text-[0.9375rem] text-[#5a4434]`}>{step.description}</p>
                 </div>
                 {i < project.flow.length - 1 && (
                   <span aria-hidden="true" className="text-[#285943]">

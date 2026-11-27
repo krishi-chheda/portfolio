@@ -7,6 +7,7 @@ import {
   krishiOsProject,
   ownerProfile,
   projectsData,
+  roleHistory,
 } from "@/lib/data";
 import type { Dir, Look, ObjectKind } from "./textures";
 import { FEATURED, type ProjectDetail } from "@/lib/portfolio";
@@ -106,6 +107,7 @@ export const ORIGIN_NPCS: Npc[] = [
     pages: [
       "Welcome to KRISHI.WORLD! This valley is where Krishi's story starts.",
       "Walk with WASD or the arrow keys. Press E to talk to people or inspect things.",
+      "Here for Krishi's work? Head east to Project Metropolis: every building there is one of his projects, and you can walk inside.",
       "Anything you discover goes in your Discovery Journal. Press I to open it.",
     ],
   },
@@ -150,7 +152,7 @@ export const ORIGIN_NPCS: Npc[] = [
 
 // Things you can inspect by facing them and pressing E, keyed by tile "x,y"
 export const ORIGIN_SIGNS: Record<string, string[]> = {
-  "18,13": ["ORIGIN VALLEY", "Where Krishi's story begins.", "North: the university. West: the homes. East: Project Metropolis."],
+  "18,13": ["ORIGIN VALLEY", "Where Krishi's story begins.", "East: Project Metropolis, Krishi's projects. North: the university. West: the homes."],
   "9,6": ["A letter addressed to Krishi sits in the mailbox.", `The return address says you can reach him at ${CONTACT_EMAIL}.`],
   "16,6": ["The mailbox is empty."],
 };
@@ -407,7 +409,8 @@ export const FRONTIER: MapContent = {
       look: { hair: "#2a2a35", hairLight: "#4a4a5a", top: "#d9a23f", topDark: "#a8742a", trim: "#ffffff", pants: "#2c3a5a", band: null },
       pages: [
         "Welcome to the Leadership Frontier!",
-        `At ${mdas.organization}, Krishi's role: ${mdas.role}.`,
+        `At ${mdas.organization}, Krishi is ${roleHistory["mdas-vp"][0].role}, after serving as ${roleHistory["mdas-vp"].slice(1).map((h) => h.role).join(" and ")}.`,
+        ...(mdas.impact ? [mdas.impact] : []),
         `The work: ${listSkills(mdas.skills)}.`,
       ],
     },
@@ -418,7 +421,7 @@ export const FRONTIER: MapContent = {
       y: 15,
       facing: "right",
       look: { hair: "#6e4524", hairLight: "#9a6a3c", top: "#7bc9df", topDark: "#4791c4", trim: "#ffffff", pants: "#46382b", band: "#f5c65b" },
-      pages: [`Krishi is ${mosaic.role} at ${mosaic.organization} (${mosaic.period}).`, `It's all about ${listSkills(mosaic.skills)}.`],
+      pages: [`Krishi is ${mosaic.role} at ${mosaic.organization} (${mosaic.period}).`, ...(mosaic.impact ? [mosaic.impact] : []), `It's all about ${listSkills(mosaic.skills)}.`],
     },
     {
       id: "mentor",
@@ -427,7 +430,7 @@ export const FRONTIER: MapContent = {
       y: 8,
       facing: "down",
       look: { hair: "#9aa0a8", hairLight: "#c8ccd4", top: "#3a3f4a", topDark: "#23262e", trim: "#e0564a", pants: "#2c3a5a", band: null },
-      pages: [`${mysahayak.organization}: ${mysahayak.role}, ${mysahayak.period}.`, `There he worked on ${listSkills(mysahayak.skills)}.`],
+      pages: [`${mysahayak.organization}: ${mysahayak.role}, ${mysahayak.period}.`, `There he worked on ${listSkills(mysahayak.skills)}.`, ...(mysahayak.impact ? [mysahayak.impact] : [])],
     },
     {
       id: "volunteer",
@@ -436,7 +439,7 @@ export const FRONTIER: MapContent = {
       y: 8,
       facing: "down",
       look: { hair: "#c9902e", hairLight: "#f5c65b", top: "#e0564a", topDark: "#a83a32", trim: "#ffffff", pants: "#46382b", band: null },
-      pages: [`At ${sacredHeart.organization}, Krishi's role is ${sacredHeart.role} (${sacredHeart.period}).`],
+      pages: [`At ${sacredHeart.organization}, Krishi's role is ${sacredHeart.role} (${sacredHeart.period}).`, ...(sacredHeart.impact ? [sacredHeart.impact] : [])],
     },
   ],
   signs: { "2,12": ["LEADERSHIP FRONTIER", "Krishi's leadership and work experience."] },
@@ -526,10 +529,11 @@ export interface Region {
 }
 
 export const REGIONS: Region[] = [
-  { id: "forest", name: "Innovation Forest", blurb: "Skills and tools", x: 38, y: 22, color: "#285943" },
+  // Listed in reading order (projects right after the intro); x/y keep each region where it sits on the map
   { id: "origin", name: "Origin Valley", blurb: "About and education", x: 38, y: 52, color: "#78b85a" },
   { id: "metropolis", name: "Project Metropolis", blurb: "Projects", x: 64, y: 52, color: "#9c9486" },
   { id: "frontier", name: "Leadership Frontier", blurb: "Leadership and experience", x: 88, y: 52, color: "#d9a23f" },
+  { id: "forest", name: "Innovation Forest", blurb: "Skills and tools", x: 38, y: 22, color: "#285943" },
   { id: "coast", name: "Adventure Coast", blurb: "Life outside tech", x: 38, y: 82, color: "#f2e2b4" },
 ];
 
@@ -557,9 +561,9 @@ export interface Achievement {
 export const ACHIEVEMENTS: Achievement[] = [
   { id: "first-steps", name: "First Steps", description: "Explore Origin Valley.", done: (p) => p.regions.includes("origin") },
   { id: "curious-mind", name: "Curious Mind", description: "Discover five attributes.", done: (p) => p.attributes.length >= 5 },
-  { id: "into-the-forest", name: "Into the Forest", description: "Visit Innovation Forest.", done: (p) => p.regions.includes("forest") },
   { id: "builder", name: "Builder", description: "Read your first project terminal.", done: (p) => p.terminals.length >= 1 },
   { id: "team-player", name: "Team Player", description: "Visit Leadership Frontier.", done: (p) => p.regions.includes("frontier") },
+  { id: "into-the-forest", name: "Into the Forest", description: "Visit Innovation Forest.", done: (p) => p.regions.includes("forest") },
   { id: "adventurer", name: "Adventurer", description: "Reach Adventure Coast.", done: (p) => p.regions.includes("coast") },
   { id: "world-explorer", name: "World Explorer", description: "Visit all five regions.", done: (p) => REGIONS.every((r) => p.regions.includes(r.id)) },
   { id: "completionist", name: "Completionist", description: "Discover every attribute.", done: (p) => ATTRIBUTES.every((a) => p.attributes.includes(a.id)) },

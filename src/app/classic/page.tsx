@@ -11,7 +11,7 @@ import { FEATURED } from "@/lib/portfolio";
 export const metadata: Metadata = {
   title: "Classic Portfolio | KRISHI.WORLD",
   description:
-    "Krishi Chheda's portfolio in one retro page: profile, education, skills, projects (ClinicalBrief, AccessVision, Traffic AI, KRISHI.OS), experience and contact.",
+    "Krishi Chheda's portfolio in one retro page: profile, projects (ClinicalBrief, AccessVision, Traffic AI, KRISHI.OS), experience, skills, achievements, education and contact.",
   alternates: { canonical: "/classic" },
 };
 
@@ -27,15 +27,15 @@ export default function ClassicPage() {
         <main className="min-w-0 space-y-8">
           <h1 className="sr-only">Krishi Chheda, Classic Portfolio</h1>
           <ProfileSection />
-          <EducationSection />
-          <RetroSection id="skilldex" title="SKILLDEX" meta={`${ownerProfile.skills.length} REGISTERED`}>
-            <Skilldex />
-          </RetroSection>
           <RetroSection id="projects" title="PROJECT ARCHIVE" meta={`${FEATURED.length} FEATURED`}>
             <ProjectArchive />
           </RetroSection>
           <QuestLog />
+          <RetroSection id="skilldex" title="SKILLDEX" meta={`${ownerProfile.skills.length} REGISTERED`}>
+            <Skilldex />
+          </RetroSection>
           <AchievementJournal />
+          <EducationSection />
           <ContactSection />
         </main>
       </div>

@@ -150,7 +150,7 @@ export default function Skilldex() {
                     >
                       <Gem colors={CATEGORY_GEMS[ci % CATEGORY_GEMS.length]} size={14} />
                       <span className="min-w-0 flex-1 leading-tight">{s}</span>
-                      <span className={`text-xs ${MUTED}`}>{number(s)}</span>
+                      <span className={`text-sm ${MUTED}`}>{number(s)}</span>
                     </button>
                   </li>
                 );

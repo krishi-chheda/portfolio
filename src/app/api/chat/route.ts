@@ -19,19 +19,18 @@ const featuredList = `${FEATURED_TITLES.slice(0, -1).join(", ")} and ${FEATURED_
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_BODY_BYTES = 8 * 1024; // a 500-character question fits many times over; anything bigger is refused unread
 
-// Navigation commands the assistant may suggest. Each must match an alias in src/lib/navigation.ts;
-// anything else the model emits is dropped.
+// Sections the assistant may point to (AskKrishi turns each key into a link); anything else the model emits is dropped.
 const COMMANDS = {
-  readme: "cat README.md",
-  accessvision: "cat projects/accessible-vision/details.md",
-  clinicalbrief: "cat projects/clinicalbrief/details.md",
-  studenthub: "cat projects/studenthub/details.md",
-  traffic: "cat projects/traffic-ai/details.md",
-  leadership: "cd leadership",
-  career: "git log --career",
-  building: "tail -f currently-building.log",
-  systemMap: "open system-map",
-  contact: "ssh recruiter@krishi.os",
+  readme: "readme",
+  accessvision: "accessible-vision",
+  clinicalbrief: "clinicalbrief",
+  studenthub: "studenthub",
+  traffic: "traffic-ai",
+  leadership: "leadership",
+  career: "career",
+  building: "building",
+  systemMap: "skills",
+  contact: "contact",
 } as const;
 const ALLOWED_COMMANDS = new Set<string>(Object.values(COMMANDS));
 

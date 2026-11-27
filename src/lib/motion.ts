@@ -10,9 +10,6 @@ export const DUR = {
   slow: 0.5,
 } as const;
 
-// Entrance pattern: travel distance in px for panels and list items.
-export const RISE = { panel: 16, item: 10 } as const;
-
 export const MOTION_OK = "(prefers-reduced-motion: no-preference)";
 
 const GLYPHS = "!<>-_/[]{}=+*^?#01";
@@ -44,9 +41,6 @@ export function scrambleText(el: HTMLElement, duration = 0.6) {
   });
   return { tween, restore };
 }
-
-/** "smooth" unless the visitor asked for reduced motion (then scroll jumps instantly). */
-export const scrollBehavior = (): ScrollBehavior => (window.matchMedia(MOTION_OK).matches ? "smooth" : "instant");
 
 /**
  * KRISHI.WORLD motion identity (Playful archetype, a GBA game): one signature entrance ease with a ~10% overshoot,

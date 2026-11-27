@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BUTTON, PIXEL, TITLE_BAR, useKeys } from "@/components/retro/ui";
 import { useChat } from "@/hooks/useChat";
-import { navigationRegistry } from "@/lib/navigation";
 import { PROJECT_DETAILS } from "@/lib/portfolio";
 import gsap from "gsap";
 import { WORLD } from "@/lib/motion";
@@ -29,22 +28,20 @@ function linkify(text: string): ReactNode[] {
   return parts;
 }
 
-// The chat API still answers with the old site's section targets; point them at Classic Mode. Featured projects
-// open their own project file; StudentHub has no page, so it (and other project answers) goes to the archive.
-const SECTION: Record<string, { href: string; label: string }> = {
-  projects: { href: "/classic#projects", label: "Project Archive" },
-  "currently-building": { href: "/classic#projects", label: "Project Archive" },
+// The chat API names a section; featured projects open their own project file, the rest link into Classic Mode.
+// StudentHub has no page, so it (and "what is he building") goes to the archive; "readme" has no link.
+const LINKS: Record<string, { href: string; label: string }> = {
+  studenthub: { href: "/classic#projects", label: "Project Archive" },
+  building: { href: "/classic#projects", label: "Project Archive" },
   leadership: { href: "/classic#experience", label: "Quest Log" },
   career: { href: "/classic#experience", label: "Quest Log" },
   contact: { href: "/classic#contact", label: "Contact" },
-  "system-map": { href: "/classic#skilldex", label: "Skilldex" },
+  skills: { href: "/classic#skilldex", label: "Skilldex" },
 };
-const target = (command?: string) => {
-  const hit = command && navigationRegistry.find((n) => n.command_aliases.includes(command));
-  if (!hit) return undefined;
-  const project = PROJECT_DETAILS[hit.section_id];
-  if (project) return { href: `/classic/projects/${project.id}`, label: `${project.title} project file` };
-  return SECTION[hit.scroll_target];
+const target = (key?: string) => {
+  if (!key) return undefined;
+  const project = PROJECT_DETAILS[key];
+  return project ? { href: `/classic/projects/${project.id}`, label: `${project.title} project file` } : LINKS[key];
 };
 
 const SUGGESTIONS = ["What is ClinicalBrief?", "What does Krishi study?", "How do I contact him?"];
@@ -107,7 +104,7 @@ export default function AskKrishi() {
               const go = m.role === "assistant" ? target(m.suggestedCommand) : undefined;
               return (
                 <div key={i} className={`border-2 border-[#46382b] p-2 text-base leading-snug shadow-[2px_2px_0_#46382b] ${m.role === "user" ? "ml-8 bg-[#c9eab0]" : "mr-4 bg-white"}`}>
-                  <p className="text-xs tracking-widest text-[#5a4434]">{m.role === "user" ? "YOU" : "KRISHI.BOT"}</p>
+                  <p className="text-sm tracking-widest text-[#5a4434]">{m.role === "user" ? "YOU" : "KRISHI.BOT"}</p>
                   <p className="whitespace-pre-wrap">{linkify(m.content)}</p>
                   {go && (
                     <a href={go.href} className="mt-1 inline-block text-sm text-[#285943] underline">

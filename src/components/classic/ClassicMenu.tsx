@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 
 export const CLASSIC_SECTIONS = [
   { id: "profile", label: "Profile" },
-  { id: "education", label: "Education" },
-  { id: "skilldex", label: "Skilldex" },
   { id: "projects", label: "Projects" },
   { id: "experience", label: "Quest Log" },
+  { id: "skilldex", label: "Skilldex" },
   { id: "achievements", label: "Achievements" },
+  { id: "education", label: "Education" },
   { id: "contact", label: "Contact" },
 ] as const;
 

@@ -36,8 +36,9 @@ export interface Experience {
   location: string;
   period: string;
   description: string[];
+  /** Why the work mattered, in words only: no figure appears here until the owner verifies it (KOS-06). */
+  impact?: string;
   skills: string[];
-  highlight: string;
 }
 
 export interface ProcessProject {
@@ -47,20 +48,12 @@ export interface ProcessProject {
   githubUrl?: string;
 }
 
-export interface LeadershipInfo {
-  role: string;
-  org: string;
-}
-
 export interface CurrentProcess {
   running: ProcessProject[];
   learning: string[];
-  leadership: LeadershipInfo;
   targetRoles: string[];
-  availability: string;
   graduation: string;
   location: string;
-  uptime: string;
 }
 
 export const currentProcesses: CurrentProcess = {
@@ -79,15 +72,9 @@ export const currentProcesses: CurrentProcess = {
     }
   ],
   learning: ["Agentic AI", "RAG Systems", "Product Development", "Production AI"],
-  leadership: {
-    role: "Vice President",
-    org: "Monash Data & AI Society"
-  },
   targetRoles: ["AI Engineer", "Machine Learning Engineer", "Software Engineer", "Technology Consultant"],
-  availability: "AVAILABLE FOR OPPORTUNITIES",
   graduation: "July 2027",
-  location: "Melbourne, Australia",
-  uptime: "Building Since 2024"
+  location: "Melbourne, Australia"
 };
 
 export interface ImpactMetric {
@@ -355,12 +342,13 @@ export const experienceData: Experience[] = [
     location: "Melbourne, VIC, Australia",
     period: "Oct 2025 - Present",
     description: [
-      "Directed media branding and digital campaign strategies for the largest data student society at Monash.",
-      "Grew workshop reach to 300+ students across 5+ events by designing and executing targeted promotions and cross-team outreach campaigns.",
-      "Co-designed marketing and logistical plans for technical developer bootcamps, campus hackathons, and corporate networking nights."
+      "As Vice President, helps lead the committee: coordinating the society's teams and keeping its events and initiatives on track.",
+      "Collaborates on the planning, promotion and delivery of technical bootcamps, campus hackathons and corporate networking nights.",
+      "Works with industry partners and other stakeholders to bring professionals into the society's events.",
+      "Earlier, as Media & Marketing Officer and then Director, led the society's media, branding and event promotion."
     ],
-    skills: ["Media Operations", "Event Strategy", "Cross-Team Collaboration", "Branding Campaigns"],
-    highlight: "Grew AI workshop reach to 300+ students across 5+ events."
+    impact: "Connects Monash students with industry professionals and gives them practical ways to learn data and AI skills and build their networks.",
+    skills: ["Team Leadership", "Event Strategy", "Stakeholder Communication", "Cross-Team Collaboration", "Media Operations", "Branding Campaigns"],
   },
   {
     id: "mosaic-coordinator",
@@ -373,8 +361,8 @@ export const experienceData: Experience[] = [
       "Managed community social coordination and event promotion for MOSAIC's local AI projects, supporting student engagement across monthly initiatives.",
       "Coordinated cross-campus outreach campaigns connecting peers to AI volunteer programs and local community projects."
     ],
+    impact: "Helps students find and join community-focused AI volunteer projects, putting their skills to work for local communities.",
     skills: ["Community Outreach", "Social Coordination", "Student Engagement", "AI volunteering"],
-    highlight: "Connected students to community-focused AI volunteer programs."
   },
   {
     id: "mysahayak-intern",
@@ -384,13 +372,13 @@ export const experienceData: Experience[] = [
     location: "Remote / India",
     period: "Jan 2025 - May 2025",
     description: [
-      "Developed cross-platform mobile features (Flutter) integrated with Python backend services in 2-week Agile sprint cycles.",
-      "Built AI-assisted content moderation workflows using machine learning filters, reducing manual review overhead by 30%.",
-      "Optimized application efficiency by 20% by profiling backend API layers and resolving 4 performance bottlenecks.",
-      "Reduced QA-reported defect rates by 20% by debugging endpoint and mobile pipeline build integration failures."
+      "Developed cross-platform mobile features in Flutter, integrated with Python backend services, in two-week Agile sprints.",
+      "Built AI-assisted content moderation workflows that use machine learning filters to cut down manual review.",
+      "Profiled the backend API layers and resolved performance bottlenecks.",
+      "Debugged endpoint and mobile build-pipeline integration failures reported by QA."
     ],
+    impact: "Moved routine content moderation toward AI-assisted review and helped make the app faster and more stable, working as part of an Agile team.",
     skills: ["Flutter", "Python Backend", "Agile Delivery", "API Optimization", "QA Defect Resolution"],
-    highlight: "Reduced manual content moderation review overhead by 30%."
   },
   {
     id: "sacredheart-volunteer",
@@ -402,10 +390,10 @@ export const experienceData: Experience[] = [
     description: [
       "Conducted electrical safety compliance testing on incoming electronics donations.",
       "Provided local IT network troubleshooting, cashier operations, and client support in a fast-paced retail environment.",
-      "Managed checkout and customer inquiries, handling 50+ customer interactions per shift."
+      "Manages checkout and customer inquiries on busy retail shifts."
     ],
+    impact: "Makes sure donated electronics are safe to resell, and keeps a charity op shop running smoothly for its customers.",
     skills: ["Electrical Compliance", "IT Troubleshooting", "POS Cashier", "Customer Service", "Retail Operations"],
-    highlight: "Handled 50+ customer interactions per shift."
   }
 ];
 
@@ -543,7 +531,6 @@ export const education: EducationEntry[] = [
   },
 ];
 // Certifications: none listed yet. Add entries here (name, issuer, year) and both modes pick them up.
-export const certifications: { name: string; issuer: string; year: string }[] = [];
 
 export interface SkillCategory {
   id: string;

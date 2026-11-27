@@ -3,16 +3,16 @@
 const base = process.argv[2] ?? "http://localhost:3000";
 
 const R = {
-  readme: "cat README.md",
-  av: "cat projects/accessible-vision/details.md",
-  cb: "cat projects/clinicalbrief/details.md",
-  sh: "cat projects/studenthub/details.md",
-  traffic: "cat projects/traffic-ai/details.md",
-  lead: "cd leadership",
-  career: "git log --career",
-  building: "tail -f currently-building.log",
-  contact: "ssh recruiter@krishi.os",
-  map: "open system-map",
+  readme: "readme",
+  av: "accessible-vision",
+  cb: "clinicalbrief",
+  sh: "studenthub",
+  traffic: "traffic-ai",
+  lead: "leadership",
+  career: "career",
+  building: "building",
+  contact: "contact",
+  map: "skills",
   none: "",
 };
 

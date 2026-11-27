@@ -43,3 +43,5 @@ next-env.d.ts
 public/assets/Master_Resume.pdf
 .claude
 brag-output*
+# local skill checkout (not part of the site)
+apple-design-skill/

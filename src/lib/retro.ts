@@ -1,16 +1,5 @@
 // KRISHI.WORLD visual constants, shared by both modes (no React, no Phaser).
 
-export const PALETTE = {
-  forest: "#285943",
-  grass: "#78b85a",
-  cream: "#f5e8c8",
-  brown: "#46382b",
-  sky: "#7bc9df",
-  gold: "#f5c65b",
-  ink: "#2b2420",
-  inkSoft: "#6e5643",
-} as const;
-
 export type Rarity = "Common" | "Rare" | "Epic" | "Legendary";
 // Light / mid / dark shades per rarity: crystal sprites and icons. Presentation only, never a skill level.
 export const RARITY_COLORS: Record<Rarity, [string, string, string]> = {

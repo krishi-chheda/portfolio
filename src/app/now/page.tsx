@@ -10,7 +10,7 @@ const FITNESS = ownerProfile.hobbies.find((h) => h.toLowerCase().startsWith("fit
 export default function NowPage() {
   return (
     <RetroShell subtitle="NOW">
-      <main className="mx-auto max-w-3xl space-y-8 px-4 py-8 text-lg leading-relaxed sm:px-6 lg:py-12">
+      <main className="mx-auto max-w-3xl space-y-8 px-4 py-8 text-lg leading-relaxed sm:px-6 lg:py-12 [&_section_p]:font-[family-name:var(--font-body)] [&_section_li]:font-[family-name:var(--font-body)]">
         <header className="border-4 border-[#46382b] bg-[#285943] p-5 text-[#f5e8c8] shadow-[6px_6px_0_#46382b]">
           <p className="text-sm tracking-widest text-[#f5c65b]">LAST UPDATED: JUNE 2026</p>
           <h1 className="mt-2 text-3xl sm:text-4xl">What I&apos;m Doing Now</h1>

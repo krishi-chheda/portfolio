@@ -39,7 +39,7 @@ export function CrystalIcon({ rarity, size = 20, hidden = false }: { rarity: Rar
 function RarityBadge({ rarity }: { rarity: Rarity }) {
   const [, mid, dark] = RARITY_COLORS[rarity];
   return (
-    <span className="border-2 px-1.5 text-xs uppercase tracking-widest" style={{ borderColor: dark, background: mid, color: "#1f1d24" }}>
+    <span className="border-2 px-1.5 text-sm uppercase tracking-widest" style={{ borderColor: dark, background: mid, color: "#1f1d24" }}>
       {rarity}
     </span>
   );
@@ -677,7 +677,7 @@ export function AchievementToast({ name }: { name: string }) {
         <Trophy done />
       </span>
       <span>
-        <span className="block text-xs uppercase tracking-widest text-[#285943]">Achievement unlocked</span>
+        <span className="block text-sm uppercase tracking-widest text-[#285943]">Achievement unlocked</span>
         <span className="text-lg">{name}</span>
       </span>
     </div>

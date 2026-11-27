@@ -1,7 +1,7 @@
 // Classic Mode's static sections, server-rendered from the shared data (src/lib/data.ts) so every word is in
 // the page HTML. Same frame, title bars and type as the game's windows.
 import type { CSSProperties, ReactNode } from "react";
-import { BUTTON, CARD, CHIP, LABEL, LINK, MUTED, PANEL, TITLE_BAR } from "@/components/retro/styles";
+import { BUTTON, CARD, CHIP, LABEL, LINK, MUTED, PANEL, PROSE, TITLE_BAR } from "@/components/retro/styles";
 import { PortraitAvatar } from "@/components/retro/WorldView";
 import UnlockOnView from "@/components/classic/UnlockOnView";
 import {
@@ -96,7 +96,7 @@ export function ProfileSection() {
         </div>
       </div>
 
-      <p className="mt-8 text-lg leading-relaxed">{profile.summary}</p>
+      <p className={`${PROSE} mt-8 text-lg`}>{profile.summary}</p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <div className={INFO_CARD}>
@@ -149,7 +149,7 @@ export function EducationSection() {
             <h3 className="mt-1 text-2xl leading-tight">{e.title}</h3>
             {e.org && <p className={`text-lg ${MUTED}`}>{e.org}</p>}
             {e.details.map((d) => (
-              <p key={d} className="mt-2 text-lg leading-snug">
+              <p key={d} className={`${PROSE} mt-2 text-lg`}>
                 {d}
               </p>
             ))}
@@ -202,17 +202,17 @@ export function QuestLog() {
                 className="absolute top-5 -left-[2.3rem] h-5 w-5 border-4 border-[#46382b] sm:-left-[2.8rem]"
                 style={{ background: kind.color }}
               />
-              <details open={i === 0} className={`${CARD} group/q`}>
+              <details open={i === 0 || questKinds[q.id] === "leadership"} className={`${CARD} group/q`}>
                 <summary className="flex cursor-pointer list-none items-start gap-3 p-4 [&::-webkit-details-marker]:hidden">
                   <span aria-hidden="true" className="mt-1 text-[#285943] transition-transform duration-150 group-open/q:rotate-90 motion-reduce:transition-none">
                     ▶
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-center gap-2">
-                      <span className="border-2 border-[#46382b] px-1.5 text-xs tracking-widest" style={{ background: kind.color }}>
+                      <span className="border-2 border-[#46382b] px-1.5 text-sm tracking-widest" style={{ background: kind.color }}>
                         {kind.label}
                       </span>
-                      <span className={`border-2 border-[#46382b] px-1.5 text-xs tracking-widest ${active ? "bg-[#f5c65b]" : "bg-[#e9f7e2]"}`}>
+                      <span className={`border-2 border-[#46382b] px-1.5 text-sm tracking-widest ${active ? "bg-[#f5c65b]" : "bg-[#e9f7e2]"}`}>
                         {active ? "ACTIVE" : "COMPLETE"}
                       </span>
                     </span>
@@ -237,10 +237,16 @@ export function QuestLog() {
                       </ol>
                     </div>
                   )}
+                  {q.impact && (
+                    <div>
+                      <p className={`${LABEL} mb-1.5`}>Impact</p>
+                      <p className={`${PROSE} border-l-4 border-[#f5c65b] bg-[#fff8e4] px-3 py-2 text-[1.0625rem]`}>{q.impact}</p>
+                    </div>
+                  )}
                   {duties.length > 0 && (
                     <div>
-                      <p className={`${LABEL} mb-1.5`}>Responsibilities</p>
-                      <ul className="space-y-1.5 text-base leading-snug">
+                      <p className={`${LABEL} mb-1.5`}>What Krishi did</p>
+                      <ul className={`${PROSE} space-y-2 text-[1.0625rem]`}>
                         {duties.map((d) => (
                           <li key={d} className="flex gap-2">
                             <span aria-hidden="true" className="text-[#285943]">
@@ -296,13 +302,13 @@ export function AchievementJournal() {
               </svg>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="border-2 border-[#46382b] px-1.5 text-xs tracking-widest" style={{ background: KIND[m.kind].color }}>
+                  <span className="border-2 border-[#46382b] px-1.5 text-sm tracking-widest" style={{ background: KIND[m.kind].color }}>
                     {KIND[m.kind].label}
                   </span>
                   {m.date && <span className={`text-sm ${MUTED}`}>{m.date}</span>}
                 </div>
                 <h3 className="mt-1.5 text-xl leading-tight">{m.title}</h3>
-                <p className="mt-1 text-base leading-snug">{m.detail}</p>
+                <p className={`${PROSE} mt-1 text-base`}>{m.detail}</p>
                 {m.link && (
                   <a
                     href={m.link.href}
@@ -327,12 +333,12 @@ export function AchievementJournal() {
 export function ContactSection() {
   return (
     <RetroSection id="contact" title="RESUME & CONTACT">
-      <p className="text-lg leading-snug">
+      <p className={`${PROSE} text-lg`}>
         Open to AI Engineering, Machine Learning, Software Engineering and Technology Consulting opportunities. The
         quickest way to reach Krishi is email; his full work history lives on LinkedIn.
       </p>
       <div className="mt-5 flex flex-wrap gap-3">
-        <a href={`mailto:${contact.email}`} className={`${LINK} bg-[#f5c65b]!`}>
+        <a href={`mailto:${contact.email}`} className={`${LINK} max-w-full bg-[#f5c65b]! [overflow-wrap:anywhere]`}>
           ✉ {contact.email}
         </a>
         <a href={contact.linkedin} target="_blank" rel="noopener noreferrer" className={LINK}>

@@ -2,7 +2,7 @@
 // exhibits (client). No hooks, so both can render them. Every word comes from ProjectDetail (src/lib/portfolio.ts).
 import type { CSSProperties, ReactNode } from "react";
 import Image from "next/image";
-import { CARD, MUTED } from "@/components/retro/styles";
+import { CARD, MUTED, PROSE } from "@/components/retro/styles";
 import { Gem } from "@/components/retro/ui";
 import { skillCategories } from "@/lib/data";
 import type { ProjectDetail } from "@/lib/portfolio";
@@ -16,7 +16,7 @@ const gemFor = (tech: string) => {
 
 export function Bullets({ items }: { items: string[] }) {
   return (
-    <ul className="space-y-2 text-lg leading-snug">
+    <ul className={`${PROSE} space-y-2 text-lg`}>
       {items.map((item) => (
         <li key={item} className="flex gap-2.5">
           <span aria-hidden="true" className="mt-1 text-sm text-[#285943]">
@@ -46,9 +46,9 @@ export function FlowDiagram({ flow, wide = "lg" }: { flow: ProjectDetail["flow"]
       {flow.map((step, i) => (
         <li key={step.label} className={`flex flex-col items-stretch gap-1 ${row ? "lg:min-w-0 lg:flex-1 lg:flex-row" : ""}`}>
           <div className="relative flex-1 border-2 border-[#46382b] bg-white p-3 pt-4 shadow-[3px_3px_0_#46382b]">
-            <span className="absolute -top-3 left-2 border-2 border-[#46382b] bg-[#f5c65b] px-1.5 text-xs tracking-widest">{String(i + 1).padStart(2, "0")}</span>
+            <span className="absolute -top-3 left-2 border-2 border-[#46382b] bg-[#f5c65b] px-1.5 text-sm tracking-widest">{String(i + 1).padStart(2, "0")}</span>
             <p className="text-lg leading-tight">{step.label}</p>
-            <p className={`mt-1 text-sm leading-snug ${MUTED}`}>{step.description}</p>
+            <p className={`${PROSE} mt-1 text-[0.9375rem] ${MUTED}`}>{step.description}</p>
           </div>
           {i < flow.length - 1 && (
             <span aria-hidden="true" className="kw-flow-arrow self-center px-1 text-xl text-[#285943]" style={{ "--i": i } as CSSProperties}>
@@ -66,20 +66,20 @@ export function OverviewSection({ p }: { p: ProjectDetail }) {
   return (
     <div className="space-y-5">
       <Block title="Overview">
-        <p className="text-lg leading-relaxed">{p.description}</p>
+        <p className={`${PROSE} text-lg`}>{p.description}</p>
       </Block>
       {(p.problem || p.solution) && (
         <div className="grid gap-4 md:grid-cols-2">
           {p.problem && (
             <div className="relative border-4 border-[#46382b] bg-white p-4 pt-5 shadow-[3px_3px_0_#46382b]">
               <span className="absolute -top-3.5 left-3 border-2 border-[#46382b] bg-[#e9a7a0] px-2 text-sm tracking-widest">PROBLEM</span>
-              <p className="text-lg leading-snug">{p.problem}</p>
+              <p className={`${PROSE} text-lg`}>{p.problem}</p>
             </div>
           )}
           {p.solution && (
             <div className="relative border-4 border-[#46382b] bg-white p-4 pt-5 shadow-[3px_3px_0_#46382b]">
               <span className="absolute -top-3.5 left-3 border-2 border-[#46382b] bg-[#c9eab0] px-2 text-sm tracking-widest">SOLUTION</span>
-              <p className="text-lg leading-snug">{p.solution}</p>
+              <p className={`${PROSE} text-lg`}>{p.solution}</p>
             </div>
           )}
         </div>
@@ -94,12 +94,12 @@ export function ArchitectureSection({ p, wide }: { p: ProjectDetail; wide?: "lg"
       {p.flow.length ? <FlowDiagram flow={p.flow} wide={wide} /> : <p className={MUTED}>No architecture diagram for this project.</p>}
       {p.architectureNote && (
         <Block title="How it fits together">
-          <p className="text-lg leading-relaxed">{p.architectureNote}</p>
+          <p className={`${PROSE} text-lg`}>{p.architectureNote}</p>
         </Block>
       )}
       {p.tradeOffs && (
         <Block title="Trade-offs">
-          <p className="text-lg leading-relaxed">{p.tradeOffs}</p>
+          <p className={`${PROSE} text-lg`}>{p.tradeOffs}</p>
         </Block>
       )}
     </div>
@@ -156,12 +156,12 @@ export function RoleSection({ p }: { p: ProjectDetail }) {
       )}
       {p.whyBuilt && (
         <Block title="Why I built it">
-          <p className="text-lg leading-relaxed">{p.whyBuilt}</p>
+          <p className={`${PROSE} text-lg`}>{p.whyBuilt}</p>
         </Block>
       )}
       {p.challenge && (
         <Block title="Hardest problem">
-          <p className="text-lg leading-relaxed">{p.challenge}</p>
+          <p className={`${PROSE} text-lg`}>{p.challenge}</p>
         </Block>
       )}
       {p.lessons.length > 0 && (
@@ -171,7 +171,7 @@ export function RoleSection({ p }: { p: ProjectDetail }) {
       )}
       {p.next && (
         <Block title="What's next">
-          <p className="text-lg leading-relaxed">{p.next}</p>
+          <p className={`${PROSE} text-lg`}>{p.next}</p>
         </Block>
       )}
     </div>

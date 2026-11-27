@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+// Readable body face for long descriptions; the pixel font stays on headings, labels, menus and game dialogue
+const geist = Geist({ variable: "--font-body", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://krishi-portfolio.vercel.app"), // resolves the pages' relative canonicals
@@ -62,7 +64,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistMono.variable} h-full antialiased motion-safe:scroll-smooth`}
+      className={`${geistMono.variable} ${geist.variable} h-full antialiased motion-safe:scroll-smooth`}
     >
       <body className="min-h-full bg-bg text-ink flex flex-col font-mono overflow-x-hidden">
         <div className="page-frame" aria-hidden="true" />

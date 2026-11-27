@@ -91,7 +91,7 @@ function SelectionBrackets() {
   );
 }
 
-const TABS = ["Profile", "Skilldex", "Projects", "Quests"];
+const TABS = ["Profile", "Projects", "Quests", "Skilldex"];
 
 /** The Classic card's visual: a GBA trainer card built from the real data and game art. */
 function TrainerPreview({ active }: { active: boolean }) {
@@ -102,7 +102,7 @@ function TrainerPreview({ active }: { active: boolean }) {
     return () => clearInterval(id);
   }, [active]);
   const row = "flex items-center gap-1 sm:gap-1.5";
-  const label = "w-[3.2rem] shrink-0 text-[9px] uppercase tracking-widest text-[#6e5643]";
+  const label = "w-[3.2rem] shrink-0 text-[10px] uppercase tracking-widest text-[#6e5643]";
 
   return (
     <div className="flex h-full flex-col bg-[repeating-linear-gradient(180deg,#e9f7e2_0_6px,#dff2d6_6px_12px)] text-[#2b2420]">
@@ -311,7 +311,7 @@ export default function TitleScreen() {
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 pt-14 pb-8 sm:px-6 sm:py-12">
         <header className="text-center">
-          <p className="text-xs tracking-[0.3em] text-[#f5e8c8]/80">KRISHI.OS {SYSTEM_VERSION.toUpperCase()} PRESENTS</p>
+          <p className="text-sm tracking-[0.3em] text-[#f5e8c8]">KRISHI.OS {SYSTEM_VERSION.toUpperCase()} PRESENTS</p>
           <h1 className="mt-3 text-[2.6rem] leading-none text-[#f5e8c8] [text-shadow:4px_4px_0_#285943,7px_7px_0_#46382b] min-[400px]:text-5xl sm:text-7xl sm:[text-shadow:5px_5px_0_#285943,8px_8px_0_#46382b] md:text-8xl">
             KRISHI.WORLD
           </h1>
